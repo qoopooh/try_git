@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1"/> 
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>
+  function init() {
+    document.commandform.command.focus();
+    document.getElementById("currenttime").innerHTML = getTimeStamp();
+  }
+  function getTimeStamp() {
+    var d = new Date();
+    return d;
+  }
+
+  function postAp230Command() {
+    $.post("ap230", { command: $("#command").val() },
+      function (data,status) {
+        $("#ans").val(data.data);
+      });
+    // var v = $("#command").val();
+    // alert(typeof +v); // cast to int by add +
+  }
+  $(document).ready(function() {
+    $("#btnSend").click(postAp230Command);
+    $("#command").keypress(function (e) {
+      if (e.which == 13) {
+        e.preventDefault();
+        $(this).select();
+        $("#btnSend").click();
+      }
+    });
+  });
+  </script>
+</head>
+<body OnLoad="init();">
+  <h1>AP-230 version 2.0</h1>
+  <p>Please type command on form below:</p>
+
+  <form name="commandform" autocomplete="on">
+    Command: <input type="text" id="command" hint="0" maxlength="10" />
+    <input type="button" id="btnSend" value="Send">
+  </form>
+  <div id="answer">
+    Response: <input id="ans" type="text" value="-">
+  </div>
+  <br />
+  <p id="currenttime">date</p>
+  <h4>Reference Command</h4>
+  <table border="1">
+  <tr>
+  <th>Command</th>
+  <th>Format</th>
+  </tr>
+  <tr>
+  <td>Check</td>
+  <td>0</td>
+  </tr>
+  <tr>
+  <td>Read Relay</td>
+  <td>1</td>
+  </tr>
+  <tr>
+  <td>Write Relay</td>
+  <td>2xxxxxxxx</td>
+  </tr>
+  <tr>
+  <td>Read 3B Port</td>
+  <td>3</td>
+  </tr>
+  <tr>
+  <td>Write 3B Port</td>
+  <td>4xxx</td>
+  </tr>
+  <tr>
+  <td>Read LED</td>
+  <td>5</td>
+  </tr>
+  <tr>
+  <td>Write LED</td>
+  <td>6xx</td>
+  </tr>
+  <tr>
+  <td>Read Input</td>
+  <td>7</td>
+  </tr>
+  </table>
+</body>
+</html>
+

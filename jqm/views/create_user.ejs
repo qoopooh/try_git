@@ -1,0 +1,31 @@
+<% var title = 'Authentication Example' %>
+<% var f_err; %>
+<% include head %>
+
+<section id="page1" data-role="page">
+  <header data-role="header"><h1>Create User</h1></header>
+  <div class="content" data-role="content">
+  <% if (f_err) { %>
+    <p class="msg error"><%= message %></p>
+  <% } else { %>
+    <p><%= message %></p>
+  <% } %>
+    <form method="post" action="/create_user">
+      <p>
+        <label>Username:</label>
+        <input type="text" name="username">
+      </p>
+      <p>
+        <label>Password:</label>
+        <input type="text" name="password">
+      </p>
+      <p>
+        <input type="submit" value="Create">
+      </p>
+    </form>
+  </div>
+  <footer data-role="footer"><h1><a href="/home">Domotics</a></h1></footer>
+</section>
+
+<% include foot %>
+

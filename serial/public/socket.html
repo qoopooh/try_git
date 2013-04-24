@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FTC Bus (RS232)</title>
+  <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1"/> 
+  <!--<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/themes/base/jquery-ui.css" />-->
+  <style type="text/css">
+#chatwindow{
+  position:relative;
+  height:100px; /* if you wish to use all of your space, use
+  position:absolute; top:0;left:0;right:0;bottom:0;
+  or drop the chatdwindow div */
+}
+#messagewindow, #inputcontainer{
+  position:absolute;
+  left:0;
+  right:0;
+  border:1px solid #000;
+}
+#messagewindow{   
+  overflow:auto;
+  top:0;
+  bottom:1em;
+}
+#inputcontainer{
+  display:block;
+  bottom:0;
+  height:1em;
+  padding:.5em;
+  margin-top:1em;
+}
+#inputcontainer > p{
+  margin:0;
+}
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+  <script type="text/javascript" src="js/client.js"></script>
+</head>
+<body>
+  <h1>FTC Bus Rev. 2_16</h1>
+  <p id="currenttime">date</p>
+  <div id="chatwindow">
+    <div id="messagewindow">
+    <!-- messages -->
+    </div>
+  </div>
+  <input id="chkTranslate" type="checkbox">Translate message</input>
+  <input id="chkOneLine" type="checkbox" checked>1 line message</input>
+  <br/>
+  <button id="btnClear" type="button">Clear</button>
+  <button id="btnAddress" type="button">Address</button>
+  <label id="txtCommandCount" for="selectCommandDevices">-</label>
+  <select id="selectCommandDevices">
+    <option>-</option>
+  </select>
+</body>
+</html>
+
