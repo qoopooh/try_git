@@ -1,0 +1,60 @@
+<% var title = 'Gateway Message' %>
+<% include head %>
+<script>
+function init() {
+  document.commandform.command.focus();
+  document.getElementById("currenttime").innerHTML = getTimeStamp();
+}
+function getTimeStamp() {
+  var d = new Date();
+  return d;
+}
+
+function queryGateway() {
+  $.post("gateway", { ip: $("#ip").val(), command: $("#command").val() },
+    function (data,status) {
+      $("#response").val(data.data);
+      $("#response").textinput('enable');
+    });
+  $("#response").textinput('disable');
+}
+function enterToSendClick(id, e) {
+  if (e.which == 13) {
+    e.preventDefault();
+    $(id).select();
+    $("#btnSend").click();
+  }
+}
+
+$(document).ready(function() {
+  init();
+  $("#btnSend").click(queryGateway);
+  $("#ip").keypress(function (e) {
+    enterToSendClick(this, e);
+  });
+  $("#command").keypress(function (e) {
+    enterToSendClick(this, e);
+  });
+});
+</script>
+
+<section id="page1" data-role="page">
+<header data-role="header"><h1><a href="/gateway">Gateway V0.1</h1></a></header>
+<form name="commandform" data-role="fieldcontain">
+  <label for="ip">IP:</label>
+  <input type="text" id="ip" name="ip" value="192.168.1.33" maxlength="20" />
+  <label for="command">Command:</label>
+  <input type="text" id="command" name="command" value="E,V" maxlength="30" />
+  <input type="button" id="btnSend" value="Send">
+</form>
+<div data-role="fieldcontain" class="ui-hide-label">
+  <label for="response">Response:</label>
+  <input id="response" name="response" type="text" placeholder="Response from Gateway">
+</div>
+<br />
+<p id="currenttime">date</p>
+  <footer data-role="footer"><h1><a href="http://aae014">Aae014</a></h1></footer>
+</section>
+
+<% include foot %>
+
