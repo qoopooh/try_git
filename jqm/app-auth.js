@@ -12,8 +12,8 @@ var config = JSON.parse(fs.readFileSync('config.json'));
 var listen_port = config.port;
 var app = module.exports = express();
 var log = console.log;
-/*var sql_options = { host: "127.0.0.1", port: 3306, user: "berm", password: "berm", database: "berm" };*/
-var sql_options = { host: "192.168.1.32", port: 3306, user: "berm", password: "berm", database: "berm" };
+/*var sql_options = { user: "berm", password: "berm", database: "berm" };*/
+var sql_options = { host: "127.0.0.1", port: 3306, user: "berm", password: "berm", database: "berm" };
 var sql = mysql.createConnection(sql_options);
 
 // config
