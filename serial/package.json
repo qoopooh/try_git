@@ -1,0 +1,16 @@
+{
+  "name": "domotics-serial",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.1.1",
+    "ejs": "0.8.3",
+    "serialport": "*",
+    "socket.io": "0.9.x",
+    "mysql": "~2.0.0"
+  }
+}
+
