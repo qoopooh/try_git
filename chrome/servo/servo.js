@@ -1,12 +1,23 @@
 var connectionId = -1;
 
 function setPosition(position) {
-  var buffer = new ArrayBuffer(1);
+  var buffer = new ArrayBuffer(2);
   var uint8View = new Uint8Array(buffer);
-  uint8View[0] = '0'.charCodeAt(0) + position;
   /*chrome.serial.write(connectionId, buffer, function() {});*/
-  document.getElementById('write-info').innerText = position;
+  document.getElementById('write-info').innerText = ab2str(buffer);
 };
+
+function writeData(data) {
+  var buffer = new ArrayBuffer(data.length + 1);
+  var uint8View = new Uint8Array(buffer);
+
+  for (var i=0; i<data.length; i++) {
+    uint8View[0] = data.charCodeAt(i);
+  }
+
+  chrome.serial.write(connectionId, buffer, function() {});
+  document.getElementById('write-info').innerText = ab2str(buffer);
+}
 
 function onRead(readInfo) {
   var uint8View = new Uint8Array(readInfo.data);
@@ -15,10 +26,10 @@ function onRead(readInfo) {
 
   document.getElementById('image').style.webkitTransform =
     'rotateZ(' + rotation + 'deg)';
-  if (uint8View[0]) {
-    var data = "";
-    data = readInfo.data;
-    document.getElementById('read-info').innerText = data;
+  if (uint8View[0] && uint8View[0] !== 255) {
+    var dat = readInfo.data;
+    document.getElementById('read-info').innerText = ab2str(dat)
+      + ", " + dat.byteLength + ", " + uint8View[0];
   }
 
   // Keep on reading.
@@ -68,7 +79,11 @@ function buildPortPicker(ports) {
 function openSelectedPort() {
   var portPicker = document.getElementById('port-picker');
   var selectedPort = portPicker.options[portPicker.selectedIndex].value;
-  chrome.serial.open(selectedPort, onOpen);
+  chrome.serial.open(selectedPort, { bitrate: 38400 }, onOpen);
+}
+
+function ab2str(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 
 onload = function() {
