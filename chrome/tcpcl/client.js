@@ -1,11 +1,13 @@
-var connectionId = -1;
+var sockId = -1;
 var readString = "";
 var readCount = 0;
+var IP = "192.168.1.101";
+var PORT = 1470;
 
 function setPosition(position) {
   var buffer = new ArrayBuffer(2);
   var uint8View = new Uint8Array(buffer);
-  /*chrome.serial.write(connectionId, buffer, function() {});*/
+  /*chrome.serial.write(sockId, buffer, function() {});*/
 };
 
 /**
@@ -22,7 +24,7 @@ function writeData(data) {
   }
   uint8View[i] = '\r'.charCodeAt(0);
 
-  chrome.serial.write(connectionId, buffer, function() {
+  chrome.serial.write(sockId, buffer, function() {
     document.getElementById('write-info').innerText = data;
   });
 }
@@ -35,7 +37,7 @@ function onRead(readInfo) {
   var ch = uint8View[0];
 
   if (!uint8View.length) {
-    chrome.serial.read(connectionId, 1, onRead);
+    chrome.serial.read(sockId, 1, onRead);
     return;
   }
   var value = uint8View[0] - '0'.charCodeAt(0);
@@ -54,19 +56,19 @@ function onRead(readInfo) {
 
   console.log("onRead size: ", uint8View.length);
   // Keep on reading.
-  chrome.serial.read(connectionId, 1, onRead);
+  chrome.serial.read(sockId, 1, onRead);
 };
 
 function onOpen(openInfo) {
-  connectionId = openInfo.connectionId;
-  if (connectionId == -1) {
+  sockId = openInfo.connectionId;
+  if (sockId == -1) {
     setStatus('Could not open');
     return;
   }
   setStatus('Connected');
 
   setPosition(0);
-  chrome.serial.read(connectionId, 1, onRead);
+  chrome.serial.read(sockId, 1, onRead);
 };
 
 function setStatus(status) {
@@ -89,8 +91,8 @@ function buildPortPicker(ports) {
   portPicker.selectedIndex = portcount;
 
   portPicker.onchange = function() {
-    if (connectionId != -1) {
-      chrome.serial.close(connectionId, openSelectedPort);
+    if (sockId != -1) {
+      chrome.serial.close(sockId, openSelectedPort);
       return;
     }
     openSelectedPort();
@@ -107,6 +109,10 @@ function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 
+function onConnected(result) {
+  console.log("Connect result:", result);
+}
+
 function startJqm() {
   $("#command").keypress(function (e) {
     if (e.which === 13) {
@@ -115,6 +121,11 @@ function startJqm() {
       writeData($(this).val());
     }
   });
+  chrome.socket.create('tcp', {}, function(createInfo) {
+    sockId = createInfo.socketId;
+    chrome.socket.connect(sockId, IP, PORT, onConnected);
+  });
+  console.log("startJqm()");
 }
 
 onload = function() {
@@ -134,10 +145,10 @@ onload = function() {
     setPosition(parseInt(this.value, 10));
   };
 
-  chrome.serial.getPorts(function(ports) {
-    buildPortPicker(ports)
-    openSelectedPort();
-  });
+  /*chrome.serial.getPorts(function(ports) {*/
+  /*buildPortPicker(ports)*/
+  /*openSelectedPort();*/
+  /*});*/
 };
 
 $(document).ready(startJqm());
