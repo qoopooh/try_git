@@ -1,13 +1,21 @@
 {
-  "name": "Hello World",
-  "description": "My first packaged app.",
+  // Required
+  "name": "My Extension",
   "version": "0.1",
+  "manifest_version": 2,
+
+  // Recommended
+  "description": "My first packaged app.",
+  "icons": { "16": "calculator-16.png", "128": "calculator-128.png" },
+
+  // Pick one (or more)
   "app": {
     "background": {
       "scripts": ["background.js"]
     }
   },
-  "icons": { "16": "calculator-16.png", "128": "calculator-128.png" },
-  "manifest_version": 2
+
+  // Add any of these that you need
+  "offline_enabled":true
 }
 
