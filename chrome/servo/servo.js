@@ -1,4 +1,5 @@
 var connectionId = -1;
+var readString = "";
 
 function setPosition(position) {
   var buffer = new ArrayBuffer(2);
@@ -11,16 +12,23 @@ function writeData(data) {
   var buffer = new ArrayBuffer(data.length + 1);
   var uint8View = new Uint8Array(buffer);
 
-  for (var i=0; i<data.length; i++) {
-    uint8View[0] = data.charCodeAt(i);
+  console.log(data);
+  var i=0;
+  for (; i<data.length; i++) {
+    uint8View[i] = data.charCodeAt(i);
   }
+  uint8View[i] = '\r'.charCodeAt(0);
 
   chrome.serial.write(connectionId, buffer, function() {});
-  document.getElementById('write-info').innerText = ab2str(buffer);
 }
 
 function onRead(readInfo) {
   var uint8View = new Uint8Array(readInfo.data);
+
+  if (!uint8View.length) {
+    chrome.serial.read(connectionId, 1, onRead);
+    return;
+  }
   var value = uint8View[0] - '0'.charCodeAt(0);
   var rotation = value * 18.0;
 
@@ -32,6 +40,7 @@ function onRead(readInfo) {
       + ", " + dat.byteLength + ", " + uint8View[0];
   }
 
+  console.log("onRead size: ", uint8View.length);
   // Keep on reading.
   chrome.serial.read(connectionId, 1, onRead);
 };
@@ -83,7 +92,17 @@ function openSelectedPort() {
 }
 
 function ab2str(buf) {
-    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+}
+
+function startJqm() {
+  $("#command").keypress(function (e) {
+    if (e.which === 13) {
+      e.preventDefault();
+      $(this).select();
+      writeData($(this).val());
+    }
+  });
 }
 
 onload = function() {
@@ -108,3 +127,6 @@ onload = function() {
     openSelectedPort();
   });
 };
+
+$(document).ready(startJqm());
+
