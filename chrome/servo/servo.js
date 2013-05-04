@@ -1,13 +1,16 @@
 var connectionId = -1;
 var readString = "";
+var readCount = 0;
 
 function setPosition(position) {
   var buffer = new ArrayBuffer(2);
   var uint8View = new Uint8Array(buffer);
   /*chrome.serial.write(connectionId, buffer, function() {});*/
-  document.getElementById('write-info').innerText = ab2str(buffer);
 };
 
+/**
+  * write data + return key
+  */
 function writeData(data) {
   var buffer = new ArrayBuffer(data.length + 1);
   var uint8View = new Uint8Array(buffer);
@@ -19,11 +22,17 @@ function writeData(data) {
   }
   uint8View[i] = '\r'.charCodeAt(0);
 
-  chrome.serial.write(connectionId, buffer, function() {});
+  chrome.serial.write(connectionId, buffer, function() {
+    document.getElementById('write-info').innerText = data;
+  });
 }
 
+/**
+ * designed for read 1 by 1
+ */
 function onRead(readInfo) {
   var uint8View = new Uint8Array(readInfo.data);
+  var ch = uint8View[0];
 
   if (!uint8View.length) {
     chrome.serial.read(connectionId, 1, onRead);
@@ -31,13 +40,16 @@ function onRead(readInfo) {
   }
   var value = uint8View[0] - '0'.charCodeAt(0);
   var rotation = value * 18.0;
-
   document.getElementById('image').style.webkitTransform =
     'rotateZ(' + rotation + 'deg)';
-  if (uint8View[0] && uint8View[0] !== 255) {
-    var dat = readInfo.data;
-    document.getElementById('read-info').innerText = ab2str(dat)
-      + ", " + dat.byteLength + ", " + uint8View[0];
+
+  if (ch !== 0x0d) {
+    readString += String.fromCharCode(ch);
+  } else {
+    console.log("readString: ", readString);
+    document.getElementById('read-info').innerText = readString;
+    document.getElementById('read-count').innerText = ++readCount;
+    readString = "";
   }
 
   console.log("onRead size: ", uint8View.length);
@@ -106,17 +118,17 @@ function startJqm() {
 }
 
 onload = function() {
-  var tv = document.getElementById('tv');
-  navigator.webkitGetUserMedia(
-      {video: true},
-      function(stream) {
-        tv.classList.add('working');
-        document.getElementById('camera-output').src =
-            webkitURL.createObjectURL(stream);
-      },
-      function() {
-        tv.classList.add('broken');
-      });
+  /*var tv = document.getElementById('tv');*/
+  /*navigator.webkitGetUserMedia(*/
+  /*{video: true},*/
+  /*function(stream) {*/
+  /*tv.classList.add('working');*/
+  /*document.getElementById('camera-output').src =*/
+  /*webkitURL.createObjectURL(stream);*/
+  /*},*/
+  /*function() {*/
+  /*tv.classList.add('broken');*/
+  /*});*/
 
   document.getElementById('position-input').onchange = function() {
     setPosition(parseInt(this.value, 10));
