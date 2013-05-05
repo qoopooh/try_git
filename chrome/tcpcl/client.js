@@ -14,7 +14,7 @@ function setPosition(position) {
   * write data + return key
   */
 function writeData(data) {
-  var buffer = new ArrayBuffer(data.length + 1);
+  var buffer = new ArrayBuffer(data.length);
   var uint8View = new Uint8Array(buffer);
 
   console.log(data);
@@ -22,10 +22,10 @@ function writeData(data) {
   for (; i<data.length; i++) {
     uint8View[i] = data.charCodeAt(i);
   }
-  uint8View[i] = '\r'.charCodeAt(0);
 
-  chrome.serial.write(sockId, buffer, function() {
+  chrome.socket.write(sockId, buffer, function() {
     document.getElementById('write-info').innerText = data;
+    onRead();
   });
 }
 
@@ -36,8 +36,12 @@ function onRead(readInfo) {
   var uint8View = new Uint8Array(readInfo.data);
   var ch = uint8View[0];
 
+  if ($("#connect").is(":unchecked")) {
+    console.log("stop read");
+    return;
+  }
   if (!uint8View.length) {
-    chrome.serial.read(sockId, 1, onRead);
+    chrome.socket.read(sockId, 1, onRead);
     return;
   }
   var value = uint8View[0] - '0'.charCodeAt(0);
@@ -56,7 +60,7 @@ function onRead(readInfo) {
 
   console.log("onRead size: ", uint8View.length);
   // Keep on reading.
-  chrome.serial.read(sockId, 1, onRead);
+  chrome.socket.read(sockId, 1, onRead);
 };
 
 function onOpen(openInfo) {
@@ -111,9 +115,63 @@ function ab2str(buf) {
 
 function onConnected(result) {
   console.log("Connect result:", result);
+  if (!result) {
+    setStatus('Connected');
+    disableOnConnect(true);
+  } else {
+    setStatus('Failed ' + result);
+    disableOnConnect(false);
+  }
+}
+
+function connectTcp(connecting) {
+  if (sockId === -1) {
+    if (!connecting)
+      return;
+    IP = $("#ip").val();
+    chrome.socket.create('tcp', {}, function(createInfo) {
+      sockId = createInfo.socketId;
+      chrome.socket.connect(sockId, IP, PORT, onConnected);
+    });
+  } else {
+    chrome.socket.getInfo(sockId, function(socketInfo) {
+      if (socketInfo.connected === connecting)
+        return;
+      if (connecting) {
+        IP = $("#ip").val();
+        chrome.socket.connect(sockId, IP, PORT, onConnected);
+      } else {
+        chrome.socket.disconnect(sockId);
+        setStatus('Disconnected');
+        disableOnConnect(false);
+      }
+    });
+  }
+}
+
+function disableOnConnect(connected) {
+  $("#ip").prop('disabled', connected);
+  $("#command").prop('disabled', !connected);
+  $("#connect").prop('checked', connected);
 }
 
 function startJqm() {
+  $("#ip").keypress(function (e) {
+      /*console.log("keypress");*/
+    if (e.which === 13) {
+      e.preventDefault();
+
+      connectTcp(true);
+    }
+  });
+  $("#connect").change(function() {
+    if ($(this).is(":checked")) {
+      console.log("connecting");
+    } else {
+      console.log("disconnecting");
+    }
+    connectTcp($(this).is(":checked"));
+  });
   $("#command").keypress(function (e) {
     if (e.which === 13) {
       e.preventDefault();
@@ -121,35 +179,11 @@ function startJqm() {
       writeData($(this).val());
     }
   });
-  chrome.socket.create('tcp', {}, function(createInfo) {
-    sockId = createInfo.socketId;
-    chrome.socket.connect(sockId, IP, PORT, onConnected);
-  });
-  console.log("startJqm()");
+  /*$("#command").disabled = true;*/
+  $("#ip").val("192.168.1.32");
+  $("#command").val("hi");
+  disableOnConnect(false);
 }
-
-onload = function() {
-  /*var tv = document.getElementById('tv');*/
-  /*navigator.webkitGetUserMedia(*/
-  /*{video: true},*/
-  /*function(stream) {*/
-  /*tv.classList.add('working');*/
-  /*document.getElementById('camera-output').src =*/
-  /*webkitURL.createObjectURL(stream);*/
-  /*},*/
-  /*function() {*/
-  /*tv.classList.add('broken');*/
-  /*});*/
-
-  document.getElementById('position-input').onchange = function() {
-    setPosition(parseInt(this.value, 10));
-  };
-
-  /*chrome.serial.getPorts(function(ports) {*/
-  /*buildPortPicker(ports)*/
-  /*openSelectedPort();*/
-  /*});*/
-};
 
 $(document).ready(startJqm());
 

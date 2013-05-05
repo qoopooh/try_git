@@ -2,16 +2,20 @@
 <html>
 <head>
   <script src="jquery-1.9.1.min.js"></script>
-  <script src="client.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="container">
-    <label>
-      Port:
-      <select id="port-picker"></select>
-    </label>
+  <!--<label>-->
+  <!--Port:-->
+  <!--<select id="port-picker"></select>-->
+  <!--</label>-->
 
+    <label>
+      IP:
+      <input type="text" id="ip">
+      <input type="checkbox" id="connect" value="Connect">Connect
+    </label>
     <label>
       Write:
       <span id="write-info">-</span>
@@ -28,8 +32,10 @@
       Status:
       <span id="status">Loading</span>
     </label>
-
-    <input type="text" id="command" name="command">
+    <label>
+      Send:
+      <input type="text" id="command">
+    </label>
     <label>
       Input:
       <input id="position-input" type="range" min="0" max="9" value="0">
@@ -37,5 +43,6 @@
 
     <div id="image"></div>
   </div>
+  <script src="client.js"></script>
 </body>
 </html>
