@@ -17,7 +17,7 @@ function writeData(data) {
   var buffer = new ArrayBuffer(data.length);
   var uint8View = new Uint8Array(buffer);
 
-  console.log(data);
+  console.log("write:", data);
   var i=0;
   for (; i<data.length; i++) {
     uint8View[i] = data.charCodeAt(i);
@@ -25,7 +25,11 @@ function writeData(data) {
 
   chrome.socket.write(sockId, buffer, function() {
     document.getElementById('write-info').innerText = data;
-    onRead();
+    chrome.socket.read(sockId, null, function(readInfo) {
+      var str = ab2str(readInfo.data);
+      console.log("can read:", str);
+      document.getElementById('read-info').innerText = str;
+    });
   });
 }
 
@@ -60,7 +64,7 @@ function onRead(readInfo) {
 
   console.log("onRead size: ", uint8View.length);
   // Keep on reading.
-  chrome.socket.read(sockId, 1, onRead);
+  /*chrome.socket.read(sockId, 1, onRead);*/
 };
 
 function onOpen(openInfo) {
@@ -181,7 +185,7 @@ function startJqm() {
   });
   /*$("#command").disabled = true;*/
   $("#ip").val("192.168.1.32");
-  $("#command").val("hi");
+  $("#command").val("hello world!");
   disableOnConnect(false);
 }
 
