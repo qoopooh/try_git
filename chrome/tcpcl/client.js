@@ -4,12 +4,6 @@ var readCount = 0;
 var IP = "192.168.1.101";
 var PORT = 1470;
 
-function setPosition(position) {
-  var buffer = new ArrayBuffer(2);
-  var uint8View = new Uint8Array(buffer);
-  /*chrome.serial.write(sockId, buffer, function() {});*/
-};
-
 /**
   * write data + return key
   */
@@ -27,90 +21,14 @@ function writeData(data) {
     document.getElementById('write-info').innerText = data;
     chrome.socket.read(sockId, null, function(readInfo) {
       var str = ab2str(readInfo.data);
-      console.log("can read:", str);
+      console.log("read:", str);
       document.getElementById('read-info').innerText = str;
     });
   });
 }
 
-/**
- * designed for read 1 by 1
- */
-function onRead(readInfo) {
-  var uint8View = new Uint8Array(readInfo.data);
-  var ch = uint8View[0];
-
-  if ($("#connect").is(":unchecked")) {
-    console.log("stop read");
-    return;
-  }
-  if (!uint8View.length) {
-    chrome.socket.read(sockId, 1, onRead);
-    return;
-  }
-  var value = uint8View[0] - '0'.charCodeAt(0);
-  var rotation = value * 18.0;
-  document.getElementById('image').style.webkitTransform =
-    'rotateZ(' + rotation + 'deg)';
-
-  if (ch !== 0x0d) {
-    readString += String.fromCharCode(ch);
-  } else {
-    console.log("readString: ", readString);
-    document.getElementById('read-info').innerText = readString;
-    document.getElementById('read-count').innerText = ++readCount;
-    readString = "";
-  }
-
-  console.log("onRead size: ", uint8View.length);
-  // Keep on reading.
-  /*chrome.socket.read(sockId, 1, onRead);*/
-};
-
-function onOpen(openInfo) {
-  sockId = openInfo.connectionId;
-  if (sockId == -1) {
-    setStatus('Could not open');
-    return;
-  }
-  setStatus('Connected');
-
-  setPosition(0);
-  chrome.serial.read(sockId, 1, onRead);
-};
-
 function setStatus(status) {
   document.getElementById('status').innerText = status;
-}
-
-function buildPortPicker(ports) {
-  var eligiblePorts = ports.filter(function(port) {
-    return !port.match(/[Bb]luetooth/);
-  });
-
-  var portPicker = document.getElementById('port-picker');
-  var portcount = -1;
-  eligiblePorts.forEach(function(port) {
-    var portOption = document.createElement('option');
-    portOption.value = portOption.innerText = port;
-    portPicker.appendChild(portOption);
-    ++portcount;
-  });
-  portPicker.selectedIndex = portcount;
-
-  portPicker.onchange = function() {
-    if (sockId != -1) {
-      chrome.serial.close(sockId, openSelectedPort);
-      return;
-    }
-    openSelectedPort();
-  };
-}
-
-function openSelectedPort() {
-  var portPicker = document.getElementById('port-picker');
-  var selectedPort = portPicker.options[portPicker.selectedIndex].value;
-  chrome.serial.open(selectedPort, { bitrate: 38400 }, onOpen);
 }
 
 function ab2str(buf) {
@@ -156,15 +74,14 @@ function connectTcp(connecting) {
 function disableOnConnect(connected) {
   $("#ip").prop('disabled', connected);
   $("#command").prop('disabled', !connected);
+  $("#write-button").prop('disabled', !connected);
   $("#connect").prop('checked', connected);
 }
 
 function startJqm() {
   $("#ip").keypress(function (e) {
-      /*console.log("keypress");*/
     if (e.which === 13) {
       e.preventDefault();
-
       connectTcp(true);
     }
   });
@@ -180,10 +97,12 @@ function startJqm() {
     if (e.which === 13) {
       e.preventDefault();
       $(this).select();
-      writeData($(this).val());
+      $("#write-button").click();
     }
   });
-  /*$("#command").disabled = true;*/
+  $("#write-button").click(function() {
+    writeData($("#command").val());
+  });
   $("#ip").val("192.168.1.32");
   $("#command").val("hello world!");
   disableOnConnect(false);

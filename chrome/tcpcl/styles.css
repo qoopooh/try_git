@@ -1,3 +1,4 @@
+
 body {
   background-color: #f8f8f8;
   font-family: "helvetica neue", helvetica, sans-serif;
@@ -17,14 +18,8 @@ label {
   color: #999;
 }
 
-#port-picker,
 #status, #write-info, #read-info {
   color: #000;
-}
-
-#port-picker {
-  max-width: 250px;
-  margin-right: 10px;
 }
 
 #position-input {
@@ -52,8 +47,8 @@ label {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  width: 256px;
-  height: 256px;
+  width: 128px;
+  height: 128px;
   -webkit-transition: all .2s linear;
 }
 
@@ -61,24 +56,6 @@ label {
   position: absolute;
   top: 0;
   left: 0;
-  width: 640px;
+  width: 480px;
 }
 
-#tv {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 320px;
-  height: 240px;
-  border-left: solid 1px #ddd;
-}
-
-#tv video,
-#tv img {
-  display: none;
-}
-
-#tv.working video,
-#tv.broken img {
-  display: block;
-}
