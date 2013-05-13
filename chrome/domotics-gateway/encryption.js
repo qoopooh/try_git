@@ -36,13 +36,19 @@ function setPhoneId(id, cb) {
     return cb();
 }
 
+/*
+Input: ArrayBuffer
+Output: Uint8Array
+*/
 function getUidBuffer() {
-  var uid = new Buffer(uuid.length * 2);
+  var uid = new ArrayBuffer(uuid.length * 2);
+  var uidView = new Uint8Array(uid);
+  var uuidView = new Uint8Array(str2ab(uuid));
 
-  len = uid.write(uuid, 0);
-  len += uid.write(uuid, len);
-  
-  return uid;
+  uidView.set(uuidView, 0);
+  uidView.set(uuidView, uuidView.length);
+
+  return uidView;
 }
 
 /*
@@ -52,6 +58,7 @@ function encrypt(data) {
   var inp = new Uint8Array(str2ab(data));
   var out = new ArrayBuffer(data.length + 2);
   var out_u8 = new Uint8Array(out);
+  var uid = getUidBuffer();
 
   out_u8[0] = phone_id.charCodeAt(0);
   out_u8[1] = ','.charCodeAt(0);
@@ -71,7 +78,7 @@ function encrypt(data) {
     if (((dat >= 48) && (dat <= 57))
         || ((dat >= 65) && (dat <= 90))
         || ((dat >= 97) && (dat <= 122))) {
-      shift = uuid.charCodeAt(i-1) + uuid.charCodeAt(0);
+      shift = uid[i-1] + uid[0];
       if (f_debug) {
         console.log('shift: ' + shift);
         console.log('out[' + i + ']: ' + dat);
@@ -103,6 +110,7 @@ function decrypt(data) {
   var inp = new Uint8Array(data);
   var out = new ArrayBuffer(data.byteLength + 2);
   var out_u8 = new Uint8Array(out);
+  var uid = getUidBuffer();
 
   i=0;
   while (inp[i+2] != k_line_feed) {
@@ -110,7 +118,7 @@ function decrypt(data) {
     if (((dat >= 48) && (dat <= 57))
         || ((dat >= 65) && (dat <= 90))
         || ((dat >= 97) && (dat <= 122))) {
-      shift = uuid.charCodeAt(i+1) + uuid.charCodeAt(0);
+      shift = uid[i+1] + uid[0];
       if (f_debug) {
         console.log('shift: ' + shift);
         console.log('out[' + i + ']: ' + dat);
