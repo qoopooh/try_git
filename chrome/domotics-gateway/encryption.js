@@ -1,7 +1,6 @@
-var uuid = '0123456789abcdef0123456789abcdef01234567';
-/*var uuid = '1234567890123456789012345678901234567890';*/
+/*var uuid = '0123456789abcdef0123456789abcdef01234567';*/
+var uuid = '1234567890123456789012345678901234567890';
 var k_line_feed = 13;
-var log = console.log;
 var phone_id = '0';
 var f_debug = false;
 
@@ -17,21 +16,11 @@ function isEncryptionCommand(data) {
   return true;
 }
 
-/*
- Input: Buffer
- */
-function isEncryptedMessage(data) {
-  var value = data[0];
-
-  if ((value < 48)
-      || (value > 57)) {
-    return false;
-  }
-  return true;
-}
-
-function setPhoneId(id) {
+function setPhoneId(id, cb) {
   phone_id = id;
+  console.log("Set phone id to", phone_id);
+  if (cb)
+    return cb();
 }
 
 function getUidBuffer() {
@@ -47,47 +36,53 @@ function getUidBuffer() {
  Input: String
  */
 function encrypt(data) {
-  var inp = new Buffer(data);
-  var out = new Buffer(data.length + 2);
-  var uid = getUidBuffer();
+  var inp = new Uint8Array(str2ab(data));
+  var out = new ArrayBuffer(data.length + 2);
+  var out_u8 = new Uint8Array(out);
 
-  out[0] = phone_id.charCodeAt(0);
-  out[1] = ','.charCodeAt(0);
+  out_u8[0] = phone_id.charCodeAt(0);
+  out_u8[1] = ','.charCodeAt(0);
   if (f_debug) {
-    log('out[0]: ' + out[0]);
-    log('out[1]: ' + out[1]);
-    log('data.length: ' + data.length);
+    console.log('out[0]: ' + out_u8[0]);
+    console.log('out[1]: ' + out_u8[1]);
+    console.log('data.length: ' + data.length);
+    console.log('data: ' + data);
   }
 
   i = 2;
   while (i < data.length + 2) {
-    out[i] = inp[i-2];
-    if (((out[i] >= 48) && (out[i] <= 57))
-        || ((out[i] >= 65) && (out[i] <= 90))
-        || ((out[i] >= 97) && (out[i] <= 122))) {
-      shift = uid[i-1] + uid[0];
+    var dat = inp[i-2];
+
+    if (f_debug)
+      console.log(i, dat);
+    if (((dat >= 48) && (dat <= 57))
+        || ((dat >= 65) && (dat <= 90))
+        || ((dat >= 97) && (dat <= 122))) {
+      shift = uuid.charCodeAt(i-1) + uuid.charCodeAt(0);
       if (f_debug) {
-        log('shift: ' + shift);
-        log('out[' + i + ']: ' + out[i]);
+        console.log('shift: ' + shift);
+        console.log('out[' + i + ']: ' + dat);
       }
       while (shift) {
         --shift;
-        ++out[i];
-        if (out[i] > 57 && out[i] < 65)
-          out[i] = 65;
-        else if (out[i] > 90 && out[i] < 97)
-          out[i] = 97;
-        else if (out[i] > 122)
-          out[i] = 48;
-      }
-      if (f_debug) {
-        log('out[' + i + ']: ' + out[i]);
+        ++dat;
+        if (dat > 57 && dat < 65)
+          dat = 65;
+        else if (dat > 90 && dat < 97)
+          dat = 97;
+        else if (dat > 122)
+          dat = 48;
       }
     }
+    out_u8[i] = dat;
+    if (f_debug)
+      console.log('out[' + i + ']: ' + dat);
     ++i;
   }
 
-  return out.toString();
+  var out_str = ab2str(out);
+  console.log("encrypt", out_str);
+  return out_str;
 }
 
 /*
@@ -96,7 +91,6 @@ function encrypt(data) {
 function decrypt(data) {
   var inp = new Buffer(data);
   var out = new Buffer(data.length - 2);
-  var uid = getUidBuffer();
 
   i=0;
   while (inp[i+2] != k_line_feed) {
@@ -104,10 +98,10 @@ function decrypt(data) {
     if (((out[i] >= 48) && (out[i] <= 57))
         || ((out[i] >= 65) && (out[i] <= 90))
         || ((out[i] >= 97) && (out[i] <= 122))) {
-      shift = uid[i+1] + uid[0];
+      shift = uuid.charCodeAt(i+1) + uuid.charCodeAt(0);
       if (f_debug) {
-        log('shift: ' + shift);
-        log('out[' + i + ']: ' + out[i]);
+        console.log('shift: ' + shift);
+        console.log('out[' + i + ']: ' + out[i]);
       }
       while (shift) {
         --shift;
@@ -120,7 +114,7 @@ function decrypt(data) {
           out[i] = 90;
       }
       if (f_debug) {
-        log('out[' + i + ']: ' + out[i]);
+        console.log('out[' + i + ']: ' + out[i]);
       }
     }
     ++i;
@@ -128,11 +122,4 @@ function decrypt(data) {
 
   return out;
 }
-
-module.exports.uuid = uuid;
-module.exports.setPhoneId = setPhoneId;
-module.exports.isEncryptionCommand = isEncryptionCommand;
-module.exports.isEncryptedMessage = isEncryptedMessage;
-module.exports.encrypt = encrypt;
-module.exports.decrypt = decrypt;
 

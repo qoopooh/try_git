@@ -8,7 +8,7 @@ var f_manualConnect = false;
 /**
   * write data(string) + return key
   */
-function writeData(data, callback) {
+function writeData(data, cb) {
   console.log("write:", data);
   data += "\r\n";
 
@@ -21,13 +21,13 @@ function writeData(data, callback) {
 
   chrome.socket.write(sockId, buffer, function(writeInfo) {
     var i = writeInfo.bytesWritten;
-    console.log("written:", i);
+    console.log("written length:", i);
     
     if (i<0) {
       document.getElementById('write-info').innerText = "-";
       setStatus("Cannot write data");
-      if (callback) {
-        return callback();
+      if (cb) {
+        return cb();
       } else {
         return;
       }
@@ -35,35 +35,75 @@ function writeData(data, callback) {
 
     document.getElementById('write-info').innerText = data;
     chrome.socket.read(sockId, null, function(readInfo) {
-      var str = ab2str(readInfo.data);
-      console.log("data length:", readInfo.data.byteLength);
+      console.log("read length:", readInfo.data.byteLength);
       if (!readInfo.data.byteLength)
         return;
-      console.log("read:", str);
-      document.getElementById('read-info').innerText = str;
-      document.getElementById('read-count').innerText = ++readCount;
-      if (callback) {
-        return callback();
-      } else {
-        return;
-      }
+      extractReadMessage(readInfo.data, function(str) {
+        document.getElementById('read-info').innerText = str;
+        document.getElementById('read-count').innerText = ++readCount;
+        if (cb) {
+          return cb(str);
+        } else {
+          return;
+        }
+      });
     });
   });
 }
 
-function sendCommand(cmd) {
+function extractReadMessage(data, callback) {
+  var str = ab2str(data);
+
+  console.log("read:", str);
+  console.log("read byte:", str.length);
+
+  if (callback) {
+    return callback(str);
+  }
+}
+
+function writeCommand(cmd, callback) {
   if (f_manualConnect) {
-    writeData($("#command").val());
+    writeData($("#command").val(), function(res) {
+      callback(res);
+    });
   } else {
-    connectTcp(true, function(result) {
-      if (result !== 0) {
+    connectTcp(true, function(res) {
+      if (res !== 0) {
         console.log("there is some error");
+        connectTcp(false);
         return;
       }
-      writeData($("#command").val(), function() {
+      writeData(cmd, function(res) {
         console.log("Send without connection");
-        connectTcp(false);
+        connectTcp(false, function() {
+          callback(res);
+        });
       });
+    });
+  }
+}
+
+function sendCommand(cmd, callback) {
+  if (isEncryptionCommand(cmd)) {
+    writeCommand("R,U," + uuid, function(res) {
+      if (res.length < 9) {
+        setStatus("R,U response error");
+        return;
+      }
+      if (res[6] !== '1') {
+        setStatus("Cannot get Phone ID");
+        return;
+      }
+      setPhoneId(res[4], function() {
+        writeCommand(encrypt(cmd), function(str) {
+        });
+      });
+    });
+  } else {
+    writeCommand(cmd, function(str) {
+      if (callback)
+        return callback(str);
     });
   }
 }
@@ -76,17 +116,26 @@ function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 
-function onConnected(result, callback) {
-  console.log("Connect result:", result);
-  if (!result) {
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length);
+  var bufView = new Uint8Array(buf);
+  for (var i=0, strLen=str.length; i<strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+function onConnected(res, cb) {
+  console.log("Connect result:", res);
+  if (!res) {
     setStatus('Connected');
     disableOnConnect(true);
   } else {
-    setStatus('Failed ' + result);
+    setStatus('Failed ' + res);
     disableOnConnect(false);
   }
-  if (callback) {
-    return callback(result);
+  if (cb) {
+    return cb(res);
   } else {
     return;
   }
@@ -95,27 +144,40 @@ function onConnected(result, callback) {
 function connectTcp(connecting, callback) {
   if (sockId === -1) {
     if (!connecting)
-      return;
+      if (callback)
+        return callback(0);
+      else
+        return;
     IP = $("#ip").val();
     chrome.socket.create('tcp', {}, function(createInfo) {
       sockId = createInfo.socketId;
-      chrome.socket.connect(sockId, IP, PORT, function(result) {
-        onConnected(result, callback);
+      chrome.socket.connect(sockId, IP, PORT, function(res) {
+        console.log("Firsly open connection");
+        onConnected(res, callback);
       });
     });
   } else {
     chrome.socket.getInfo(sockId, function(socketInfo) {
       if (socketInfo.connected === connecting)
-        return;
+        if (callback)
+          return callback(0);
+        else
+          return;
       if (connecting) {
         IP = $("#ip").val();
-        chrome.socket.connect(sockId, IP, PORT, function(result) {
-          onConnected(result, callback);
+        chrome.socket.connect(sockId, IP, PORT, function(res) {
+          console.log("Open connection");
+          onConnected(res, callback);
         });
       } else {
         chrome.socket.disconnect(sockId);
+        console.log("Close connection");
         setStatus('Disconnected');
         disableOnConnect(false);
+        if (callback)
+          return callback(0);
+        else
+          return;
       }
     });
   }
@@ -132,7 +194,6 @@ function startJqm() {
   $("#ip").keypress(function (e) {
     if (e.which === 13) {
       e.preventDefault();
-      /*connectTcp(true);*/
       $("#write-button").click();
     }
   });
@@ -155,8 +216,9 @@ function startJqm() {
   $("#write-button").click(function() {
     sendCommand($("#command").val());
   });
-  $("#ip").val("192.168.1.33");
-  $("#command").val("E,V");
+  $("#ip").val("192.168.1.39");
+  /*$("#command").val("E,V");*/
+  $("#command").val("E,L,1");
   disableOnConnect(false);
 }
 
