@@ -8,7 +8,7 @@ var f_manualConnect = false;
 /**
   * write data(string) + return key
   */
-function writeData(data) {
+function writeData(data, callback) {
   console.log("write:", data);
   data += "\r\n";
 
@@ -26,7 +26,11 @@ function writeData(data) {
     if (i<0) {
       document.getElementById('write-info').innerText = "-";
       setStatus("Cannot write data");
-      return;
+      if (callback) {
+        return callback();
+      } else {
+        return;
+      }
     }
 
     document.getElementById('write-info').innerText = data;
@@ -38,12 +42,30 @@ function writeData(data) {
       console.log("read:", str);
       document.getElementById('read-info').innerText = str;
       document.getElementById('read-count').innerText = ++readCount;
+      if (callback) {
+        return callback();
+      } else {
+        return;
+      }
     });
   });
 }
 
 function sendCommand(cmd) {
-  writeData($("#command").val());
+  if (f_manualConnect) {
+    writeData($("#command").val());
+  } else {
+    connectTcp(true, function(result) {
+      if (result !== 0) {
+        console.log("there is some error");
+        return;
+      }
+      writeData($("#command").val(), function() {
+        console.log("Send without connection");
+        connectTcp(false);
+      });
+    });
+  }
 }
 
 function setStatus(status) {
