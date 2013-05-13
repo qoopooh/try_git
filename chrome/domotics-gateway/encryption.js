@@ -16,6 +16,19 @@ function isEncryptionCommand(data) {
   return true;
 }
 
+/*
+Input: ArrayBuffer
+*/
+function isEncryptedMessage(data) {
+var value = new Uint8Array(data)[0];
+
+  if ((value < 48)
+      || (value > 57)) {
+    return false;
+  }
+  return true;
+}
+
 function setPhoneId(id, cb) {
   phone_id = id;
   console.log("Set phone id to", phone_id);
@@ -80,46 +93,46 @@ function encrypt(data) {
     ++i;
   }
 
-  var out_str = ab2str(out);
-  console.log("encrypt", out_str);
-  return out_str;
+  return ab2str(out);
 }
 
 /*
- Input: Buffer + line feed
+ Input: ArrayBuffer + line feed
  */
 function decrypt(data) {
-  var inp = new Buffer(data);
-  var out = new Buffer(data.length - 2);
+  var inp = new Uint8Array(data);
+  var out = new ArrayBuffer(data.byteLength + 2);
+  var out_u8 = new Uint8Array(out);
 
   i=0;
   while (inp[i+2] != k_line_feed) {
-    out[i] = inp[i+2];
-    if (((out[i] >= 48) && (out[i] <= 57))
-        || ((out[i] >= 65) && (out[i] <= 90))
-        || ((out[i] >= 97) && (out[i] <= 122))) {
+    var dat = inp[i+2];
+    if (((dat >= 48) && (dat <= 57))
+        || ((dat >= 65) && (dat <= 90))
+        || ((dat >= 97) && (dat <= 122))) {
       shift = uuid.charCodeAt(i+1) + uuid.charCodeAt(0);
       if (f_debug) {
         console.log('shift: ' + shift);
-        console.log('out[' + i + ']: ' + out[i]);
+        console.log('out[' + i + ']: ' + dat);
       }
       while (shift) {
         --shift;
-        --out[i];
-        if (out[i] < 48)
-          out[i] = 122;
-        else if (out[i] > 57 && out[i] < 65)
-          out[i] = 57;
-        else if (out[i] > 90 && out[i] < 97)
-          out[i] = 90;
+        --dat;
+        if (dat < 48)
+          dat = 122;
+        else if (dat > 57 && dat < 65)
+          dat = 57;
+        else if (dat > 90 && dat < 97)
+          dat = 90;
       }
       if (f_debug) {
-        console.log('out[' + i + ']: ' + out[i]);
+        console.log('out[' + i + ']: ' + dat);
       }
     }
+    out_u8[i] = dat;
     ++i;
   }
 
-  return out;
+  return ab2str(out);
 }
 

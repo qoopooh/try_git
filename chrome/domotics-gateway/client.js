@@ -52,11 +52,14 @@ function writeData(data, cb) {
 }
 
 function extractReadMessage(data, callback) {
-  var str = ab2str(data);
-
+  var str = "";
+  if (isEncryptedMessage(data)) {
+    str = decrypt(data);
+  } else {
+    str = ab2str(data);
+  }
   console.log("read:", str);
   console.log("read byte:", str.length);
-
   if (callback) {
     return callback(str);
   }
