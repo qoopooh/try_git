@@ -193,6 +193,81 @@ function disableOnConnect(connected) {
   $("#connect").prop('checked', connected);
 }
 
+//////////////////////////
+// Gateway
+//////////////////////////
+
+function Gateway(address) {
+  this.id = address;
+  this.command = "E,V";
+  this.phone_id = '0';
+  this.date = new Date();
+}
+
+function Gateways() {
+  this.gateways = [];
+  this.version = Gateways.CurrentVersion;
+}
+
+Gateways.CurrentVersion = 1;
+Gateways.prototype.sync = function() {
+  this.gateways.forEach(function(gateway) {
+    gateway.date = gateway.date.toJSON();
+  });
+
+  chrome.storage.sync.set({ 'gateways': this });
+  chrome.storage.sync.set({ 'current_gateway': current_gateway });
+}
+Gateways.prototype.add = function(gateway) {
+  this.gateways.push(gateway);
+  this.sync();
+}
+Gateways.prototype.remove = function(gateway) {
+  this.gateways.splice(this.gateways.indexOf(gateway), 1);
+  this.sync();
+}
+Gateways.prototype.length = function() {
+  return this.gateways.length;
+}
+Gateways.prototype.findByKey = function(key, value) {
+  for (var i = 0; i < this.gateways.length; ++i) {
+    var gateway = this.gateways[i];
+    if (gateway[key] === value)
+      return gateway;
+  }
+  return null;
+}
+Gateways.prototype.findById = function(value) {
+  return findByKey("id", value);
+}
+Gateways.prototype.sortedByKey = function(key) {
+  return this.gateways.slice(0).sort(function(a,b){
+    var ret = (typeof a[key] === 'string') ? a[key].localeCompare(b[key]) : a[key] - b[key];
+    return ret;
+  });
+}
+Gateways.prototype.ordered = function() {
+  return this.sortedByKey('date');
+}
+Gateways.prototype.asArray = function() {
+  return this.gateways;
+}
+function GatewayData(host, cmd, phone_id) {
+  this.id = host;
+  this.command = cmd;
+  this.phone_id = phone_id;
+}
+
+var gateways = null;
+var current_gateway = null;
+var gateway_data = {}; // map gateway.id->GatewayData
+//////////////////////////
+// Gateway
+//////////////////////////
+
+function getInitInfo() {
+}
+
 function startJqm() {
   $("#ip").keypress(function (e) {
     if (e.which === 13) {
@@ -219,10 +294,25 @@ function startJqm() {
   $("#write-button").click(function() {
     sendCommand($("#command").val());
   });
-  $("#ip").val("192.168.1.39");
-  /*$("#command").val("E,V");*/
-  $("#command").val("E,L,1");
-  disableOnConnect(false);
+  chrome.storage.sync.get(function(items) {
+    if (items.gateways !== undefined && items.gateways.version == Gateways.CurrentVersion) {
+      gateways = items.gateways;
+      gateways.__proto__ = Gateways.prototype;
+      gateways.asArray().forEach(function(gateway) {
+        gateway.__proto__ = Gateway.prototype;
+        gateway.date = new Date(gateway.date);
+      });
+    } else {
+      gateways = new Gateways();
+    }
+    if (items.current_gateway !== undefined) {
+    } else {
+      $("#ip").val("192.168.1.39");
+      $("#command").val("E,L,1");
+    }
+    getInitInfo();
+    disableOnConnect(false);
+  });
 }
 
 $(document).ready(startJqm());

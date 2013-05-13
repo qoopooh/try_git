@@ -20,7 +20,8 @@
       "socket": [
         "tcp-connect:*:1470"
       ]
-    }
+    },
+    "storage"
   ]
 }
 
