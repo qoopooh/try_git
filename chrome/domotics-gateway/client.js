@@ -65,22 +65,22 @@ function extractReadMessage(data, callback) {
   }
 }
 
-function writeCommand(cmd, callback) {
+function writeCommand(cmd, cb) {
   if (f_manualConnect) {
     writeData($("#command").val(), function(res) {
-      callback(res);
+      cb(res);
     });
   } else {
     connectTcp(true, function(res) {
       if (res !== 0) {
         console.log("there is some error");
         connectTcp(false);
-        return;
+        return cb(res);
       }
       writeData(cmd, function(res) {
         console.log("Send without connection");
         connectTcp(false, function() {
-          callback(res);
+          cb(res);
         });
       });
     });
@@ -89,26 +89,47 @@ function writeCommand(cmd, callback) {
 
 function sendCommand(cmd, callback) {
   if (isEncryptionCommand(cmd)) {
-    writeCommand("R,U," + uuid, function(res) {
-      if (res.length < 9) {
-        setStatus("R,U response error");
-        return;
-      }
-      if (res[6] !== '1') {
-        setStatus("Cannot get Phone ID");
-        return;
-      }
-      setPhoneId(res[4], function() {
+    var id = getCurrentGateway().phone_id;
+
+    if ((id !== '0') && !$("#uid").is(":checked")) {
+      setPhoneId(id, function() {
         writeCommand(encrypt(cmd), function(str) {
+          if (callback)
+            return callback(str);
         });
       });
-    });
+    } else {
+      requestPhoneId(function(res) {
+        writeCommand(encrypt(cmd), function(str) {
+          if (callback)
+            return callback(str);
+        });
+      });
+    }
   } else {
     writeCommand(cmd, function(str) {
       if (callback)
         return callback(str);
     });
   }
+}
+
+function requestPhoneId(callback) {
+  writeCommand("R,U," + uuid, function(res) {
+    if (res.length < 9) {
+      setStatus("R,U response error");
+      return callback(res.length);
+    }
+    if (res[6] !== '1') {
+      setStatus("Cannot get Phone ID");
+      return callback(res[6]);
+    }
+    setPhoneId(res[4], function() {
+      getCurrentGateway().phone_id = res[4];
+      gws.sync();
+      return callback(null);
+    });
+  });
 }
 
 function setStatus(status) {
@@ -204,53 +225,53 @@ function Gateway(address) {
   this.date = new Date();
 }
 
-function Gateways() {
-  this.gateways = [];
-  this.version = Gateways.CurrentVersion;
+function Gws() {
+  this.gws = [];
+  this.version = Gws.CurrentVersion;
 }
 
-Gateways.CurrentVersion = 1;
-Gateways.prototype.sync = function() {
-  this.gateways.forEach(function(gateway) {
-    gateway.date = gateway.date.toJSON();
-  });
+Gws.CurrentVersion = 1;
+Gws.prototype.sync = function() {
+  /*this.gws.forEach(function(gateway) {*/
+  /*gateway.date = gateway.date.toJSON();*/
+  /*});*/
 
-  chrome.storage.sync.set({ 'gateways': this });
+  chrome.storage.sync.set({ 'gws': this });
   chrome.storage.sync.set({ 'current_gateway': current_gateway });
 }
-Gateways.prototype.add = function(gateway) {
-  this.gateways.push(gateway);
+Gws.prototype.add = function(gateway) {
+  this.gws.push(gateway);
   this.sync();
 }
-Gateways.prototype.remove = function(gateway) {
-  this.gateways.splice(this.gateways.indexOf(gateway), 1);
+Gws.prototype.remove = function(gateway) {
+  this.gws.splice(this.gws.indexOf(gateway), 1);
   this.sync();
 }
-Gateways.prototype.length = function() {
-  return this.gateways.length;
+Gws.prototype.length = function() {
+  return this.gws.length;
 }
-Gateways.prototype.findByKey = function(key, value) {
-  for (var i = 0; i < this.gateways.length; ++i) {
-    var gateway = this.gateways[i];
+Gws.prototype.findByKey = function(key, value) {
+  for (var i = 0; i < this.gws.length; ++i) {
+    var gateway = this.gws[i];
     if (gateway[key] === value)
       return gateway;
   }
   return null;
 }
-Gateways.prototype.findById = function(value) {
-  return findByKey("id", value);
+Gws.prototype.findById = function(value) {
+  return this.findByKey("id", value);
 }
-Gateways.prototype.sortedByKey = function(key) {
-  return this.gateways.slice(0).sort(function(a,b){
+Gws.prototype.sortedByKey = function(key) {
+  return this.gws.slice(0).sort(function(a,b){
     var ret = (typeof a[key] === 'string') ? a[key].localeCompare(b[key]) : a[key] - b[key];
     return ret;
   });
 }
-Gateways.prototype.ordered = function() {
+Gws.prototype.ordered = function() {
   return this.sortedByKey('date');
 }
-Gateways.prototype.asArray = function() {
-  return this.gateways;
+Gws.prototype.asArray = function() {
+  return this.gws;
 }
 function GatewayData(host, cmd, phone_id) {
   this.id = host;
@@ -258,9 +279,22 @@ function GatewayData(host, cmd, phone_id) {
   this.phone_id = phone_id;
 }
 
-var gateways = null;
-var current_gateway = null;
+var gws = null;
+var current_gateway = "192.168.1.39";
 var gateway_data = {}; // map gateway.id->GatewayData
+
+function getCurrentGateway() {
+  var gateway = gws.findById(current_gateway);
+  if (!gateway) {
+    gateway = new Gateway(current_gateway);
+    gws.add(gateway);
+  }
+  return gateway;
+}
+function selectGateway(gateway) {
+  $("#ip").val(gateway.id);
+  $("#command").val(gateway.command);
+}
 //////////////////////////
 // Gateway
 //////////////////////////
@@ -272,6 +306,12 @@ function startJqm() {
   $("#ip").keypress(function (e) {
     if (e.which === 13) {
       e.preventDefault();
+      var ip = $(this).val();
+      
+      if (ip !== current_gateway) {
+        current_gateway = ip;
+        getCurrentGateway().command = $("#command").val();
+      }
       $("#write-button").click();
     }
   });
@@ -292,25 +332,27 @@ function startJqm() {
     }
   });
   $("#write-button").click(function() {
-    sendCommand($("#command").val());
+    var cmd = $("#command").val();
+    sendCommand(cmd);
+    getCurrentGateway().command = cmd;
+    gws.sync();
   });
   chrome.storage.sync.get(function(items) {
-    if (items.gateways !== undefined && items.gateways.version == Gateways.CurrentVersion) {
-      gateways = items.gateways;
-      gateways.__proto__ = Gateways.prototype;
-      gateways.asArray().forEach(function(gateway) {
+    if (items.gws !== undefined && items.gws.version == Gws.CurrentVersion) {
+      gws = items.gws;
+      gws.__proto__ = Gws.prototype;
+      gws.asArray().forEach(function(gateway) {
         gateway.__proto__ = Gateway.prototype;
         gateway.date = new Date(gateway.date);
       });
     } else {
-      gateways = new Gateways();
+      gws = new Gws();
     }
     if (items.current_gateway !== undefined) {
-    } else {
-      $("#ip").val("192.168.1.39");
-      $("#command").val("E,L,1");
+      current_gateway = items.current_gateway;
     }
-    getInitInfo();
+
+    selectGateway(getCurrentGateway());
     disableOnConnect(false);
   });
 }
