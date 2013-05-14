@@ -144,3 +144,33 @@ function decrypt(data) {
   return ab2str(out);
 }
 
+function setUuid(id) {
+  console.log("id size", id.length);
+
+  var id_max_size = 40;
+  var id_size = id.length;
+  var dat = "";
+
+  uuid = "";
+  for (var i = 0; i < id_max_size; i++) {
+    if (i < id_size) {
+      dat = id[i];
+    } else {
+      dat = id[i-id_size];
+    }
+
+    var num = dat.charCodeAt(0);
+    num %= 16;
+    if (num < 10) {
+      dat = "" + num;
+    } else {
+      dat = String.fromCharCode(('a'.charCodeAt(0) + (num - 10)));
+    }
+    uuid += dat;
+  }
+
+  console.log("new uuid", uuid);
+  console.log("uuid size", uuid.length);
+}
+
+

@@ -336,6 +336,7 @@ function startJqm() {
     sendCommand(cmd);
     getCurrentGateway().command = cmd;
     gws.sync();
+    setUuid(chrome.i18n.getMessage("@@extension_id"));
   });
   chrome.storage.sync.get(function(items) {
     if (items.gws !== undefined && items.gws.version == Gws.CurrentVersion) {
@@ -355,6 +356,7 @@ function startJqm() {
     selectGateway(getCurrentGateway());
     disableOnConnect(false);
   });
+  setUuid(chrome.i18n.getMessage("@@extension_id"));
 }
 
 $(document).ready(startJqm());
