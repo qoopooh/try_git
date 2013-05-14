@@ -4,6 +4,7 @@ var readCount = 0;
 var IP = "192.168.1.101";
 var PORT = 1470;
 var f_manualConnect = false;
+/*var timeout = 0;*/
 
 /**
   * write data(string) + return key
@@ -34,19 +35,50 @@ function writeData(data, cb) {
     }
 
     document.getElementById('write-info').innerText = data;
-    chrome.socket.read(sockId, null, function(readInfo) {
-      console.log("read length:", readInfo.data.byteLength);
-      if (!readInfo.data.byteLength)
+    /*chrome.socket.read(sockId, 1, function(readInfo) {*/
+
+      readData(cb);
+      /*});*/
+    /*if (timeout)*/
+    /*clearInterval(timeout);*/
+    /*timeout = setInterval(function() {*/
+    /*setTimeout(function() {*/
+    /*if ($("#write-button").is(":disabled")) {*/
+    /*waitResponse(false);*/
+    /*if (!f_manualConnect) {*/
+    /*connectTcp(false, function() {*/
+    /*setStatus("Timeout");*/
+    /*});*/
+    /*chrome.socket.disconnect(sockId);*/
+    /*} else {*/
+    /*setStatus("Timeout");*/
+    /*}*/
+    /*setStatus("Timeout");*/
+    /*}*/
+    /*if (cb) {*/
+    /*return cb("");*/
+    /*}*/
+    /*}, 5000);*/
+  });
+}
+
+function readData(cb) {
+  chrome.socket.read(sockId, null, function(readInfo) {
+    console.log("read length:", readInfo.data.byteLength);
+    if (!readInfo.data.byteLength)
+      if (cb) {
+        return cb("-");
+      } else {
         return;
-      extractReadMessage(readInfo.data, function(str) {
-        document.getElementById('read-info').innerText = str;
-        document.getElementById('read-count').innerText = ++readCount;
-        if (cb) {
-          return cb(str);
-        } else {
-          return;
-        }
-      });
+      }
+    extractReadMessage(readInfo.data, function(str) {
+      document.getElementById('read-info').innerText = str;
+      document.getElementById('read-count').innerText = ++readCount;
+      if (cb) {
+        return cb(str);
+      } else {
+        return;
+      }
     });
   });
 }
@@ -59,7 +91,6 @@ function extractReadMessage(data, callback) {
     str = ab2str(data);
   }
   console.log("read:", str);
-  console.log("read byte:", str.length);
   if (callback) {
     return callback(str);
   }
@@ -74,7 +105,7 @@ function writeCommand(cmd, cb) {
     connectTcp(true, function(res) {
       if (res !== 0) {
         console.log("there is some error");
-        connectTcp(false);
+        chrome.socket.disconnect(sockId);
         return cb(res);
       }
       writeData(cmd, function(res) {
@@ -99,7 +130,7 @@ function sendCommand(cmd, callback) {
         });
       });
     } else {
-      requestPhoneId(function(res) {
+      requestPhoneId(function() {
         writeCommand(encrypt(cmd), function(str) {
           if (callback)
             return callback(str);
@@ -118,16 +149,16 @@ function requestPhoneId(callback) {
   writeCommand("R,U," + uuid, function(res) {
     if (res.length < 9) {
       setStatus("R,U response error");
-      return callback(res.length);
+      return;
     }
     if (res[6] !== '1') {
       setStatus("Cannot get Phone ID");
-      return callback(res[6]);
+      return;
     }
     setPhoneId(res[4], function() {
       getCurrentGateway().phone_id = res[4];
       gws.sync();
-      return callback(null);
+      return callback();
     });
   });
 }
@@ -209,10 +240,14 @@ function connectTcp(connecting, callback) {
 
 function disableOnConnect(connected) {
   $("#ip").prop('disabled', connected);
-  /*$("#command").prop('disabled', !connected);*/
-  /*$("#write-button").prop('disabled', !connected);*/
   $("#connect").prop('checked', connected);
 }
+
+function waitResponse(on) {
+  $("#command").prop('disabled', on);
+  $("#write-button").prop('disabled', on);
+}
+
 
 //////////////////////////
 // Gateway
@@ -299,9 +334,6 @@ function selectGateway(gateway) {
 // Gateway
 //////////////////////////
 
-function getInitInfo() {
-}
-
 function startJqm() {
   $("#ip").keypress(function (e) {
     if (e.which === 13) {
@@ -333,10 +365,12 @@ function startJqm() {
   });
   $("#write-button").click(function() {
     var cmd = $("#command").val();
-    sendCommand(cmd);
+    waitResponse(true);
+    sendCommand(cmd, function() {
+      waitResponse(false);
+    });
     getCurrentGateway().command = cmd;
     gws.sync();
-    setUuid(chrome.i18n.getMessage("@@extension_id"));
   });
   chrome.storage.sync.get(function(items) {
     if (items.gws !== undefined && items.gws.version == Gws.CurrentVersion) {

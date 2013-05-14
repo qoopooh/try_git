@@ -1,5 +1,5 @@
-/*var uuid = '0123456789abcdef0123456789abcdef01234567';*/
-var uuid = '1234567890123456789012345678901234567890';
+var uuid = '0123456789abcdef0123456789abcdef01234567';
+/*var uuid = '1234567890123456789012345678901234567890';*/
 var k_line_feed = 13;
 var phone_id = '0';
 var f_debug = false;
@@ -145,7 +145,7 @@ function decrypt(data) {
 }
 
 function setUuid(id) {
-  console.log("id size", id.length);
+  /*console.log("id size", id.length);*/
 
   var id_max_size = 40;
   var id_size = id.length;
@@ -160,17 +160,24 @@ function setUuid(id) {
     }
 
     var num = dat.charCodeAt(0);
+
+    // hex encode
     num %= 16;
     if (num < 10) {
       dat = "" + num;
     } else {
       dat = String.fromCharCode(('a'.charCodeAt(0) + (num - 10)));
     }
+
+    // dec encode
+    /*num %= 10;*/
+    /*dat = "" + num;*/
+
     uuid += dat;
   }
 
-  console.log("new uuid", uuid);
-  console.log("uuid size", uuid.length);
+  console.log("uuid:", uuid);
+  /*console.log("uuid size", uuid.length);*/
 }
 
 
