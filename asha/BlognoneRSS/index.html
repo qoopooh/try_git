@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>    	
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>Blognone RSS feed</title>
+		<script type="text/javascript" src="s40-theme/js/screensize.js"></script>
+		<script type="text/javascript" src="s40-theme/js/rssHorizView.js"></script>
+		<script type="text/javascript" src="s40-theme/js/rssVerticalView.js"></script>
+		<script type="text/javascript" src="s40-theme/js/jquery-1.4.4.min.js"></script>	
+        <script type="text/javascript" src="s40-theme/js/jquery.jfeed.js"></script>				
+		<script type="text/javascript" src="s40-theme/js/getRSS.js"></script>
+    </head>
+	<body>
+    
+		<!--RSSContent -->
+		<div class="container">
+			<div class="strip view0" id="views">
+	            <div id="verviewcontainer">
+	                <div id="verview">
+	                    <div class="pubDate_contnr"><div id="catPubDate" class="pubDate_txt"></div></div>
+	                    <div class="verHorloader">Loading...</div>
+	                </div>
+	            </div>
+				<div id="horview" class="hide"><div class="verHorloader">Loading...</div></div>		
+			</div>
+		</div>
+		<!-- End RSSContent -->
+
+        <script type="text/javascript">
+              window.onload=function(){getRSS('verview', 'horview', 'http://feeds2.feedburner.com/time/topstories')}
+              mwl.addNavBackListener('#horview', "mwl.addClass(\'#entry0\', \'height_cur2\');mwl.addClass(\'#entry1\', \'height_cur2\');mwl.addClass(\'#entry2\', \'height_cur2\');mwl.addClass(\'#entry3\', \'height_cur2\');mwl.addClass(\'#entry4\', \'height_cur2\');mwl.addClass(\'#entry5\', \'height_cur2\');mwl.addClass(\'#entry6\', \'height_cur2\');mwl.addClass(\'#entry7\', \'height_cur2\');mwl.addClass(\'#entry8\', \'height_cur2\');mwl.addClass(\'#entry9\', \'height_cur2\');mwl.switchClass(\'#views\',\'view2\', \'view1\');mwl.removeClass(\'#entries\', \'entry*\');mwl.removeClass(\'#entries\', \'hortransition\');mwl.switchClass(\'#horview\', \'show\', \'hide\');mwl.removeClass(\'#verviewcontainer\', \'height_cur\');");
+        </script>
+
+    </body>
+</html>
