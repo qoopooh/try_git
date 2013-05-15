@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+xmlns:NOKIA="http://www.ovi.com/widgetservice"
+        id="http://BlognoneRSSfeed"
+        version="0.0.1">
+
+    <name short="Blognone RSS">Blognone RSS feed</name>
+
+    <description>Top stories of Blognone.com</description>
+
+    <content src="index.html"/>
+    
+    <icon src="s40-theme/images/icon.png"/>
+
+    <!-- Note: Feed URL MUST BE Url encoded 
+         @see http://en.wikipedia.org/wiki/Percent-encoding -->
+    <preference name = "feedURLRSS"
+                value = "http://feeds2.feedburner.com/time/topstories"
+                readonly = "true"/>
+
+    <feature name="nokia://s40.nokia.com/SAWRT/2.3" required="true" />
+
+    <!-- Note: Author href MUST BE Url encoded 
+         @see http://en.wikipedia.org/wiki/Percent-encoding -->
+    <author email="qoopooh@gmail.com" href="https://plus.google.com/101730125191232805913">
+       Kanjanakhan  
+    </author>
+
+    <license>
+        Copyright Kanjanakhan Corp, 2013.
+    </license>
+</widget>

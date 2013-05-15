@@ -1,0 +1,21 @@
+{
+  // Required
+  "name": "My Thermo Plot",
+  "version": "0.1",
+  "manifest_version": 2,
+
+  // Recommended
+  "description": "Plot thermo data with Chart.js",
+  "icons": { "128": "icon.jpg" },
+
+  // Pick one (or more)
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+
+  // Add any of these that you need
+  "offline_enabled":true
+}
+

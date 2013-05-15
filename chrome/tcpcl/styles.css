@@ -1,0 +1,61 @@
+
+body {
+  background-color: #f8f8f8;
+  font-family: "helvetica neue", helvetica, sans-serif;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+label {
+  display: block;
+  padding: 20px;
+  border-bottom: solid 1px #ddd;
+  border-right: solid 1px #ddd;
+  width: 300px;
+}
+
+label {
+  color: #999;
+}
+
+#status, #write-info, #read-info {
+  color: #000;
+}
+
+#position-input {
+  display: block;
+   -webkit-appearance:none !important;
+  width: 90%;
+  margin: 20px auto;
+  height: 6px;
+  background: rgb(13, 168, 97);
+}
+
+#position-input::-webkit-slider-thumb {
+  -webkit-appearance:none !important;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background: rgb(67, 135, 253);
+}
+
+#image {
+  position: absolute;
+  right: 10px;
+  top: -10px;
+  background-image: url(chrome-logo.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 128px;
+  height: 128px;
+  -webkit-transition: all .2s linear;
+}
+
+#container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 480px;
+}
+

@@ -1,0 +1,24 @@
+{
+  // Required
+  "name": "My Extension",
+  "version": "0.1",
+  "manifest_version": 2,
+
+  // Recommended
+  "description": "My first packaged app.",
+  "minimum_chrome_version": "23",
+
+  // Pick one (or more)
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "permissions": [
+    "bluetooth"
+  ],
+
+  // Add any of these that you need
+  "offline_enabled":true
+}
+

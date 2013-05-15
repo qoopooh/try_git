@@ -1,0 +1,27 @@
+{
+  "name": "A-Touch Gateway",
+  "version": "0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "description": "A-Touch software on Gateway module",
+
+  "app": {
+    "background": {
+      "scripts": [ "background.js" ]
+    }
+  },
+
+  "icons": {
+    "128": "assets/icon.png"
+  },
+
+  "permissions": [
+    {
+      "socket": [
+        "tcp-connect:*:1470"
+      ]
+    },
+    "storage"
+  ]
+}
+
