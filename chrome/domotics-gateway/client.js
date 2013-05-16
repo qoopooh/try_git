@@ -1,13 +1,11 @@
 var sockId = -1;
-var readString = "";
 var readCount = 0;
 var IP = "192.168.1.101";
 var PORT = 1470;
 var f_manualConnect = false;
-/*var timeout = 0;*/
 
 /**
-  * write data(string) + return key
+  * write data(string)
   */
 function writeData(data, cb) {
   console.log("write:", data);
@@ -35,35 +33,15 @@ function writeData(data, cb) {
     }
 
     document.getElementById('write-info').innerText = data;
-    /*chrome.socket.read(sockId, 1, function(readInfo) {*/
-
-      readData(cb);
-      /*});*/
-    /*if (timeout)*/
-    /*clearInterval(timeout);*/
-    /*timeout = setInterval(function() {*/
-    /*setTimeout(function() {*/
-    /*if ($("#write-button").is(":disabled")) {*/
-    /*waitResponse(false);*/
-    /*if (!f_manualConnect) {*/
-    /*connectTcp(false, function() {*/
-    /*setStatus("Timeout");*/
-    /*});*/
-    /*chrome.socket.disconnect(sockId);*/
-    /*} else {*/
-    /*setStatus("Timeout");*/
-    /*}*/
-    /*setStatus("Timeout");*/
-    /*}*/
-    /*if (cb) {*/
-    /*return cb("");*/
-    /*}*/
-    /*}, 5000);*/
+    readData(cb);
   });
 }
 
+/**
+  * return String
+  */
 function readData(cb) {
-  chrome.socket.read(sockId, null, function(readInfo) {
+  chrome.socket.read(sockId, function(readInfo) {
     console.log("read length:", readInfo.data.byteLength);
     if (!readInfo.data.byteLength)
       if (cb) {
@@ -391,6 +369,9 @@ function startJqm() {
     disableOnConnect(false);
   });
   setUuid(chrome.i18n.getMessage("@@extension_id"));
+  /*chrome.experimental.identity.getAuthToken(this, function(token) {*/
+  /*console.log("token:", token);*/
+  /*});*/
 }
 
 $(document).ready(startJqm());
