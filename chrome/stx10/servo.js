@@ -118,10 +118,6 @@ function init() {
 
 onload = function() {
 
-  document.getElementById('position-input').onchange = function() {
-    setPosition(parseInt(this.value, 10));
-  };
-
   chrome.serial.getPorts(function(ports) {
     buildPortPicker(ports)
     openSelectedPort();
