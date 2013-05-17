@@ -2,6 +2,7 @@ var conn_id = -1;
 var read_string = "";
 var read_count = 0;
 var previous_position = 0;
+var position_count = 0;
 
 /**
   * write data + return key
@@ -130,14 +131,25 @@ function setPosition(position) {
     'rotateZ(' + rotation + 'deg)';
   if (position !== previous_position) {
     previous_position = position;
-    log('pos ' + position);
+    if (++position_count > 20) {
+      position_count = 0;
+      log('pos ' + position);
+    }
   }
 };
 
 function log(msg) {
-  $("#messagewindow").append(timeToString() + '-> ' + msg + '<br/>');
+  $("#messagewindow").append(timeToString() + ' ' + msg + '<br/>');
   var height = $("#messagewindow")[0].scrollHeight;
   $("#messagewindow").scrollTop(height);
+}
+
+function resizeMessageWindow() {
+  var bodyheight = $(window).height();
+  var bodywidth = $(window).width();
+
+  $("#messagewindow").width(bodywidth - 360);
+  $("#image").css({ left: bodywidth - 90 });
 }
 
 function init() {
@@ -152,6 +164,7 @@ function init() {
     $("#messagewindow").text("");
   });
   $("#messagewindow").text('Start: ' + dateToString());
+  resizeMessageWindow();
 }
 
 onload = function() {
@@ -163,4 +176,7 @@ onload = function() {
 };
 
 $(document).ready(init());
+$(window).resize(function() {
+  resizeMessageWindow();
+});
 
