@@ -19,6 +19,7 @@ public:
     static QList<QString> discovery();
     void connectReader();
     void connectReader(const QString &serialportName);
+    bool isConnected();
     /* Boot Loader */
     /* Boot Loader */
 

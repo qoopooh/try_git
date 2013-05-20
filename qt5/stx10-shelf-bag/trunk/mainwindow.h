@@ -42,7 +42,6 @@ public:
 
 private slots:
     void on_pushButtonRefresh_clicked();
-    void on_pushButtonConnect_clicked();
     void on_pushButtonBrowse_clicked();
     void on_pushButtonFlash_clicked();
     void setConnectingControl(bool connect);
@@ -51,6 +50,8 @@ private slots:
     void onFlashNextPage(int progressPercentage);
 
     void on_pushButtonTest_clicked();
+
+    void on_checkBoxConnect_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

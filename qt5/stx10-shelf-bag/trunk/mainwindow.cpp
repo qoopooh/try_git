@@ -52,12 +52,21 @@ void MainWindow::getReaderChannels()
     ui->comboBoxPort->setCurrentIndex(0); // for ttyACM0
 }
 
-void MainWindow::on_pushButtonConnect_clicked()
+void MainWindow::on_checkBoxConnect_clicked(bool checked)
 {
-    channel = ui->comboBoxPort->currentText();
+    if (checked) {
+        if (stReader->isConnected())
+            return;
+        channel = ui->comboBoxPort->currentText();
 
-    stReader->connectReader(channel);
+        stReader->connectReader(channel);
+    } else {
+        if (!stReader->isConnected())
+            return;
+        stReader->disconnectReader();
+    }
 }
+
 void MainWindow::setConnectingControl(bool connect)
 {
     ui->groupBoxConnection->setEnabled (!connect);
@@ -214,4 +223,3 @@ void MainWindow::on_pushButtonTest_clicked()
 //    stReader->gotoBootloaderMode();
 //    stReader->gotoFirmwareMode();
 }
-

@@ -60,6 +60,11 @@ void AaeReader::disconnectReader()
     serialport = NULL;
 }
 
+bool AaeReader::isConnected()
+{
+    return this->serialport->isOpen();
+}
+
 void AaeReader::setBaudrate(qint32 _brt)
 {
     this->brt = _brt;
