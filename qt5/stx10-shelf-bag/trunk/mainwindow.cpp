@@ -48,7 +48,8 @@ void MainWindow::getReaderChannels()
     for (int i = 0; i<channels.size(); i++){
         ui->comboBoxPort->addItem(channels.at(i));
     }
-    ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1);
+    //ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1);
+    ui->comboBoxPort->setCurrentIndex(0); // for ttyACM0
 }
 
 void MainWindow::on_pushButtonConnect_clicked()
