@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>405</width>
-    <height>324</height>
+    <width>403</width>
+    <height>495</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -29,8 +29,8 @@
      <rect>
       <x>10</x>
       <y>145</y>
-      <width>380</width>
-      <height>131</height>
+      <width>391</width>
+      <height>321</height>
      </rect>
     </property>
     <property name="verticalScrollBarPolicy">
@@ -39,137 +39,6 @@
     <property name="alternatingRowColors">
      <bool>true</bool>
     </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBoxFirmware">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>50</y>
-      <width>380</width>
-      <height>90</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Firmware</string>
-    </property>
-    <widget class="QRadioButton" name="radioButtonSt">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>15</y>
-       <width>82</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>RF Module</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButtonPr">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>15</y>
-       <width>82</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>PRx10</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEditFilepath">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>35</y>
-       <width>360</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonBrowse">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>10</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>&amp;Browse</string>
-     </property>
-     <property name="shortcut">
-      <string>Alt+B</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonFlash">
-     <property name="geometry">
-      <rect>
-       <x>290</x>
-       <y>10</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>&amp;Flash</string>
-     </property>
-     <property name="shortcut">
-      <string>Alt+F</string>
-     </property>
-    </widget>
-    <widget class="QProgressBar" name="progressBar">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>360</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="value">
-      <number>24</number>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonTest">
-     <property name="geometry">
-      <rect>
-       <x>165</x>
-       <y>10</y>
-       <width>40</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>&amp;Test</string>
-     </property>
-     <property name="shortcut">
-      <string>Alt+T</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBoxConnection">
     <property name="geometry">
