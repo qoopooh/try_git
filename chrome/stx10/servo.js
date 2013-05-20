@@ -27,6 +27,9 @@ function writeData(data) {
  * designed for read 1 by 1
  */
 function onRead(readInfo) {
+  if (!conn_id) {
+    return;
+  }
   var uint8View = new Uint8Array(readInfo.data);
   var ch = uint8View[0];
 

@@ -1,3 +1,5 @@
+var appWindow;
+
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('main.html', {
     minWidth: 320,
@@ -8,5 +10,17 @@ chrome.app.runtime.onLaunched.addListener(function() {
       width: 650,
       height: 480
     }
+  }, function(app) {
+    app.contentWindow.onclose = function() {
+      console.log("onClosed");
+    };
   });
-})
+
+  chrome.runtime.onSuspend.addListener(function() { 
+  });
+  /*chrome.app.window.onClosed.addListener(function() {*/
+  /*console.log("onClosed");*/
+  /*});*/
+});
+
+
