@@ -2,6 +2,7 @@
 
 AaeReader::AaeReader(QObject *parent) :
     QObject(parent),
+    serialport(NULL),
     channelName("COM1"),
     brt(38400)
 {
@@ -62,6 +63,9 @@ void AaeReader::disconnectReader()
 
 bool AaeReader::isConnected()
 {
+    if (serialport == NULL) {
+        return false;
+    }
     return this->serialport->isOpen();
 }
 
