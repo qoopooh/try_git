@@ -159,6 +159,11 @@
       <string>Clear</string>
      </property>
     </widget>
+    <zorder>pushButtonStart</zorder>
+    <zorder>pushButtonStop</zorder>
+    <zorder>pushButtonSingle</zorder>
+    <zorder>pushButtonClear</zorder>
+    <zorder>horizontalSpacer</zorder>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

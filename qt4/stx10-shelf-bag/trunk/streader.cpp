@@ -51,23 +51,13 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
         emit dataReceived(ba.toHex ());
     }
         break;
-    case AaeCommand::CmdGetSoftwareRevision: {
-        QByteArray ba = aaeCommand->getPayload ();
-        emit dataReceived(ba.toHex ());
-    }
-        break;
-    case AaeCommand::CmdGetBootloaderRevision: {
-        QByteArray ba = aaeCommand->getPayload ();
-        emit dataReceived(ba.toHex ());
-    }
-        break;
-    case AaeCommand::CmdSwitchBlMode: {
-        QByteArray ba = aaeCommand->getPayload ();
-        emit dataReceived(ba.toHex ());
-    }
-        break;
-    case AaeCommand::CmdSwitchFwMode: {
-        QByteArray ba = aaeCommand->getPayload ();
+    case AaeCommand::CmdGetSoftwareRevision:
+    case AaeCommand::CmdGetBootloaderRevision:
+    case AaeCommand::CmdSwitchBlMode:
+    case AaeCommand::CmdSwitchFwMode:
+    case AaeCommand::CmdInventoryCyclic:
+    case AaeCommand::CmdInventorySingle: {
+        QByteArray ba = aaeCommand->getPayload();
         emit dataReceived(ba.toHex ());
     }
         break;
@@ -76,17 +66,11 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
     }
         break;
     case AaeCommand::CmdInventoryCyclicInterrupt: {
-        QByteArray ba = aaeCommand->getPayload ();
+        QByteArray ba = aaeCommand->getPayload();
         int len = (int) ba.at (1);
         if (ba.size () >= len + 2) {
-//            if (readOneTagFlag) {
-//                emit readOneTag(false);
-//            }
-
             ba = ba.mid (2, len);
             emit readingEpc (ba.toHex ());
-//            epc = QString(ba.data ());
-//            emit readingEpcString (epc);
         }
     }
         break;
@@ -205,4 +189,10 @@ void StReader::setUsbReader(bool _usb)
 {
     usb = _usb;
 }
+
+AaeCommand::AAE_COMMAND StReader::getCommandName()
+{
+  return aaeCommandName;
+}
+
 

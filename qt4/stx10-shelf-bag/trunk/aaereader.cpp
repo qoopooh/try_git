@@ -92,15 +92,16 @@ void AaeReader::sendDataToReader(const QByteArray &ba)
     dataSendByteArray.clear();
     dataSendByteArray.append(ba);
     if (serialport->isWritable()) {
-        qDebug() << "Written bytes:" << serialport->write(dataSendByteArray);
+      //qDebug() << "Written bytes:" <<
+          serialport->write(dataSendByteArray);
     } else {
-        qDebug() << "Port Closed: cannot send " << ba;
+        qDebug() << "Error: cannot write data to serial port" << ba;
     }
 }
 
 void AaeReader::onReadyRead()
 {
-  qDebug() << "onReadyRead";
+  qDebug() << "AaeReader::onReadyRead()";
 }
 
 void AaeReader::run()

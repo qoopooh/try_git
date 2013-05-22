@@ -15,6 +15,7 @@ public:
     bool gotoBootloaderMode();
     bool gotoFirmwareMode();
     void setUsbReader(bool);
+    AaeCommand::AAE_COMMAND getCommandName();
 
 signals:
     void heartbeatSignal();
@@ -34,3 +35,4 @@ protected:
 };
 
 #endif // STREADER_H
+

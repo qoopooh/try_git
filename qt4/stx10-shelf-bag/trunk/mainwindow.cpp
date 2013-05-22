@@ -30,6 +30,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+  int w = event->size().width();
+  int h = event->size().height();
+
+  ui->listWidgetLog->resize(w - 20, h - 150);
+  ui->groupBoxControl->resize(w - 20, ui->groupBoxControl->size().height());
+}
+
 void MainWindow::on_pushButtonRefresh_clicked()
 {
     getReaderChannels();
@@ -69,8 +78,28 @@ void MainWindow::setConnectingControl(bool connect)
 
 void MainWindow::onReaderPacketIn(const QByteArray &input)
 {
-    ui->listWidgetLog->addItem(QString(input));
-    ui->listWidgetLog->scrollToBottom();
+  QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + ": ";
+  AaeCommand::AAE_COMMAND cmd = stReader->getCommandName();
+
+  switch (cmd) {
+    case AaeCommand::CmdGetSoftwareRevision:
+      msg += "software ver.";
+      break;
+    case AaeCommand::CmdGetSerialNumber:
+      msg += "sn.";
+      break;
+    case AaeCommand::CmdInventoryCyclic:
+      msg += "Inventory cyclic";
+      break;
+    case AaeCommand::CmdInventorySingle:
+      msg += "Inventory single";
+      break;
+    default:
+      break;
+  }
+  msg += QString(input);
+  ui->listWidgetLog->addItem(msg);
+  ui->listWidgetLog->scrollToBottom();
 }
 
 void MainWindow::on10msTimer()
@@ -99,9 +128,11 @@ void MainWindow::on_pushButtonStop_clicked()
 void MainWindow::on_pushButtonSingle_clicked()
 {
   stReader->inventorySingle();
+  stReader->sendTestData();
 }
 
 void MainWindow::on_pushButtonClear_clicked()
 {
   ui->listWidgetLog->clear();
 }
+
