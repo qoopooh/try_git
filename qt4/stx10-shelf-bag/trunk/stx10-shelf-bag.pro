@@ -1,18 +1,19 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2011-11-30T13:33:33
+# Project created by Berm 2013-05-22T14:47:33
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui
 lessThan(QT_MAJOR_VERSION, 5) {
-  CONFIG += serialport
-  LIBS += -lqtserialport
+  CONFIG += extserialport
+#LIBS += -lqtserialport
 } else {
-  QT += serialport
+  QT += serialport widgets
 }
 TARGET = STx10-shelf-and-bag
 TEMPLATE = app
+include(../../lib/qextserialport-1.2rc/src/qextserialport.pri)
 
 HEADERS  += mainwindow.h \
     aaecommand.h \

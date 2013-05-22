@@ -2,9 +2,9 @@
 
 AaeReader::AaeReader(QObject *parent) :
     QThread(parent),
-    serialport(new QSerialPort(this)),
+    serialport(new QextSerialPort(QextSerialPort::EventDriven)),
     channelName("COM1"),
-    brt(QSerialPort::Baud38400)
+    brt(BAUD38400)
 {
   connect(this->serialport, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 }
@@ -19,10 +19,10 @@ AaeReader::~AaeReader()
 QList<QString> AaeReader::discovery()
 {
     QList<QString> portnames;
-    QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
+    QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
 
     for (int i = 0; i<ports.size(); i++){
-        portnames.append((ports.at(i).portName()));
+        portnames.append(ports.at(i).portName);
     }
 
     return portnames;
@@ -39,10 +39,10 @@ void AaeReader::connectReader(const QString &serialportName)
 
     this->serialport->setPortName(channelName);
     this->serialport->setBaudRate(brt);
-    this->serialport->setFlowControl(QSerialPort::NoFlowControl);
-    this->serialport->setParity(QSerialPort::NoParity);
-    this->serialport->setDataBits(QSerialPort::Data8);
-    this->serialport->setStopBits(QSerialPort::OneStop);
+    this->serialport->setFlowControl(FLOW_OFF);
+    this->serialport->setParity(PAR_NONE);
+    this->serialport->setDataBits(DATA_8);
+    this->serialport->setStopBits(STOP_1);
     if(this->serialport->open(QIODevice::ReadWrite)) {
         emit connection(true);
         emit raiseStatusMessage(serialportName + tr(" is connecting"));
@@ -71,7 +71,7 @@ bool AaeReader::isConnected()
     return this->serialport->isOpen();
 }
 
-void AaeReader::setBaudrate(qint32 _brt)
+void AaeReader::setBaudrate(BaudRateType _brt)
 {
     this->brt = _brt;
 }

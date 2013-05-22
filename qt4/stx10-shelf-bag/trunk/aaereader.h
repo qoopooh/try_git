@@ -8,8 +8,8 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include <QtSerialPort/qserialport.h>
-#include <QtSerialPort/qserialportinfo.h>
+#include <qextserialport.h>
+#include <qextserialenumerator.h>
 
 class AaeReader : public QThread
 {
@@ -56,14 +56,14 @@ protected:
     QByteArray dataSendByteArray;
     QQueue<char> dataReceivedQueue;
 
-    void setBaudrate(qint32 _brt);
+    void setBaudrate(BaudRateType _brt);
     QByteArray readDataFromConnection();
     void sendDataToReader(const QByteArray &ba);
 
 private:
-    QSerialPort *serialport;
+    QextSerialPort *serialport;
     QString channelName;
-    qint32 brt;
+    BaudRateType brt;
     int waitTimeout;
     QMutex mutex;
     bool quit;

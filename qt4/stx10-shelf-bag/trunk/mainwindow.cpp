@@ -88,7 +88,6 @@ void MainWindow::on10msTimer()
 
 void MainWindow::on_pushButtonStart_clicked()
 {
-    stReader->sendTestData();
 }
 
 void MainWindow::on_pushButtonStop_clicked()
@@ -98,10 +97,10 @@ void MainWindow::on_pushButtonStop_clicked()
 
 void MainWindow::on_pushButtonSingle_clicked()
 {
-
+  stReader->sendTestData();
 }
 
 void MainWindow::on_pushButtonClear_clicked()
 {
-
+  ui->listWidgetLog->clear();
 }

@@ -4,4 +4,5 @@ ui_*
 qrc_*
 Makefile
 *.user
+cscope.*
 

@@ -4,7 +4,7 @@
 BootLoader::BootLoader(QObject *parent) :
     AaeReader(parent)
 {
-    setBaudrate(115200);
+    setBaudrate(BAUD115200);
     dataReceivedQueue.clear();
     blReceiveState = BL_RCV_UNDEF;
 }
