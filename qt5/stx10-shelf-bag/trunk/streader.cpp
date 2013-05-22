@@ -5,7 +5,7 @@ StReader::StReader(QObject *parent) :
     aaeCommand(new AaeCommand(this)),
     debugSequenceCounter(0)
 {
-    setBaudrate(115200);
+    setBaudrate(QSerialPort::Baud115200);
 }
 
 void StReader::onReadyRead()
@@ -97,6 +97,7 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
 
 void StReader::sendTestData()
 {
+  sendDataToReader(aaeCommand->getSoftwareRevisionCommand());
 }
 
 bool StReader::gotoBootloaderMode()

@@ -4,7 +4,7 @@ AaeReader::AaeReader(QObject *parent) :
     QObject(parent),
     serialport(NULL),
     channelName("COM1"),
-    brt(38400)
+    brt(QSerialPort::Baud38400)
 {
 }
 

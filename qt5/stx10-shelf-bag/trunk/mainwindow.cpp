@@ -64,7 +64,7 @@ void MainWindow::on_checkBoxConnect_clicked(bool checked)
 void MainWindow::setConnectingControl(bool connect)
 {
     ui->groupBoxConnection->setEnabled (!connect);
-    //ui->groupBoxFirmware->setEnabled (connect);
+    ui->groupBoxControl->setEnabled (connect);
 }
 
 void MainWindow::onReaderPacketIn(const QByteArray &input)
@@ -79,5 +79,29 @@ void MainWindow::on10msTimer()
 
     if ((clk10msCounter % 50) == 0) {
         //handleFlashState();
+//      QByteArray ba = stReader->readDataFromConnection();
+//      if (ba.size() > 0) {
+//        qDebug() << ba.toBase64();
+//      }
     }
+}
+
+void MainWindow::on_pushButtonStart_clicked()
+{
+    stReader->sendTestData();
+}
+
+void MainWindow::on_pushButtonStop_clicked()
+{
+
+}
+
+void MainWindow::on_pushButtonSingle_clicked()
+{
+
+}
+
+void MainWindow::on_pushButtonClear_clicked()
+{
+
 }

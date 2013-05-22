@@ -40,6 +40,14 @@ private slots:
 
     void on_checkBoxConnect_clicked(bool checked);
 
+    void on_pushButtonStart_clicked();
+
+    void on_pushButtonStop_clicked();
+
+    void on_pushButtonSingle_clicked();
+
+    void on_pushButtonClear_clicked();
+
 private:
     Ui::MainWindow *ui;
     StReader *stReader;
