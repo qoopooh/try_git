@@ -19,7 +19,7 @@ signals:
     void stx10BootloaderMode(bool blMode);
 
 protected slots:
-    void onReadyRead();
+    virtual void onReadyRead();
 
 protected:
     AaeCommand *aaeCommand;

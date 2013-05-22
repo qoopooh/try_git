@@ -5,23 +5,26 @@
 #include <QDebug>
 #include <QList>
 #include <QQueue>
-/*#include <qextserialport.h>*/
-/*#include <qextserialenumerator.h>*/
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 #include <QtSerialPort/qserialport.h>
 #include <QtSerialPort/qserialportinfo.h>
 
-class AaeReader : public QObject
+class AaeReader : public QThread
 {
     Q_OBJECT
 public:
-    explicit AaeReader(QObject*);
+    AaeReader(QObject *parent = 0);
+    virtual ~AaeReader();
 
     static QList<QString> discovery();
     void connectReader();
     void connectReader(const QString &serialportName);
     bool isConnected();
-    /* Boot Loader */
-    /* Boot Loader */
+
+    void startSlave(const QString &portName, int waitTimeout, const QString &response);
+    void run();
 
 signals:
     void connection(bool connected);
@@ -32,11 +35,15 @@ signals:
 
     void readingEpc(const QByteArray &);
     void readingEpcString(QString);
+    void request(const QString &s);
+    void error(const QString &s);
+    void timeout(const QString &s);
 
 public slots:
     void disconnectReader();
 
 protected slots:
+    virtual void onReadyRead();
 
 protected:
     typedef unsigned char BYTE;
@@ -49,9 +56,6 @@ protected:
     QByteArray dataSendByteArray;
     QQueue<char> dataReceivedQueue;
 
-    /* Boot Loader */
-    /* Boot Loader */
-
     void setBaudrate(qint32 _brt);
     QByteArray readDataFromConnection();
     void sendDataToReader(const QByteArray &ba);
@@ -60,6 +64,9 @@ private:
     QSerialPort *serialport;
     QString channelName;
     qint32 brt;
+    int waitTimeout;
+    QMutex mutex;
+    bool quit;
 };
 
 #endif // AAEREADER_H

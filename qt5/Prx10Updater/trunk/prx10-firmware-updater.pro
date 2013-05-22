@@ -4,7 +4,13 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport widgets
+QT       += core gui widgets
+lessThan(QT_MAJOR_VERSION, 5) {
+  CONFIG += serialport
+  LIBS += -lqtserialport
+} else {
+  QT += serialport
+}
 
 TARGET = Prx10Flash
 TEMPLATE = app

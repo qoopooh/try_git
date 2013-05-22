@@ -26,7 +26,7 @@ signals:
 public slots:
 
 protected slots:
-    void onReadyRead();
+    virtual void onReadyRead();
 
 protected:
     quint16 pageCounter;

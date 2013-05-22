@@ -1,11 +1,19 @@
 #include "aaereader.h"
 
 AaeReader::AaeReader(QObject *parent) :
-    QObject(parent),
-    serialport(NULL),
+    QThread(parent),
+    serialport(new QSerialPort(this)),
     channelName("COM1"),
     brt(QSerialPort::Baud38400)
 {
+  connect(this->serialport, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+}
+AaeReader::~AaeReader()
+{
+    mutex.lock();
+    quit = true;
+    mutex.unlock();
+    wait();
 }
 
 QList<QString> AaeReader::discovery()
@@ -29,7 +37,6 @@ void AaeReader::connectReader(const QString &serialportName)
     //qDebug() << "connectReader";
     channelName = serialportName;
 
-    this->serialport = new QSerialPort();
     this->serialport->setPortName(channelName);
     this->serialport->setBaudRate(brt);
     this->serialport->setFlowControl(QSerialPort::NoFlowControl);
@@ -37,7 +44,6 @@ void AaeReader::connectReader(const QString &serialportName)
     this->serialport->setDataBits(QSerialPort::Data8);
     this->serialport->setStopBits(QSerialPort::OneStop);
     if(this->serialport->open(QIODevice::ReadWrite)) {
-        connect(this->serialport, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
         emit connection(true);
         emit raiseStatusMessage(serialportName + tr(" is connecting"));
     } else {
@@ -55,10 +61,6 @@ void AaeReader::disconnectReader()
     this->serialport->close();
     emit connection(false);
     emit raiseStatusMessage(this->serialport->portName() + tr(" is disconnected"));
-
-    disconnect(this->serialport, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    delete this->serialport;
-    serialport = NULL;
 }
 
 bool AaeReader::isConnected()
@@ -89,11 +91,20 @@ void AaeReader::sendDataToReader(const QByteArray &ba)
 {
     dataSendByteArray.clear();
     dataSendByteArray.append(ba);
-    if ((serialport != NULL) && (serialport->isOpen())) {
-        serialport->write(dataSendByteArray);
+    if (serialport->isWritable()) {
+        qDebug() << "Written bytes:" << serialport->write(dataSendByteArray);
     } else {
         qDebug() << "Port Closed: cannot send " << ba;
     }
 }
 
+void AaeReader::onReadyRead()
+{
+  qDebug() << "onReadyRead";
+}
+
+void AaeReader::run()
+{
+
+}
 

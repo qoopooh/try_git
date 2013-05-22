@@ -7,8 +7,8 @@
 #include <QQueue>
 /*#include <qextserialport.h>*/
 /*#include <qextserialenumerator.h>*/
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
+#include <QtSerialPort/qserialport.h>
+#include <QtSerialPort/qserialportinfo.h>
 
 class AaeReader : public QObject
 {
