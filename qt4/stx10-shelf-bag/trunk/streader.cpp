@@ -99,6 +99,17 @@ void StReader::sendTestData()
 {
   sendDataToReader(aaeCommand->getSoftwareRevisionCommand());
 }
+void StReader::inventorySingle()
+{
+  sendDataToReader(aaeCommand->inventorySingle());
+}
+void StReader::inventoryCyclic(bool on)
+{
+  if (on)
+    sendDataToReader(aaeCommand->inventoryCyclic(AaeCommand::INVENTORY_ON));
+  else
+    sendDataToReader(aaeCommand->inventoryCyclic(AaeCommand::INVENTORY_OFF));
+}
 
 bool StReader::gotoBootloaderMode()
 {

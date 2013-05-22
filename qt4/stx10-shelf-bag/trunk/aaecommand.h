@@ -175,6 +175,7 @@ public:
     QByteArray setCommand(const AAE_COMMAND _command, int _payloadSize, const QByteArray &_payload);
     QByteArray setHeartbeatCommand(const HEARTBEAT_SIGNAL hbSigal, int ms);
     QByteArray inventoryCyclic(const INVENTORY_MODE inventoryMode);
+    QByteArray inventorySingle();
     QByteArray getPayload();
     /* Boot Loader */
     QByteArray getReaderTypeCommand();

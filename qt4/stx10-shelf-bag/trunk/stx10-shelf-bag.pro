@@ -6,14 +6,13 @@
 
 QT       += core gui
 lessThan(QT_MAJOR_VERSION, 5) {
+  include(../../lib/qextserialport-1.2rc/src/qextserialport.pri)
   CONFIG += extserialport
-#LIBS += -lqtserialport
 } else {
   QT += serialport widgets
 }
 TARGET = STx10-shelf-and-bag
 TEMPLATE = app
-include(../../lib/qextserialport-1.2rc/src/qextserialport.pri)
 
 HEADERS  += mainwindow.h \
     aaecommand.h \

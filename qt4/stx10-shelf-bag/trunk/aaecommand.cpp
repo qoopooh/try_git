@@ -389,6 +389,12 @@ QByteArray AaeCommand::inventoryCyclic(const INVENTORY_MODE inventoryMode)
     _payload.append ((char) inventoryMode);
     return setCommand(AaeCommand::CmdInventoryCyclic, 1, _payload);
 }
+QByteArray AaeCommand::inventorySingle()
+{
+    QByteArray _payload;
+
+    return setCommand(AaeCommand::CmdInventorySingle, 0, NULL);
+}
 QByteArray AaeCommand::getPayload()
 {
     return payload;

@@ -8,8 +8,10 @@ class StReader : public AaeReader
 {
     Q_OBJECT
 public:
-    explicit StReader(QObject *parent = 0);
+    StReader(QObject *parent = 0);
     void sendTestData();
+    void inventorySingle();
+    void inventoryCyclic(bool);
     bool gotoBootloaderMode();
     bool gotoFirmwareMode();
     void setUsbReader(bool);

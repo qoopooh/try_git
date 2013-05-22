@@ -88,16 +88,17 @@ void MainWindow::on10msTimer()
 
 void MainWindow::on_pushButtonStart_clicked()
 {
+  stReader->inventoryCyclic(true);
 }
 
 void MainWindow::on_pushButtonStop_clicked()
 {
-
+  stReader->inventoryCyclic(false);
 }
 
 void MainWindow::on_pushButtonSingle_clicked()
 {
-  stReader->sendTestData();
+  stReader->inventorySingle();
 }
 
 void MainWindow::on_pushButtonClear_clicked()
