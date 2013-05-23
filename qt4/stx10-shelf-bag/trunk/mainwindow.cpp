@@ -108,6 +108,7 @@ void MainWindow::onReaderPacketIn(const QByteArray &input)
 
 void MainWindow::onEpc(const QByteArray &ba)
 {
+  qDebug() << "onEpc " << ba.data();
 }
 
 void MainWindow::onEpcString(const QString &epc)
