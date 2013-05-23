@@ -112,18 +112,18 @@ void MainWindow::onEpc(const QByteArray &ba)
 
 void MainWindow::onEpcString(const QString &epc)
 {
-
   insertDupplicatedTag(epc);
 }
 
 void MainWindow::insertDupplicatedTag(const QString epc)
 {
+  QListWidget *logs = ui->listWidgetLog;
   QString msg;
 
-  if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
+  if ((epc.compare(prev_epc) == 0 && (logs->count()))) {
     ++prev_epc_count;
 
-    QListWidgetItem* item = ui->listWidgetLog->takeItem(ui->listWidgetLog->count() - 1);
+    QListWidgetItem* item =logs->takeItem(logs->count() - 1);
     msg = QString(item->text());
     int comma_position = msg.lastIndexOf(",");
     msg.remove(comma_position, msg.size() - comma_position);
@@ -137,16 +137,21 @@ void MainWindow::insertDupplicatedTag(const QString epc)
   }
 
   msg += ", " + QString::number(prev_epc_count);
-  ui->listWidgetLog->addItem(msg);
-  ui->listWidgetLog->scrollToBottom();
+  logs->addItem(msg);
+  logs->scrollToBottom();
 }
 
 void MainWindow::setShelfAndBag(const QString epc)
 {
-  if (epc[0] == 'S') {
-    ui->lineEditShelf->setText(epc.mid(1));
-  } else if (epc[0] == 'B') {
-    ui->lineEditBag->setText(epc.mid(1));
+  QString data = epc.mid(1);
+  if ((epc[0] == 'S') && (data.compare(ui->lineEditShelf->text()) != 0)) {
+    ui->lineEditShelf->setText(data);
+    ui->lineEditShelf->setStyleSheet("QLineEdit{background: orange;}");
+    shelf_changed_tout = 500;
+  } else if ((epc[0] == 'B') && (data.compare(ui->lineEditBag->text()) != 0)) {
+    ui->lineEditBag->setText(data);
+    ui->lineEditBag->setStyleSheet("QLineEdit{background: orange;}");
+    bag_changed_tout = 500;
   }
 }
 
@@ -155,11 +160,19 @@ void MainWindow::on10msTimer()
     clk10msCounter++;
 
     if ((clk10msCounter % 50) == 0) {
-        //handleFlashState();
-//      QByteArray ba = stReader->readDataFromConnection();
-//      if (ba.size() > 0) {
-//        qDebug() << ba.toBase64();
-//      }
+    }
+
+    if (shelf_changed_tout) {
+      --shelf_changed_tout;
+      if (!shelf_changed_tout) {
+        ui->lineEditShelf->setStyleSheet("QLineEdit{background: white;}");
+      }
+    }
+    if (bag_changed_tout) {
+      --bag_changed_tout;
+      if (!bag_changed_tout) {
+        ui->lineEditBag->setStyleSheet("QLineEdit{background: white;}");
+      }
     }
 }
 
