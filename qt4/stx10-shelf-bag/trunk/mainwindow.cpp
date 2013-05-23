@@ -4,7 +4,9 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    vcom(false)
+    vcom(false),
+    prev_epc(""),
+    prev_epc_count(0)
 {
     ui->setupUi(this);
 
@@ -80,21 +82,21 @@ void MainWindow::setConnectingControl(bool connect)
 
 void MainWindow::onReaderPacketIn(const QByteArray &input)
 {
-  QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + ": ";
+  QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " ";
   AaeCommand::AAE_COMMAND cmd = stReader->getCommandName();
 
   switch (cmd) {
     case AaeCommand::CmdGetSoftwareRevision:
-      msg += "software ver.";
+      msg += "software ver.: ";
       break;
     case AaeCommand::CmdGetSerialNumber:
-      msg += "sn.";
+      msg += "sn.: ";
       break;
     case AaeCommand::CmdInventoryCyclic:
-      msg += "Inventory cyclic";
+      msg += "Inventory cyclic: ";
       break;
     case AaeCommand::CmdInventorySingle:
-      msg += "Inventory single";
+      msg += "Inventory single: ";
       break;
     default:
       break;
@@ -110,10 +112,42 @@ void MainWindow::onEpc(const QByteArray &ba)
 
 void MainWindow::onEpcString(const QString &epc)
 {
-  QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
-  msg += epc;
+
+  insertDupplicatedTag(epc);
+}
+
+void MainWindow::insertDupplicatedTag(const QString epc)
+{
+  QString msg;
+
+  if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
+    ++prev_epc_count;
+
+    QListWidgetItem* item = ui->listWidgetLog->takeItem(ui->listWidgetLog->count() - 1);
+    msg = QString(item->text());
+    int comma_position = msg.lastIndexOf(",");
+    msg.remove(comma_position, msg.size() - comma_position);
+    delete item;
+  } else {
+    prev_epc = epc;
+    prev_epc_count = 1;
+    msg = QTime::currentTime().toString("hh:mm:ss") + " EPC: ";
+    msg += epc;
+    setShelfAndBag(epc);
+  }
+
+  msg += ", " + QString::number(prev_epc_count);
   ui->listWidgetLog->addItem(msg);
   ui->listWidgetLog->scrollToBottom();
+}
+
+void MainWindow::setShelfAndBag(const QString epc)
+{
+  if (epc[0] == 'S') {
+    ui->lineEditShelf->setText(epc.mid(1));
+  } else if (epc[0] == 'B') {
+    ui->lineEditBag->setText(epc.mid(1));
+  }
 }
 
 void MainWindow::on10msTimer()

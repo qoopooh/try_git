@@ -57,11 +57,15 @@ private:
     BootLoader *bootloader;
     QString channel;
     bool vcom;
+    QString prev_epc;
+    int prev_epc_count;
 
     QTimer *clk10msTimer;
     quint32 clk10msCounter;
 
     void getReaderChannels();
+    void insertDupplicatedTag(const QString);
+    void setShelfAndBag(const QString);
 };
 
 #endif // MAINWINDOW_H

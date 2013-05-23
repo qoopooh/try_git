@@ -29,8 +29,6 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
     switch (cmdName) {
     case AaeCommand::CmdGetSerialNumber: {
         QByteArray ba = aaeCommand->getPayload ();
-//        QString str = QString(ba.toHex ());
-//        emit readerTypeNumber (str);
         emit dataReceived(ba.toHex ());
     }
         break;
