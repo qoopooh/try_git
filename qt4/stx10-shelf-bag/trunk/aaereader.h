@@ -34,7 +34,7 @@ signals:
     void dataReceivedString(const QString &_msg);
 
     void readingEpc(const QByteArray &);
-    void readingEpcString(QString);
+    void readingEpcString(const QString &);
     void request(const QString &s);
     void error(const QString &s);
     void timeout(const QString &s);

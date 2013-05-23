@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(stReader, SIGNAL(raiseErrorMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
     connect(stReader, SIGNAL(raiseStatusMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
     connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
+    connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
+    connect(stReader, SIGNAL(readingEpcString(QString)), this, SLOT(onEpcString(QString)));
 
     connect(clk10msTimer, SIGNAL(timeout()), this, SLOT(on10msTimer()));
     clk10msTimer->start(10);
@@ -102,6 +104,18 @@ void MainWindow::onReaderPacketIn(const QByteArray &input)
   ui->listWidgetLog->scrollToBottom();
 }
 
+void MainWindow::onEpc(const QByteArray &ba)
+{
+}
+
+void MainWindow::onEpcString(const QString &epc)
+{
+  QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
+  msg += epc;
+  ui->listWidgetLog->addItem(msg);
+  ui->listWidgetLog->scrollToBottom();
+}
+
 void MainWindow::on10msTimer()
 {
     clk10msCounter++;
@@ -128,7 +142,7 @@ void MainWindow::on_pushButtonStop_clicked()
 void MainWindow::on_pushButtonSingle_clicked()
 {
   stReader->inventorySingle();
-  stReader->sendTestData();
+  //stReader->sendTestData();
 }
 
 void MainWindow::on_pushButtonClear_clicked()

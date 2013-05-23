@@ -55,10 +55,30 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
     case AaeCommand::CmdGetBootloaderRevision:
     case AaeCommand::CmdSwitchBlMode:
     case AaeCommand::CmdSwitchFwMode:
-    case AaeCommand::CmdInventoryCyclic:
-    case AaeCommand::CmdInventorySingle: {
+    case AaeCommand::CmdInventoryCyclic: {
         QByteArray ba = aaeCommand->getPayload();
         emit dataReceived(ba.toHex ());
+    }
+        break;
+    case AaeCommand::CmdInventorySingle: {
+        QByteArray ba = aaeCommand->getPayload();
+        int status = (int) ba.at (0);
+        int id_count = (int) ba.at (1);
+        if (id_count < 1) {
+          QByteArray tag_id = QByteArray("-");
+          emit readingEpc (tag_id.toHex ());
+          emit readingEpcString (QString(tag_id.data()));
+          break;
+        }
+        int packet_id_count = (int) ba.at (2);
+        int taginfo_len = (int) ba.at (3);
+        int start_tag_id = (int) ba.at (4); // 1
+        int id_len = (int) ba.at (5);
+        if (ba.size () >= id_len + 6) {
+          QByteArray tag_id = ba.mid (6, id_len);
+          emit readingEpc (tag_id.toHex ());
+          emit readingEpcString (QString(tag_id.data()));
+        }
     }
         break;
     case AaeCommand::CmdHeartbeatInterrupt: {
@@ -71,6 +91,7 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
         if (ba.size () >= len + 2) {
             ba = ba.mid (2, len);
             emit readingEpc (ba.toHex ());
+            emit readingEpcString (QString(ba.data()));
         }
     }
         break;

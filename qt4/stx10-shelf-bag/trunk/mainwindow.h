@@ -41,6 +41,8 @@ private slots:
     void on_pushButtonRefresh_clicked();
     void setConnectingControl(bool connect);
     void onReaderPacketIn(const QByteArray &input);
+    void onEpc(const QByteArray &);
+    void onEpcString(const QString &);
     void on10msTimer();
 
     void on_checkBoxConnect_clicked(bool checked);
