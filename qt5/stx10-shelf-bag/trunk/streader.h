@@ -1,0 +1,34 @@
+#ifndef STREADER_H
+#define STREADER_H
+
+#include "aaereader.h"
+#include "aaecommand.h"
+
+class StReader : public AaeReader
+{
+    Q_OBJECT
+public:
+    explicit StReader(QObject *parent = 0);
+    void sendTestData();
+    bool gotoBootloaderMode();
+    bool gotoFirmwareMode();
+    void setUsbReader(bool);
+
+signals:
+    void heartbeatSignal();
+    void stx10BootloaderMode(bool blMode);
+
+protected slots:
+    virtual void onReadyRead();
+
+protected:
+    AaeCommand *aaeCommand;
+    AaeCommand::AAE_COMMAND aaeCommandName;
+    qint8 debugSequenceCounter;
+    bool blMode;
+    bool usb;
+
+    void emitCommand(AaeCommand::AAE_COMMAND cmdName);
+};
+
+#endif // STREADER_H
