@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QResizeEvent>
+#include <QListWidgetItem>
 #include "streader.h"
 #include "aaecommand.h"
 #include "bootloader.h"
@@ -53,6 +54,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QListWidgetItem *listitem;
     StReader *stReader;
     BootLoader *bootloader;
     QString channel;

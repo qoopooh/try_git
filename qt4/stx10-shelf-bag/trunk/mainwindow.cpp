@@ -4,6 +4,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    listitem(NULL),
     vcom(false),
     prev_epc(""),
     prev_epc_count(0)
@@ -108,7 +109,7 @@ void MainWindow::onReaderPacketIn(const QByteArray &input)
 
 void MainWindow::onEpc(const QByteArray &ba)
 {
-  qDebug() << "onEpc " << ba.data();
+  //qDebug() << "onEpc " << ba.data();
 }
 
 void MainWindow::onEpcString(const QString &epc)
@@ -118,28 +119,28 @@ void MainWindow::onEpcString(const QString &epc)
 
 void MainWindow::insertDupplicatedTag(const QString epc)
 {
-  QListWidget *logs = ui->listWidgetLog;
   QString msg;
 
-  if ((epc.compare(prev_epc) == 0 && (logs->count()))) {
+  if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
     ++prev_epc_count;
 
-    QListWidgetItem* item =logs->takeItem(logs->count() - 1);
-    msg = QString(item->text());
+    msg = QString(listitem->text());
     int comma_position = msg.lastIndexOf(",");
     msg.remove(comma_position, msg.size() - comma_position);
-    delete item;
+    msg += ", " + QString::number(prev_epc_count);
+    listitem->setText(msg);
   } else {
     prev_epc = epc;
     prev_epc_count = 1;
     msg = QTime::currentTime().toString("hh:mm:ss") + " EPC: ";
     msg += epc;
     setShelfAndBag(epc);
+    msg += ", " + QString::number(prev_epc_count);
+    listitem = new QListWidgetItem(msg);
+    ui->listWidgetLog->addItem(listitem);
   }
 
-  msg += ", " + QString::number(prev_epc_count);
-  logs->addItem(msg);
-  logs->scrollToBottom();
+  ui->listWidgetLog->scrollToBottom();
 }
 
 void MainWindow::setShelfAndBag(const QString epc)
