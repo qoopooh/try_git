@@ -7,7 +7,7 @@
 QT       += core gui
 include(../../lib/qextserialport-1.2rc/src/qextserialport.pri)
 lessThan(QT_MAJOR_VERSION, 5) {
-  CONFIG += extserialport
+  CONFIG += qextserialport
 } else {
   QT += serialport widgets
 }
