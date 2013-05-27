@@ -37,6 +37,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void createLogTable();
 
 private slots:
     void on_pushButtonRefresh_clicked();

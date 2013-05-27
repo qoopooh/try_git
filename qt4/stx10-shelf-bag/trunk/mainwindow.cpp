@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     prev_epc_count(0)
 {
     ui->setupUi(this);
+    createLogTable();
 
     stReader = new StReader(this);
     bootloader = new BootLoader(this);
@@ -40,8 +41,12 @@ void MainWindow::resizeEvent(QResizeEvent *event)
   int w = event->size().width();
   int h = event->size().height();
 
-  ui->listWidgetLog->resize(w - 20, h - 150);
+  //ui->listWidgetLog->resize(w - 20, h - 150);
   ui->groupBoxControl->resize(w - 20, ui->groupBoxControl->size().height());
+}
+
+void MainWindow::createLogTable()
+{
 }
 
 void MainWindow::on_pushButtonRefresh_clicked()
@@ -100,20 +105,28 @@ void MainWindow::onReaderPacketIn(const QByteArray &input)
       msg += "Inventory single: ";
       break;
     default:
+      msg = "";
       break;
   }
+
+  if (msg.length() < 1)
+    return;
   msg += QString(input);
-  ui->listWidgetLog->addItem(msg);
-  ui->listWidgetLog->scrollToBottom();
+  //ui->listWidgetLog->addItem(msg);
+  //ui->listWidgetLog->scrollToBottom();
+  ui->textEditLog->append(msg);
 }
 
 void MainWindow::onEpc(const QByteArray &ba)
 {
-  //QString msg = QTime::currentTime().toString("hh:mm:ss") + " EPC: ";
-  //msg += ba.data();
+  QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
+
+  msg += ba.data();
   //listitem = new QListWidgetItem(msg);
   //ui->listWidgetLog->addItem(listitem);
   //ui->listWidgetLog->scrollToBottom();
+
+  ui->textEditLog->append(msg);
 }
 
 void MainWindow::onEpcString(const QString &epc)
@@ -128,8 +141,10 @@ void MainWindow::onEpcString(const QString &epc)
 void MainWindow::insertDupplicatedTag(const QString epc)
 {
   QString msg;
+  QString epc_id, epc_count;
 
-  if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
+  if (0) {
+  //if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
     ++prev_epc_count;
 
     msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
@@ -143,10 +158,10 @@ void MainWindow::insertDupplicatedTag(const QString epc)
     setShelfAndBag(epc);
     msg += ", " + QString::number(prev_epc_count);
     listitem = new QListWidgetItem(msg);
-    ui->listWidgetLog->addItem(listitem);
+    //ui->listWidgetLog->addItem(listitem);
   }
 
-  ui->listWidgetLog->scrollToBottom();
+  //ui->listWidgetLog->scrollToBottom();
 }
 
 //void MainWindow::insertDupplicatedTag(const QString epc)
@@ -228,6 +243,9 @@ void MainWindow::on_pushButtonSingle_clicked()
 
 void MainWindow::on_pushButtonClear_clicked()
 {
-  ui->listWidgetLog->clear();
+  //ui->listWidgetLog->clear();
+  ui->textEditLog->clear();
+  prev_epc = "";
+  prev_epc_count = 0;
 }
 

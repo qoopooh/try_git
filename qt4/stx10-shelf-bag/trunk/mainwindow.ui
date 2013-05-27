@@ -24,22 +24,6 @@
     <normaloff>:/images/shelf.png</normaloff>:/images/shelf.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QListWidget" name="listWidgetLog">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>125</y>
-      <width>391</width>
-      <height>341</height>
-     </rect>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-    <property name="alternatingRowColors">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBoxConnection">
     <property name="geometry">
      <rect>
@@ -226,6 +210,49 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="tabWidgetLog">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>129</y>
+      <width>391</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tabTable">
+     <attribute name="title">
+      <string>Table</string>
+     </attribute>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>371</width>
+        <height>301</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabLog">
+     <attribute name="title">
+      <string>Log</string>
+     </attribute>
+     <widget class="QTextEdit" name="textEditLog">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>371</width>
+        <height>301</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

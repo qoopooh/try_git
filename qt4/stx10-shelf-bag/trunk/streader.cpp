@@ -64,8 +64,8 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
         int id_count = (int) ba.at (1);
         if (id_count < 1) {
           QByteArray tag_id = QByteArray("-");
-          emit readingEpc (tag_id.toHex ());
-          emit readingEpcString (QString(tag_id.data()));
+          emit readingEpc (tag_id.data());
+          emit readingEpcString (tag_id.data());
           break;
         }
 //        int packet_id_count = (int) ba.at (2);
@@ -75,7 +75,7 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
         if (ba.size () >= id_len + 6) {
           QByteArray tag_id = ba.mid (6, id_len);
           emit readingEpc (tag_id.toHex ());
-          emit readingEpcString (QString(tag_id.data()));
+          emit readingEpcString (tag_id.data());
         }
     }
         break;

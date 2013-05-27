@@ -20,7 +20,9 @@ HEADERS  += mainwindow.h \
     streader.h \
     bootloader.h \
     aaereader.h \
-    XonXoff.h
+    XonXoff.h \
+    epctreeitem.h \
+    epctreemodel.h
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -28,10 +30,16 @@ SOURCES += main.cpp\
     log.cpp \
     streader.cpp \
     bootloader.cpp \
-    aaereader.cpp
+    aaereader.cpp \
+    epctreeitem.cpp \
+    epctreemodel.cpp
 
 FORMS    += mainwindow.ui
 
 RESOURCES += \
     resource.qrc
+
+
+
+
 
