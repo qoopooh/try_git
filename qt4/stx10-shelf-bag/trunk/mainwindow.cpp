@@ -4,7 +4,6 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    listitem(NULL),
     vcom(false),
     prev_epc(""),
     prev_epc_count(0)
@@ -47,6 +46,10 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::createLogTable()
 {
+  model = new EpcTreeModel("");
+  ui->treeViewLog->setModel(model);
+  ui->treeViewLog->setColumnWidth(0, 200);
+  ui->treeViewLog->setWindowTitle(QObject::tr("EPC Reading"));
 }
 
 void MainWindow::on_pushButtonRefresh_clicked()
@@ -112,8 +115,6 @@ void MainWindow::onReaderPacketIn(const QByteArray &input)
   if (msg.length() < 1)
     return;
   msg += QString(input);
-  //ui->listWidgetLog->addItem(msg);
-  //ui->listWidgetLog->scrollToBottom();
   ui->textEditLog->append(msg);
 }
 
@@ -122,20 +123,14 @@ void MainWindow::onEpc(const QByteArray &ba)
   QString msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
 
   msg += ba.data();
-  //listitem = new QListWidgetItem(msg);
-  //ui->listWidgetLog->addItem(listitem);
-  //ui->listWidgetLog->scrollToBottom();
-
   ui->textEditLog->append(msg);
 }
 
 void MainWindow::onEpcString(const QString &epc)
 {
   insertDupplicatedTag(epc);
-  //if (epc.compare(prev_epc) != 0) {
-    //prev_epc = epc;
-    //setShelfAndBag(epc);
-  //}
+  model->insertEpc(epc);
+  updateActions();
 }
 
 void MainWindow::insertDupplicatedTag(const QString epc)
@@ -144,12 +139,10 @@ void MainWindow::insertDupplicatedTag(const QString epc)
   QString epc_id, epc_count;
 
   if (0) {
-  //if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
     ++prev_epc_count;
 
     msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
     msg += epc + ", " + QString::number(prev_epc_count);
-    listitem->setText(msg);
   } else {
     prev_epc = epc;
     prev_epc_count = 1;
@@ -157,38 +150,8 @@ void MainWindow::insertDupplicatedTag(const QString epc)
     msg += epc;
     setShelfAndBag(epc);
     msg += ", " + QString::number(prev_epc_count);
-    listitem = new QListWidgetItem(msg);
-    //ui->listWidgetLog->addItem(listitem);
   }
-
-  //ui->listWidgetLog->scrollToBottom();
 }
-
-//void MainWindow::insertDupplicatedTag(const QString epc)
-//{
-  //QString msg;
-
-  //if ((epc.compare(prev_epc) == 0 && (ui->listWidgetLog->count()))) {
-    //++prev_epc_count;
-
-    //msg = QString(listitem->text());
-    //int comma_position = msg.lastIndexOf(",");
-    //msg.remove(comma_position, msg.size() - comma_position);
-    //msg += ", " + QString::number(prev_epc_count);
-    //listitem->setText(msg);
-  //} else {
-    //prev_epc = epc;
-    //prev_epc_count = 1;
-    //msg = QTime::currentTime().toString("hh:mm:ss") + " EPC: ";
-    //msg += epc;
-    //setShelfAndBag(epc);
-    //msg += ", " + QString::number(prev_epc_count);
-    //listitem = new QListWidgetItem(msg);
-    //ui->listWidgetLog->addItem(listitem);
-  //}
-
-  //ui->listWidgetLog->scrollToBottom();
-//}
 
 void MainWindow::setShelfAndBag(const QString epc)
 {
@@ -196,12 +159,17 @@ void MainWindow::setShelfAndBag(const QString epc)
   if ((epc[0] == 'S') && (data.compare(ui->lineEditShelf->text()) != 0)) {
     ui->lineEditShelf->setText(data);
     ui->lineEditShelf->setStyleSheet("QLineEdit{background: orange;}");
-    shelf_changed_tout = 500;
+    shelf_changed_tout = 300;
   } else if ((epc[0] == 'B') && (data.compare(ui->lineEditBag->text()) != 0)) {
     ui->lineEditBag->setText(data);
     ui->lineEditBag->setStyleSheet("QLineEdit{background: orange;}");
-    bag_changed_tout = 500;
+    bag_changed_tout = 300;
   }
+}
+
+void MainWindow::updateActions()
+{
+  ui->treeViewLog->reset();
 }
 
 void MainWindow::on10msTimer()
@@ -243,9 +211,13 @@ void MainWindow::on_pushButtonSingle_clicked()
 
 void MainWindow::on_pushButtonClear_clicked()
 {
-  //ui->listWidgetLog->clear();
   ui->textEditLog->clear();
   prev_epc = "";
   prev_epc_count = 0;
+
+  delete model;
+  model = new EpcTreeModel("");
+  ui->treeViewLog->setModel(model);
+  updateActions();
 }
 

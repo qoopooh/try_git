@@ -228,7 +228,7 @@
      <attribute name="title">
       <string>Table</string>
      </attribute>
-     <widget class="QTableView" name="tableView">
+     <widget class="QTreeView" name="treeViewLog">
       <property name="geometry">
        <rect>
         <x>10</x>

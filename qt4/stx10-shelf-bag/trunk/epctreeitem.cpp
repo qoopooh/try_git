@@ -32,6 +32,11 @@ int EpcTreeItem::columnCount() const
   return itemData.count();
 }
 
+void EpcTreeItem::setData(int column, QVariant value)
+{
+  itemData[column] = value;
+}
+
 QVariant EpcTreeItem::data(int column) const
 {
   return itemData.value(column);

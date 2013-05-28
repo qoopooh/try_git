@@ -24,6 +24,8 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+    void insertEpc(const QString &epc);
+
 signals:
 
 public slots:
@@ -32,7 +34,6 @@ private:
     void setupModelData(const QStringList &lines, EpcTreeItem *parent);
 
     EpcTreeItem *rootItem;
-
 };
 
 #endif // EPCTREEMODEL_H

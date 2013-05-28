@@ -7,7 +7,7 @@ EpcTreeModel::EpcTreeModel(const QString &data, QObject *parent)
   : QAbstractItemModel(parent)
 {
   QList<QVariant> rootData;
-  rootData << "Title" << "Summary";
+  rootData << "EPC" << "Count";
   rootItem = new EpcTreeItem(rootData);
   setupModelData(data.split(QString("\n")), rootItem);
 }
@@ -109,30 +109,24 @@ void EpcTreeModel::setupModelData(const QStringList &lines, EpcTreeItem *parent)
   QList<int> indentations;
   parents << parent;
   indentations << 0;
-
   int number = 0;
-
   while (number < lines.count()) {
     int position = 0;
     while (position < lines[number].length()) {
       if (lines[number].mid(position, 1) != " ")
-      break;
+        break;
       position++;
     }
-
     QString lineData = lines[number].mid(position).trimmed();
-
     if (!lineData.isEmpty()) {
       // Read the column data from the rest of the line.
       QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
       QList<QVariant> columnData;
       for (int column = 0; column < columnStrings.count(); ++column)
         columnData << columnStrings[column];
-
       if (position > indentations.last()) {
         // The last child of the current parent is now the new parent
         // unless the current parent has no children.
-
         if (parents.last()->childCount() > 0) {
           parents << parents.last()->child(parents.last()->childCount()-1);
           indentations << position;
@@ -149,5 +143,28 @@ void EpcTreeModel::setupModelData(const QStringList &lines, EpcTreeItem *parent)
 
   number++;
   }
+}
+
+void EpcTreeModel::insertEpc(const QString &epc)
+{
+  bool f_dup_epc = false;
+
+  for (int i = 0; i < rootItem->childCount(); ++i) {
+    EpcTreeItem *item = rootItem->child(i);
+    if (item->data(0).toString().compare(epc) == 0) {
+      int count = item->data(1).toInt();
+
+      item->setData(1, ++count);
+      f_dup_epc = true;
+    }
+  }
+
+  if (f_dup_epc)
+    return;
+
+  QList<QVariant> columnData;
+  columnData << epc;
+  columnData << 1;
+  rootItem->appendChild(new EpcTreeItem(columnData, rootItem));
 }
 

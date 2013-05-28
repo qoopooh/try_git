@@ -15,6 +15,7 @@ public:
     EpcTreeItem *child(int row);
     int childCount() const;
     int columnCount() const;
+    void setData(int column, QVariant value);
     QVariant data(int column) const;
     int row() const;
     EpcTreeItem *parent();

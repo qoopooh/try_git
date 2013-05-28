@@ -10,6 +10,7 @@
 #include "streader.h"
 #include "aaecommand.h"
 #include "bootloader.h"
+#include "epctreemodel.h"
 
 namespace Ui {
     class MainWindow;
@@ -55,7 +56,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QListWidgetItem *listitem;
+    EpcTreeModel *model;
     StReader *stReader;
     BootLoader *bootloader;
     QString channel;
@@ -71,6 +72,7 @@ private:
     void getReaderChannels();
     void insertDupplicatedTag(const QString);
     void setShelfAndBag(const QString);
+    void updateActions();
 };
 
 #endif // MAINWINDOW_H
