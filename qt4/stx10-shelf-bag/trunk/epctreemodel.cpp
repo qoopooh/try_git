@@ -148,13 +148,16 @@ void EpcTreeModel::setupModelData(const QStringList &lines, EpcTreeItem *parent)
 void EpcTreeModel::insertEpc(const QString &epc)
 {
   bool f_dup_epc = false;
+  EpcTreeItem *item, *subitem;
 
   for (int i = 0; i < rootItem->childCount(); ++i) {
-    EpcTreeItem *item = rootItem->child(i);
+    item = rootItem->child(i);
     if (item->data(0).toString().compare(epc) == 0) {
       int count = item->data(1).toInt();
 
       item->setData(1, ++count);
+      subitem = item->child(1);
+      subitem->setData(1, QTime::currentTime().toString("hh:mm:ss.zzz"));
       f_dup_epc = true;
     }
   }
@@ -165,6 +168,16 @@ void EpcTreeModel::insertEpc(const QString &epc)
   QList<QVariant> columnData;
   columnData << epc;
   columnData << 1;
-  rootItem->appendChild(new EpcTreeItem(columnData, rootItem));
+  item = new EpcTreeItem(columnData, rootItem);
+  columnData.clear();
+  columnData << tr("First read");
+  columnData << QDate::currentDate().toString("yyyy-MM-dd ")
+                + QTime::currentTime().toString("hh:mm:ss.zzz");
+  item->appendChild(new EpcTreeItem(columnData, item));
+  columnData.clear();
+  columnData << tr("Last read");
+  columnData << QTime::currentTime().toString("hh:mm:ss.zzz");
+  item->appendChild(new EpcTreeItem(columnData, item));
+  rootItem->appendChild(item);
 }
 
