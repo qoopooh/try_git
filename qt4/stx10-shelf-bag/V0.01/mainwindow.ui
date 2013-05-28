@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Shelf &amp; Bag V0.02</string>
+   <string>Shelf &amp; Bag V0.01</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
