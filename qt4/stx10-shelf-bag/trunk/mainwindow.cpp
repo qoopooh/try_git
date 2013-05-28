@@ -40,7 +40,9 @@ void MainWindow::resizeEvent(QResizeEvent *event)
   int w = event->size().width();
   int h = event->size().height();
 
-  //ui->listWidgetLog->resize(w - 20, h - 150);
+  ui->tabWidgetLog->resize(w - 20, h - 150);
+  ui->treeViewLog->resize(w - 20, h - 170);
+  ui->textEditLog->resize(w - 20, h - 170);
   ui->groupBoxControl->resize(w - 20, ui->groupBoxControl->size().height());
 }
 

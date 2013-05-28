@@ -231,10 +231,10 @@
      <widget class="QTreeView" name="treeViewLog">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
+        <x>-1</x>
+        <y>-1</y>
         <width>371</width>
-        <height>301</height>
+        <height>321</height>
        </rect>
       </property>
      </widget>
@@ -246,8 +246,8 @@
      <widget class="QTextEdit" name="textEditLog">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
+        <x>-1</x>
+        <y>-1</y>
         <width>371</width>
         <height>301</height>
        </rect>
