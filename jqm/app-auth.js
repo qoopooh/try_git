@@ -189,16 +189,19 @@ app.post('/login', function(req, res){
 });
 
 var path = require('path');
-app.get('/jquery/:file', function(req,res,next){
-  res.sendfile(path.join(__dirname, 'public', 'jquery', req.params.file));
-});
-app.get('/jquery/images/:file', function(req,res,next){
-  res.sendfile(path.join(__dirname, 'public', 'jquery', 'images', req.params.file));
-});
+
 app.get('/favicon.ico', function(req,res,next) {
   res.sendfile(path.join(__dirname, 'public', req.path));
 });
-
+app.get('/js/:file', function(req,res,next){
+  res.sendfile(path.join(__dirname, 'public', 'js', req.params.file));
+});
+app.get('/css/:file', function(req,res,next){
+  res.sendfile(path.join(__dirname, 'public', 'css', req.params.file));
+});
+app.get('/css/images/:file', function(req,res,next){
+  res.sendfile(path.join(__dirname, 'public', 'css', 'images', req.params.file));
+});
 app.get('/home', restrict, function(req,res,next) {
   res.locals.message = 'Hello ' + req.session.user + ', this is your home.';
   if (req.query.cmd !== undefined) {
