@@ -213,10 +213,14 @@ void MainWindow::on_pushButtonSingle_clicked()
 
 void MainWindow::on_pushButtonClear_clicked()
 {
-  ui->textEditLog->clear();
   prev_epc = "";
   prev_epc_count = 0;
 
+  ui->lineEditShelf->setText("-");
+  ui->lineEditShelf->setStyleSheet("QLineEdit{background: white;}");
+  ui->lineEditBag->setText("-");
+  ui->lineEditBag->setStyleSheet("QLineEdit{background: white;}");
+  ui->textEditLog->clear();
   delete model;
   model = new EpcTreeModel("");
   ui->treeViewLog->setModel(model);
