@@ -1,5 +1,5 @@
 # Add more folders to ship with the application, here
-folder_01.source = qml/quick484
+folder_01.source = qml/quickapp
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
@@ -11,19 +11,12 @@ QML_IMPORT_PATH =
 # CONFIG += mobility
 # MOBILITY +=
 
-# Speed up launching on MeeGo/Harmattan when using applauncherd daemon
-# CONFIG += qdeclarative-boostable
-
 # The .cpp file which was generated for your project. Feel free to hack it.
-SOURCES += main.cpp \
-    myclass.cpp
+SOURCES += main.cpp
 
 # Installation path
 # target.path =
 
 # Please do not modify the following two lines. Required for deployment.
-include(qmlapplicationviewer/qmlapplicationviewer.pri)
+include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 qtcAddDeployment()
-
-HEADERS += \
-    myclass.h
