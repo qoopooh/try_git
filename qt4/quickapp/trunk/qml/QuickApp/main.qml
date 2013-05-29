@@ -10,6 +10,7 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
+            item.qmlSignal("Hello from QML");
             Qt.quit();
         }
     }
