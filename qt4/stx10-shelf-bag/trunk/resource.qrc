@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/folder_orange_open.png</file>
         <file>images/shelf.png</file>
     </qresource>
 </RCC>
