@@ -39,7 +39,7 @@ FORMS    += mainwindow.ui
 RESOURCES += \
     resource.qrc
 
-
-
-
+win32 {
+    RC_FILE = shelf.rc
+}
 
