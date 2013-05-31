@@ -19,6 +19,10 @@
  <http://www.zambetti.com> 
  
  */
+char recvData[10];
+int i;
+int val;
+
 void setup() { 
  //Initialize serial and wait for port to open:
   Serial.begin(9600); 
@@ -27,14 +31,16 @@ void setup() {
   }
   
   // prints title with ending line break 
-  Serial.println("ASCII Table ~ Character Map"); 
+  Serial.println("ASCII Table ~ Character Map");
+  memset(recvData, '\0', sizeof(recvData));
+  i = 0;
 } 
 
 // first visible ASCIIcharacter '!' is number 33:
 int thisByte = 33; 
 // you can also write ASCII characters in single quotes.
 // for example. '!' is the same as 33, so you could also use this:
-//int thisByte = '!';  
+//int thisByte = '!'; 
 
 void loop() { 
   // prints value unaltered, i.e. the raw binary version of the 
@@ -70,9 +76,28 @@ void loop() {
   if(thisByte == 126) {     // you could also use if (thisByte == '~') {
     // This loop loops forever and does nothing
     while(true) { 
-      continue; 
+      if (Serial.available()) {
+        recvData[i] = static_cast<char>(Serial.read());
+        if (recvData[i] == '\r') {
+          recvData[i] = '\0';
+          i = 0;
+          val = atoi(recvData);
+          if (val < 33) {
+            thisByte = 33;
+          } else if (val > 124) {
+            thisByte = 124;
+          } else {
+            thisByte = val;
+          }
+          Serial.print("\r\nnew thisByte ");
+          Serial.println(recvData); 
+          break;
+        }
+        ++i;
+      }
     } 
   } 
   // go on to the next character
   thisByte++;  
 } 
+
