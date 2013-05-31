@@ -150,8 +150,10 @@ void Dialog::onOpenCloseButtonClicked()
 //! [4]
 void Dialog::onSendButtonClicked()
 {
-    if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty())
+    if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
         port->write(ui->sendEdit->toPlainText().toLatin1());
+        port->write("\r");
+    }
 }
 
 void Dialog::onReadyRead()
