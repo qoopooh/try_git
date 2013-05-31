@@ -5,4 +5,12 @@ chrome.app.runtime.onLaunched.addListener(function() {
       height: 375
     }
   });
+  console.log('launched');
 })
+chrome.runtime.onInstalled.addListener(function() {
+  console.log('installed');
+});
+chrome.runtime.onSuspend.addListener(function() { 
+  console.log('suspend');
+});
+
