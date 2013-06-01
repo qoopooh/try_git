@@ -132,9 +132,11 @@ void Dialog::onOpenCloseButtonClicked()
     if (!port->isOpen()) {
         port->setPortName(ui->portBox->currentText());
         port->open(QIODevice::ReadWrite);
+        qDebug() << "opening";
     }
     else {
         port->close();
+        qDebug() << "closing";
     }
 
     //If using polling mode, we need a QTimer
@@ -151,8 +153,10 @@ void Dialog::onOpenCloseButtonClicked()
 void Dialog::onSendButtonClicked()
 {
     if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
-        port->write(ui->sendEdit->toPlainText().toLatin1());
+        const char *data = ui->sendEdit->toPlainText().toLatin1();
+        port->write(data);
         port->write("\r");
+        qDebug() << data;
     }
 }
 

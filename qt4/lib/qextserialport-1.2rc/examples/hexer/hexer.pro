@@ -9,6 +9,7 @@ contains(QT_VERSION, ^5\\..*\\..*): QT += widgets
 
 TARGET = Hexer
 TEMPLATE = app
+CONFIG += debug
 
 include(../../src/qextserialport.pri)
 
@@ -20,4 +21,8 @@ HEADERS  += dialog.h \
             hled.h
 
 FORMS    += dialog.ui
+
+debug {
+  CONFIG += console
+}
 
