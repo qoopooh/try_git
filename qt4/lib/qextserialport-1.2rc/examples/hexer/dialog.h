@@ -9,7 +9,7 @@ namespace Ui {
 }
 class QTimer;
 class QextSerialPort;
-class QextSerialEnumerator;
+class SerialThread;
 
 class Dialog : public QDialog
 {
@@ -40,7 +40,7 @@ private:
     Ui::Dialog *ui;
     QTimer *timer;
     QextSerialPort *port;
-    QextSerialEnumerator *enumerator;
+    SerialThread *serial;
 };
 
 #endif // DIALOG_H

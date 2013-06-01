@@ -1,5 +1,5 @@
 #include "qextserialport.h"
-#include "qextserialenumerator.h"
+#include "serialthread.h"
 #include "dialog.h"
 #include "ui_dialog.h"
 #include <QtCore>
@@ -11,8 +11,7 @@ Dialog::Dialog(QWidget *parent) :
     ui->setupUi(this);
 
     //! [0]
-    foreach (QextPortInfo info, QextSerialEnumerator::getPorts())
-        ui->portBox->addItem(info.portName);
+    onPortAddedOrRemoved();
     //make sure user can input their own port name!
     ui->portBox->setEditable(true);
 
@@ -49,9 +48,6 @@ Dialog::Dialog(QWidget *parent) :
     port = new QextSerialPort(ui->portBox->currentText(), settings, QextSerialPort::Polling);
     //! [1]
 
-    enumerator = new QextSerialEnumerator(this);
-    enumerator->setUpNotifications();
-
     connect(ui->baudRateBox, SIGNAL(currentIndexChanged(int)), SLOT(onBaudRateChanged(int)));
     connect(ui->parityBox, SIGNAL(currentIndexChanged(int)), SLOT(onParityChanged(int)));
     connect(ui->dataBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onDataBitsChanged(int)));
@@ -63,9 +59,6 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
     connect(timer, SIGNAL(timeout()), SLOT(onReadyRead()));
     connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
-
-    connect(enumerator, SIGNAL(deviceDiscovered(QextPortInfo)), SLOT(onPortAddedOrRemoved()));
-    connect(enumerator, SIGNAL(deviceRemoved(QextPortInfo)), SLOT(onPortAddedOrRemoved()));
 
     setWindowTitle(tr("QextSerialPort Demo"));
 }
@@ -170,14 +163,16 @@ void Dialog::onReadyRead()
 
 void Dialog::onPortAddedOrRemoved()
 {
+  QList<QString> ports = SerialThread::discovery();
+
     QString current = ui->portBox->currentText();
 
     ui->portBox->blockSignals(true);
     ui->portBox->clear();
-    foreach (QextPortInfo info, QextSerialEnumerator::getPorts())
-        ui->portBox->addItem(info.portName);
+    foreach (QString info, ports)
+        ui->portBox->addItem(info);
 
-    ui->portBox->setCurrentIndex(ui->portBox->findText(current));
+    ui->portBox->setCurrentIndex(ui->portBox->count() - 1);
 
     ui->portBox->blockSignals(false);
 }

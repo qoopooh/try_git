@@ -15,10 +15,12 @@ include(../../src/qextserialport.pri)
 
 SOURCES += main.cpp\
         dialog.cpp\
-        hled.cpp
+        hled.cpp\
+        serialthread.cpp\
 
 HEADERS  += dialog.h \
-            hled.h
+            hled.h \
+            serialthread.h \
 
 FORMS    += dialog.ui
 
