@@ -24,12 +24,6 @@ protected:
 
 private Q_SLOTS:
     void onPortNameChanged(const QString &name);
-    void onBaudRateChanged(int idx);
-    void onParityChanged(int idx);
-    void onDataBitsChanged(int idx);
-    void onStopBitsChanged(int idx);
-    void onQueryModeChanged(int idx);
-    void onTimeoutChanged(int val);
     void onOpenCloseButtonClicked();
     void onSendButtonClicked();
     void onReadyRead(const QString &);

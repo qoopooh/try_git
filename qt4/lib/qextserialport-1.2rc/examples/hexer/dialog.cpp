@@ -45,12 +45,12 @@ Dialog::Dialog(QWidget *parent) :
     timer->setInterval(40);
     serial = new SerialThread("ttyS3", this);
 
-    connect(ui->baudRateBox, SIGNAL(currentIndexChanged(int)), SLOT(onBaudRateChanged(int)));
-    connect(ui->parityBox, SIGNAL(currentIndexChanged(int)), SLOT(onParityChanged(int)));
-    connect(ui->dataBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onDataBitsChanged(int)));
-    connect(ui->stopBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onStopBitsChanged(int)));
-    connect(ui->queryModeBox, SIGNAL(currentIndexChanged(int)), SLOT(onQueryModeChanged(int)));
-    connect(ui->timeoutBox, SIGNAL(valueChanged(int)), SLOT(onTimeoutChanged(int)));
+    //connect(ui->baudRateBox, SIGNAL(currentIndexChanged(int)), SLOT(onBaudRateChanged(int)));
+    //connect(ui->parityBox, SIGNAL(currentIndexChanged(int)), SLOT(onParityChanged(int)));
+    //connect(ui->dataBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onDataBitsChanged(int)));
+    //connect(ui->stopBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onStopBitsChanged(int)));
+    //connect(ui->queryModeBox, SIGNAL(currentIndexChanged(int)), SLOT(onQueryModeChanged(int)));
+    //connect(ui->timeoutBox, SIGNAL(valueChanged(int)), SLOT(onTimeoutChanged(int)));
     connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
     connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
@@ -80,74 +80,43 @@ void Dialog::changeEvent(QEvent *e)
 
 void Dialog::onPortNameChanged(const QString & /*name*/)
 {
-    if (port->isOpen()) {
-        port->close();
+  //if (port->isOpen()) {
+  //port->close();
         ui->led->turnOff();
-    }
+        //}
 }
-//! [2]
-void Dialog::onBaudRateChanged(int idx)
-{
-    port->setBaudRate((BaudRateType)ui->baudRateBox->itemData(idx).toInt());
-}
-
-void Dialog::onParityChanged(int idx)
-{
-    port->setParity((ParityType)ui->parityBox->itemData(idx).toInt());
-}
-
-void Dialog::onDataBitsChanged(int idx)
-{
-    port->setDataBits((DataBitsType)ui->dataBitsBox->itemData(idx).toInt());
-}
-
-void Dialog::onStopBitsChanged(int idx)
-{
-    port->setStopBits((StopBitsType)ui->stopBitsBox->itemData(idx).toInt());
-}
-
-void Dialog::onQueryModeChanged(int idx)
-{
-    port->setQueryMode((QextSerialPort::QueryMode)ui->queryModeBox->itemData(idx).toInt());
-}
-
-void Dialog::onTimeoutChanged(int val)
-{
-    port->setTimeout(val);
-}
-//! [2]
 //! [3]
 void Dialog::onOpenCloseButtonClicked()
 {
-    if (!port->isOpen()) {
-        port->setPortName(ui->portBox->currentText());
-        port->open(QIODevice::ReadWrite);
+  //if (!port->isOpen()) {
+  //port->setPortName(ui->portBox->currentText());
+  //port->open(QIODevice::ReadWrite);
         qDebug() << "opening";
-    }
-    else {
-        port->close();
-        qDebug() << "closing";
-    }
+        //}
+        //else {
+        //port->close();
+        //qDebug() << "closing";
+        //}
 
     //If using polling mode, we need a QTimer
-    if (port->isOpen() && port->queryMode() == QextSerialPort::Polling)
-        timer->start();
-    else
-        timer->stop();
+    //if (port->isOpen() && port->queryMode() == QextSerialPort::Polling)
+    //timer->start();
+    //else
+    //timer->stop();
 
     //update led's status
-    ui->led->turnOn(port->isOpen());
+    //ui->led->turnOn(port->isOpen());
 }
 //! [3]
 //! [4]
 void Dialog::onSendButtonClicked()
 {
-  if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
-    const char *data = ui->sendEdit->toPlainText().toLatin1();
-    port->write(data);
-    port->write("\r");
+  //if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
+  const char *data = ui->sendEdit->toPlainText().toLatin1();
+  //port->write(data);
+  //port->write("\r");
     qDebug() << data;
-  }
+    //}
 }
 
 void Dialog::onReadyRead(const QString &data)
