@@ -41,20 +41,13 @@ Dialog::Dialog(QWidget *parent) :
 
     ui->led->turnOff();
 
-    timer = new QTimer(this);
-    timer->setInterval(40);
+    //timer = new QTimer(this);
+    //timer->setInterval(40);
     serial = new SerialThread("ttyS3", this);
 
-    //connect(ui->baudRateBox, SIGNAL(currentIndexChanged(int)), SLOT(onBaudRateChanged(int)));
-    //connect(ui->parityBox, SIGNAL(currentIndexChanged(int)), SLOT(onParityChanged(int)));
-    //connect(ui->dataBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onDataBitsChanged(int)));
-    //connect(ui->stopBitsBox, SIGNAL(currentIndexChanged(int)), SLOT(onStopBitsChanged(int)));
-    //connect(ui->queryModeBox, SIGNAL(currentIndexChanged(int)), SLOT(onQueryModeChanged(int)));
-    //connect(ui->timeoutBox, SIGNAL(valueChanged(int)), SLOT(onTimeoutChanged(int)));
     connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
     connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
-    //connect(timer, SIGNAL(timeout()), SLOT(onReadyRead()));
     connect(serial, SIGNAL(data(QString)), SLOT(onReadyRead(QString)));
 
     setWindowTitle(tr("QextSerialPort Demo"));
@@ -63,7 +56,6 @@ Dialog::Dialog(QWidget *parent) :
 Dialog::~Dialog()
 {
     delete ui;
-    //delete port;
 }
 
 void Dialog::changeEvent(QEvent *e)

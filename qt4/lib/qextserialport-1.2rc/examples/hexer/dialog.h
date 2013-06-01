@@ -32,8 +32,6 @@ private Q_SLOTS:
 
 private:
     Ui::Dialog *ui;
-    QTimer *timer;
-    QextSerialPort *port;
     SerialThread *serial;
 };
 
