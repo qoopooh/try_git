@@ -43,10 +43,7 @@ Dialog::Dialog(QWidget *parent) :
 
     timer = new QTimer(this);
     timer->setInterval(40);
-    //! [1]
-    PortSettings settings = {BAUD9600, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
-    port = new QextSerialPort(ui->portBox->currentText(), settings, QextSerialPort::Polling);
-    //! [1]
+    serial = new SerialThread("ttyS3", this);
 
     connect(ui->baudRateBox, SIGNAL(currentIndexChanged(int)), SLOT(onBaudRateChanged(int)));
     connect(ui->parityBox, SIGNAL(currentIndexChanged(int)), SLOT(onParityChanged(int)));
@@ -57,8 +54,8 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
     connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
-    connect(timer, SIGNAL(timeout()), SLOT(onReadyRead()));
-    connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
+    //connect(timer, SIGNAL(timeout()), SLOT(onReadyRead()));
+    connect(serial, SIGNAL(data(QString)), SLOT(onReadyRead(QString)));
 
     setWindowTitle(tr("QextSerialPort Demo"));
 }
@@ -66,7 +63,7 @@ Dialog::Dialog(QWidget *parent) :
 Dialog::~Dialog()
 {
     delete ui;
-    delete port;
+    //delete port;
 }
 
 void Dialog::changeEvent(QEvent *e)
@@ -145,36 +142,31 @@ void Dialog::onOpenCloseButtonClicked()
 //! [4]
 void Dialog::onSendButtonClicked()
 {
-    if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
-        const char *data = ui->sendEdit->toPlainText().toLatin1();
-        port->write(data);
-        port->write("\r");
-        qDebug() << data;
-    }
+  if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
+    const char *data = ui->sendEdit->toPlainText().toLatin1();
+    port->write(data);
+    port->write("\r");
+    qDebug() << data;
+  }
 }
 
-void Dialog::onReadyRead()
+void Dialog::onReadyRead(const QString &data)
 {
-    if (port->bytesAvailable()) {
-        ui->recvEdit->moveCursor(QTextCursor::End);
-        ui->recvEdit->insertPlainText(QString::fromLatin1(port->readAll()));
-    }
+  ui->recvEdit->moveCursor(QTextCursor::End);
+  ui->recvEdit->insertPlainText(data);
 }
 
 void Dialog::onPortAddedOrRemoved()
 {
   QList<QString> ports = SerialThread::discovery();
+  QString current = ui->portBox->currentText();
 
-    QString current = ui->portBox->currentText();
-
-    ui->portBox->blockSignals(true);
-    ui->portBox->clear();
-    foreach (QString info, ports)
-        ui->portBox->addItem(info);
-
-    ui->portBox->setCurrentIndex(ui->portBox->count() - 1);
-
-    ui->portBox->blockSignals(false);
+  ui->portBox->blockSignals(true);
+  ui->portBox->clear();
+  foreach (QString info, ports)
+    ui->portBox->addItem(info);
+  ui->portBox->setCurrentIndex(ui->portBox->count() - 1);
+  ui->portBox->blockSignals(false);
 }
 
 //! [4]

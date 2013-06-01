@@ -32,7 +32,7 @@ private Q_SLOTS:
     void onTimeoutChanged(int val);
     void onOpenCloseButtonClicked();
     void onSendButtonClicked();
-    void onReadyRead();
+    void onReadyRead(const QString &);
 
     void onPortAddedOrRemoved();
 

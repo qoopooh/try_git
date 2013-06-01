@@ -15,7 +15,7 @@ class SerialThread : public QThread
   Q_OBJECT
 
 public:
-  SerialThread(QObject *parent = 0);
+  SerialThread(QString, QObject *parent = 0);
   ~SerialThread();
 
   static QList<QString> discovery();

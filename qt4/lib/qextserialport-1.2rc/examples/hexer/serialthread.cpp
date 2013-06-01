@@ -11,15 +11,18 @@ public:
   bool isOn;
 };
 
-SerialThread::SerialThread(QObject *parent)
+SerialThread::SerialThread(QString portname, QObject *parent)
     :QThread(parent)
 {
+  PortSettings settings = {BAUD9600, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
+  port = new QextSerialPort(portname, settings, QextSerialPort::Polling);
   connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
 }
 
 SerialThread::~SerialThread()
 {
   //delete m_d;
+  delete port;
 }
 
 void SerialThread::turnOn(bool on)
