@@ -6,35 +6,28 @@ Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 
-    //! [0]
-    onPortAddedOrRemoved();
-    //make sure user can input their own port name!
-    ui->portBox->setEditable(true);
+  onPortAddedOrRemoved();
+  //make sure user can input their own port name!
+  ui->portBox->setEditable(true);
 
-    ui->baudRateBox->addItem("1200", BAUD1200);
-    ui->baudRateBox->addItem("2400", BAUD2400);
-    ui->baudRateBox->addItem("4800", BAUD4800);
-    ui->baudRateBox->addItem("9600", BAUD9600);
-    ui->baudRateBox->addItem("19200", BAUD19200);
-    ui->baudRateBox->setCurrentIndex(3);
+  ui->baudRateBox->addItem("1200", BAUD1200);
+  ui->baudRateBox->addItem("2400", BAUD2400);
+  ui->baudRateBox->addItem("4800", BAUD4800);
+  ui->baudRateBox->addItem("9600", BAUD9600);
+  ui->baudRateBox->addItem("19200", BAUD19200);
+  ui->baudRateBox->setCurrentIndex(3);
 
-    //! [0]
+  ui->led->turnOff();
 
-    ui->led->turnOff();
+  connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
+  connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
+  connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
+  connect(&serial, SIGNAL(data(QString)), SLOT(onReadyRead(QString)));
+  connect(this, SIGNAL(sendData(QByteArray)), &serial, SLOT(write(QByteArray)));
 
-    //timer = new QTimer(this);
-    //timer->setInterval(40);
-    //serial = new SerialThread();
-
-    connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
-    connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
-    connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
-    connect(&serial, SIGNAL(data(QString)), SLOT(onReadyRead(QString)));
-    connect(this, SIGNAL(sendData(QByteArray)), &serial, SLOT(write(QByteArray)));
-
-    setWindowTitle(tr("QextSerialPort Demo"));
+  setWindowTitle(tr("QextSerialPort Demo"));
 }
 
 Dialog::~Dialog()
@@ -66,12 +59,10 @@ void Dialog::onPortNameChanged(const QString &name)
     ui->led->turnOff();
   }
 }
-//! [3]
+
 void Dialog::onOpenCloseButtonClicked()
 {
   if (!serial.isRunning()) {
-    //port->setPortName(ui->portBox->currentText());
-    //port->open(QIODevice::ReadWrite);
     qDebug() << "opening";
     onPortNameChanged(ui->portBox->currentText());
     serial.start();
@@ -81,23 +72,23 @@ void Dialog::onOpenCloseButtonClicked()
     serial.wait();
   }
 
-    //If using polling mode, we need a QTimer
-    //if (port->isOpen() && port->queryMode() == QextSerialPort::Polling)
-    //timer->start();
-    //else
-    //timer->stop();
+  //If using polling mode, we need a QTimer
+  //if (port->isOpen() && port->queryMode() == QextSerialPort::Polling)
+  //timer->start();
+  //else
+  //timer->stop();
 
-    //update led's status
-    //ui->led->turnOn(port->isOpen());
+  //update led's status
+  ui->led->turnOn(serial.isRunning());
 }
-//! [3]
-//! [4]
+
 void Dialog::onSendButtonClicked()
 {
-  //if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
-  const char *data = ui->sendEdit->toPlainText().toLatin1();
-  emit sendData(data);
-  emit sendData("\r");
+  if (serial.isRunning() && !ui->sendEdit->toPlainText().isEmpty()) {
+    const char *data = ui->sendEdit->toPlainText().toLatin1();
+    emit sendData(data);
+    emit sendData("\r");
+  }
 }
 
 void Dialog::onReadyRead(const QString &data)
@@ -119,4 +110,3 @@ void Dialog::onPortAddedOrRemoved()
   ui->portBox->blockSignals(false);
 }
 
-//! [4]

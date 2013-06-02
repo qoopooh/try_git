@@ -70,8 +70,8 @@ void SerialThread::setBaud(const QString &baud)
 void SerialThread::write(const QByteArray &ba)
 {
   if (port != NULL) {
-    qDebug() << "write " << ba.data();
     port->write(ba);
+    qDebug() << "w " << ba.data();
   } else {
     qDebug() << "cannot write";
   }
@@ -79,13 +79,10 @@ void SerialThread::write(const QByteArray &ba)
 
 void SerialThread::run()
 {
-  //PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
-  //if (port != NULL)
-  //delete port;
-  port = new QextSerialPort();
+  PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
+  port = new QextSerialPort(settings);
   qDebug() << "port" << m_info->portName;
   port->setPortName(m_info->portName);
-  //port->setBaudRate(m_info->baud);
   if (!port->open(QIODevice::ReadWrite)) {
     emit data("Cannot open port");
     delete port;
