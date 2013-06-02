@@ -38,7 +38,11 @@ Dialog::Dialog(QWidget *parent) :
 
 Dialog::~Dialog()
 {
-    delete ui;
+  if (serial.isRunning()) {
+    serial.quit();
+    serial.wait();
+  }
+  delete ui;
 }
 
 void Dialog::changeEvent(QEvent *e)
@@ -55,7 +59,7 @@ void Dialog::changeEvent(QEvent *e)
 
 void Dialog::onPortNameChanged(const QString &name)
 {
-  //serial->setPort(name);
+  serial.setPort(name);
   //if (port->isOpen()) {
   //port->close();
         ui->led->turnOff();
@@ -64,16 +68,16 @@ void Dialog::onPortNameChanged(const QString &name)
 //! [3]
 void Dialog::onOpenCloseButtonClicked()
 {
-  //if (!serial->isRunning()) {
-    ////port->setPortName(ui->portBox->currentText());
-    ////port->open(QIODevice::ReadWrite);
-    //qDebug() << "opening";
-    //serial->start();
-  //} else {
-    //qDebug() << "closing";
-    //serial->quit();
-    //serial->wait();
-  //}
+  if (!serial.isRunning()) {
+    //port->setPortName(ui->portBox->currentText());
+    //port->open(QIODevice::ReadWrite);
+    qDebug() << "opening";
+    serial.start();
+  } else {
+    qDebug() << "closing";
+    serial.quit();
+    serial.wait();
+  }
 
     //If using polling mode, we need a QTimer
     //if (port->isOpen() && port->queryMode() == QextSerialPort::Polling)

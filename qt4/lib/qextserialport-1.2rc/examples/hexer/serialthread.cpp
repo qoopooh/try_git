@@ -13,7 +13,7 @@ public:
 
 SerialThread::SerialThread()
 {
-  PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
+  //PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
   //port = new QextSerialPort(m_info->portName, settings, QextSerialPort::Polling);
 
   //timer = new QTimer(this);
@@ -23,7 +23,7 @@ SerialThread::SerialThread()
 
 SerialThread::~SerialThread()
 {
-  delete port;
+  //delete port;
 }
 
 void SerialThread::turnOn(bool /*on*/)
