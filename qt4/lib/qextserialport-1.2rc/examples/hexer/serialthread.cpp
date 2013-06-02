@@ -1,29 +1,28 @@
 #include "serialthread.h"
+#include <QDebug>
 
 struct SerialThread::SerialInfo
 {
 public:
   SerialInfo()
-      : portName("COM1"), baud(BAUD9600)
+      : portName(QString("COM1")), baud(BAUD9600)
   { }
 
   QString portName;
   BaudRateType baud;
 };
 
-SerialThread::SerialThread()
+SerialThread::SerialThread() :
+  m_info(new SerialInfo()), port(NULL)
 {
-  //PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
-  //port = new QextSerialPort(m_info->portName, settings, QextSerialPort::Polling);
 
-  //timer = new QTimer(this);
-  //timer->setInterval(40);
-  //connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
+  timer = new QTimer(this);
+  timer->setInterval(40);
 }
 
 SerialThread::~SerialThread()
 {
-  //delete port;
+  delete port;
 }
 
 void SerialThread::turnOn(bool /*on*/)
@@ -46,9 +45,10 @@ QList<QString> SerialThread::discovery()
 
 void SerialThread::onReadyRead()
 {
-  QString str;
-
-  emit data(str);
+  if (port->bytesAvailable()) {
+    QString str = QString::fromLatin1(port->readAll());
+    emit data(str);
+  }
 }
 
 void SerialThread::setPort(const QString &name)
@@ -67,8 +67,36 @@ void SerialThread::setBaud(const QString &baud)
   }
 }
 
-void run()
+void SerialThread::write(const QByteArray &ba)
 {
-  //exec();
+  if (port != NULL) {
+    qDebug() << "write " << ba.data();
+    port->write(ba);
+  } else {
+    qDebug() << "cannot write";
+  }
+}
+
+void SerialThread::run()
+{
+  //PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
+  //if (port != NULL)
+  //delete port;
+  port = new QextSerialPort();
+  qDebug() << "port" << m_info->portName;
+  port->setPortName(m_info->portName);
+  //port->setBaudRate(m_info->baud);
+  if (!port->open(QIODevice::ReadWrite)) {
+    emit data("Cannot open port");
+    delete port;
+    port = NULL;
+    return;
+  }
+  connect(port, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+  exec();
+  disconnect(port, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+  port->close();
+  delete port;
+  port = NULL;
 }
 

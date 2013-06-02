@@ -25,12 +25,16 @@ public Q_SLOTS:
   void turnOff(bool off=true);
   void setPort(const QString &);
   void setBaud(const QString &);
+  void write(const QByteArray &);
 
 signals:
   void data(QString);
 
 protected Q_SLOTS:
   void onReadyRead();
+
+protected:
+  virtual void run();
 
 private:
   struct SerialInfo;

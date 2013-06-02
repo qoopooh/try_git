@@ -18,6 +18,9 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
 
+signals:
+    void sendData(QByteArray);
+
 protected:
     void changeEvent(QEvent *e);
 

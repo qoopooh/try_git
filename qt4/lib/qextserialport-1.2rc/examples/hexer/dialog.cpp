@@ -31,7 +31,8 @@ Dialog::Dialog(QWidget *parent) :
     connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
     connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
-    connect(&serial, SIGNAL(data(QString)), this, SLOT(onReadyRead(QString)));
+    connect(&serial, SIGNAL(data(QString)), SLOT(onReadyRead(QString)));
+    connect(this, SIGNAL(sendData(QByteArray)), &serial, SLOT(write(QByteArray)));
 
     setWindowTitle(tr("QextSerialPort Demo"));
 }
@@ -60,10 +61,10 @@ void Dialog::changeEvent(QEvent *e)
 void Dialog::onPortNameChanged(const QString &name)
 {
   serial.setPort(name);
-  //if (port->isOpen()) {
-  //port->close();
-        ui->led->turnOff();
-        //}
+  if (serial.isRunning()) {
+    serial.quit();
+    ui->led->turnOff();
+  }
 }
 //! [3]
 void Dialog::onOpenCloseButtonClicked()
@@ -72,6 +73,7 @@ void Dialog::onOpenCloseButtonClicked()
     //port->setPortName(ui->portBox->currentText());
     //port->open(QIODevice::ReadWrite);
     qDebug() << "opening";
+    onPortNameChanged(ui->portBox->currentText());
     serial.start();
   } else {
     qDebug() << "closing";
@@ -94,10 +96,8 @@ void Dialog::onSendButtonClicked()
 {
   //if (port->isOpen() && !ui->sendEdit->toPlainText().isEmpty()) {
   const char *data = ui->sendEdit->toPlainText().toLatin1();
-  //port->write(data);
-  //port->write("\r");
-    qDebug() << data;
-    //}
+  emit sendData(data);
+  emit sendData("\r");
 }
 
 void Dialog::onReadyRead(const QString &data)
