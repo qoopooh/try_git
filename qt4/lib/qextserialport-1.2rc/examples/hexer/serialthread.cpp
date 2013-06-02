@@ -1,31 +1,32 @@
-#include "serialthread.h" 
+#include "serialthread.h"
 
-struct SerialThread::Private
+struct SerialThread::SerialInfo
 {
 public:
-  Private()
-      : darkerFactor(300), isOn(true)
+  SerialInfo()
+      : portName("COM1"), baud(BAUD9600)
   { }
 
-  int darkerFactor;
-  bool isOn;
+  QString portName;
+  BaudRateType baud;
 };
 
-SerialThread::SerialThread(QString portname, QObject *parent)
-    :QThread(parent)
+SerialThread::SerialThread()
 {
-  PortSettings settings = {BAUD9600, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
-  port = new QextSerialPort(portname, settings, QextSerialPort::Polling);
-  connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
+  PortSettings settings = {m_info->baud, DATA_8, PAR_NONE, STOP_1, FLOW_OFF, 10};
+  //port = new QextSerialPort(m_info->portName, settings, QextSerialPort::Polling);
+
+  //timer = new QTimer(this);
+  //timer->setInterval(40);
+  //connect(port, SIGNAL(readyRead()), SLOT(onReadyRead()));
 }
 
 SerialThread::~SerialThread()
 {
-  //delete m_d;
   delete port;
 }
 
-void SerialThread::turnOn(bool on)
+void SerialThread::turnOn(bool /*on*/)
 {
   //m_d->isOn = on;
 }
@@ -48,5 +49,26 @@ void SerialThread::onReadyRead()
   QString str;
 
   emit data(str);
+}
+
+void SerialThread::setPort(const QString &name)
+{
+  m_info->portName = name;
+}
+
+void SerialThread::setBaud(const QString &baud)
+{
+  if (baud == "9600") {
+    m_info->baud = BAUD9600;
+  } else if (baud == "38400") {
+    m_info->baud = BAUD38400;
+  } else {
+    m_info->baud = BAUD115200;
+  }
+}
+
+void run()
+{
+  //exec();
 }
 

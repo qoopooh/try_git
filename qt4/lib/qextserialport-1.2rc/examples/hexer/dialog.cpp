@@ -1,5 +1,3 @@
-#include "qextserialport.h"
-#include "serialthread.h"
 #include "dialog.h"
 #include "ui_dialog.h"
 #include <QtCore>
@@ -22,33 +20,18 @@ Dialog::Dialog(QWidget *parent) :
     ui->baudRateBox->addItem("19200", BAUD19200);
     ui->baudRateBox->setCurrentIndex(3);
 
-    ui->parityBox->addItem("NONE", PAR_NONE);
-    ui->parityBox->addItem("ODD", PAR_ODD);
-    ui->parityBox->addItem("EVEN", PAR_EVEN);
-
-    ui->dataBitsBox->addItem("5", DATA_5);
-    ui->dataBitsBox->addItem("6", DATA_6);
-    ui->dataBitsBox->addItem("7", DATA_7);
-    ui->dataBitsBox->addItem("8", DATA_8);
-    ui->dataBitsBox->setCurrentIndex(3);
-
-    ui->stopBitsBox->addItem("1", STOP_1);
-    ui->stopBitsBox->addItem("2", STOP_2);
-
-    ui->queryModeBox->addItem("Polling", QextSerialPort::Polling);
-    ui->queryModeBox->addItem("EventDriven", QextSerialPort::EventDriven);
     //! [0]
 
     ui->led->turnOff();
 
     //timer = new QTimer(this);
     //timer->setInterval(40);
-    serial = new SerialThread("ttyS3", this);
+    //serial = new SerialThread();
 
     connect(ui->portBox, SIGNAL(editTextChanged(QString)), SLOT(onPortNameChanged(QString)));
     connect(ui->openCloseButton, SIGNAL(clicked()), SLOT(onOpenCloseButtonClicked()));
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(onSendButtonClicked()));
-    connect(serial, SIGNAL(data(QString)), SLOT(onReadyRead(QString)));
+    connect(&serial, SIGNAL(data(QString)), this, SLOT(onReadyRead(QString)));
 
     setWindowTitle(tr("QextSerialPort Demo"));
 }
@@ -70,8 +53,9 @@ void Dialog::changeEvent(QEvent *e)
     }
 }
 
-void Dialog::onPortNameChanged(const QString & /*name*/)
+void Dialog::onPortNameChanged(const QString &name)
 {
+  //serial->setPort(name);
   //if (port->isOpen()) {
   //port->close();
         ui->led->turnOff();
@@ -80,15 +64,16 @@ void Dialog::onPortNameChanged(const QString & /*name*/)
 //! [3]
 void Dialog::onOpenCloseButtonClicked()
 {
-  //if (!port->isOpen()) {
-  //port->setPortName(ui->portBox->currentText());
-  //port->open(QIODevice::ReadWrite);
-        qDebug() << "opening";
-        //}
-        //else {
-        //port->close();
-        //qDebug() << "closing";
-        //}
+  //if (!serial->isRunning()) {
+    ////port->setPortName(ui->portBox->currentText());
+    ////port->open(QIODevice::ReadWrite);
+    //qDebug() << "opening";
+    //serial->start();
+  //} else {
+    //qDebug() << "closing";
+    //serial->quit();
+    //serial->wait();
+  //}
 
     //If using polling mode, we need a QTimer
     //if (port->isOpen() && port->queryMode() == QextSerialPort::Polling)

@@ -3,13 +3,12 @@
 
 #include <QDialog>
 #include <QDebug>
+#include "serialthread.h"
 
 namespace Ui {
     class Dialog;
 }
 class QTimer;
-class QextSerialPort;
-class SerialThread;
 
 class Dialog : public QDialog
 {
@@ -32,7 +31,7 @@ private Q_SLOTS:
 
 private:
     Ui::Dialog *ui;
-    SerialThread *serial;
+    SerialThread serial;
 };
 
 #endif // DIALOG_H
