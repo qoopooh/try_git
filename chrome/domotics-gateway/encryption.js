@@ -1,4 +1,5 @@
 var uuid = '';
+var id_max_size = 40;
 var k_line_feed = 13;
 var phone_id = '0';
 var f_debug = false;
@@ -144,7 +145,6 @@ function decrypt(data) {
 }
 
 function getRandomUuid() {
-  var id_max_size = 40;
   var dat = "";
   var num = 0;
 
@@ -166,7 +166,7 @@ function getRandomUuid() {
 
 (function () {
   chrome.storage.sync.get("myUuid", function(val) {
-    if (val.myUuid && val.myUuid.length == 40) {
+    if (val.myUuid && val.myUuid.length === id_max_size) {
       uuid = val.myUuid;
       console.log("uuid:", uuid);
     } else {
