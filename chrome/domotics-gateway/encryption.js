@@ -1,5 +1,4 @@
-var uuid = '0123456789abcdef0123456789abcdef01234567';
-/*var uuid = '1234567890123456789012345678901234567890';*/
+var uuid = '';
 var k_line_feed = 13;
 var phone_id = '0';
 var f_debug = false;
@@ -144,40 +143,35 @@ function decrypt(data) {
   return ab2str(out);
 }
 
-function setUuid(id) {
-  /*console.log("id size", id.length);*/
-
+function getRandomUuid() {
   var id_max_size = 40;
-  var id_size = id.length;
   var dat = "";
+  var num = 0;
 
   uuid = "";
   for (var i = 0; i < id_max_size; i++) {
-    if (i < id_size) {
-      dat = id[i];
-    } else {
-      dat = id[i-id_size];
-    }
-
-    var num = dat.charCodeAt(0);
+    var num = Math.floor((Math.random() * 16));
 
     // hex encode
-    num %= 16;
     if (num < 10) {
-      dat = "" + num;
+      uuid += "" + num;
     } else {
-      dat = String.fromCharCode(('a'.charCodeAt(0) + (num - 10)));
+      uuid += String.fromCharCode(('a'.charCodeAt(0) + (num - 10)));
     }
-
-    // dec encode
-    /*num %= 10;*/
-    /*dat = "" + num;*/
-
-    uuid += dat;
   }
-
-  console.log("uuid:", uuid);
-  /*console.log("uuid size", uuid.length);*/
+  chrome.storage.sync.set({"myUuid": uuid}, function() {
+    console.log("Random uuid:", uuid);
+  });
 }
 
+(function () {
+  chrome.storage.sync.get("myUuid", function(val) {
+    if (val.myUuid && val.myUuid.length == 40) {
+      uuid = val.myUuid;
+      console.log("uuid:", uuid);
+    } else {
+      getRandomUuid();
+    }
+  });
+})();
 

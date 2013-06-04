@@ -368,10 +368,6 @@ function startJqm() {
     selectGateway(getCurrentGateway());
     disableOnConnect(false);
   });
-  setUuid(chrome.i18n.getMessage("@@extension_id"));
-  /*chrome.experimental.identity.getAuthToken(this, function(token) {*/
-  /*console.log("token:", token);*/
-  /*});*/
 }
 
 $(document).ready(startJqm());
