@@ -1,20 +1,33 @@
+var Request = require("sdk/request").Request;
 var data = require("sdk/self").data;
-var text_entry = require("sdk/panel").Panel({
-  width: 690,
+var aia_port = require("sdk/panel").Panel({
+  width: 700,
   height: 450,
-  contentURL: 'https://direct.aia.co.th/btob/FundQueryServlet?actionType=show'
+  contentScriptFile: data.url('load.js'),
+  /*contentURL: 'https://direct.aia.co.th/btob/FundQueryServlet?actionType=show'*/
+  contentURL: data.url('window.html')
 });
 require("sdk/widget").Widget({
-  label: "Text entry",
-  id: "text-entry",
+  label: "AIA Link widget",
+  id: "aia-link-widget",
   contentURL: data.url("aia48.png"),
-  panel: text_entry
+  panel: aia_port
 });
-text_entry.on("show", function() {
-  text_entry.port.emit("show");
+aia_port.on("show", function() {
+    /*aia_port.port.emit("show");*/
+  loadDoc('https://direct.aia.co.th/btob/FundQueryServlet?actionType=show');
 });
-text_entry.port.on("text-entered", function(text) {
-  console.log(text);
-  text_entry.hide();
-});
+
+
+function loadDoc(link)
+{
+  Request({
+    url: link,
+    onComplete: function(response) {
+      console.log("loadDoc onComplete");
+      aia_port.port.emit("portfolio", response.text);
+    }
+  }).get();
+  console.log("loadDoc()" + link);
+}
 
