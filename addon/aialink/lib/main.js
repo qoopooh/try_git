@@ -1,10 +1,8 @@
-/*var Request = require("sdk/request").Request;*/
 var data = require("sdk/self").data;
 var aia_port = require("sdk/panel").Panel({
   width: 450,
   height: 600,
   contentScriptFile: data.url('load.js'),
-  /*contentURL: 'https://direct.aia.co.th/btob/FundQueryServlet?actionType=show'*/
   contentURL: data.url('window.html')
 });
 require("sdk/widget").Widget({
