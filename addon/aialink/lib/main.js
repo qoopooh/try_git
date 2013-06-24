@@ -1,14 +1,13 @@
 var data = require("sdk/self").data;
 var text_entry = require("sdk/panel").Panel({
-  width: 212,
-  height: 200,
-  contentURL: data.url("text-entry.html"),
-  contentScriptFile: data.url("get-text.js")
+  width: 690,
+  height: 450,
+  contentURL: 'https://direct.aia.co.th/btob/FundQueryServlet?actionType=show'
 });
 require("sdk/widget").Widget({
   label: "Text entry",
   id: "text-entry",
-  contentURL: "http://www.mozilla.org/favicon.ico",
+  contentURL: data.url("aia48.png"),
   panel: text_entry
 });
 text_entry.on("show", function() {
