@@ -1,22 +1,32 @@
 {
   // Required
-  "name": "My Extension",
+  "name": "AIA Link",
   "version": "0.1",
   "manifest_version": 2,
 
   // Recommended
-  "description": "My first packaged app.",
-  "icons": { "16": "calculator-16.png", "128": "calculator-128.png" },
+  "description": "Check the price of AIA Open-Ended Mutual Funds",
+  //"icons": { "16": "calculator-16.png", "128": "calculator-128.png" },
+  "icons": { "16": "aia16.png",
+            "48": "aia48.png",
+            "128": "aia128.png" },
+  "browser_action": {
+    "default_icon": "aia_01.jpg",
+    "default_popup": "window.html"
+  },
 
   // Pick one (or more)
-  "app": {
-    "background": {
-      "scripts": ["background.js"]
-    }
-  },
+  //"app": {
+  //  "background": {
+  //    "scripts": ["background.js"]
+  //  }
+  //},
   "permissions": [
+    "tabs",
+    "https://portal.aia.co.th/",
     "https://direct.aia.co.th/"
   ],
+
   // Add any of these that you need
   "offline_enabled":true
 }

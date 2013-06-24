@@ -12,26 +12,26 @@ function loadXMLDoc(url)
   }
   xmlhttp.onreadystatechange=function() {
     if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-      //console.log("xmlhttp.responseText " + xmlhttp.responseText);
-      xml = (new DOMParser()).parseFromString(xmlhttp.responseText, "text/xml");
-      // x=xmlhttp.responseXML.documentElement.getElementsByTagName("CD");
-      if (xml) {
-        console.log(xml.documentElement);
-      } else {
-        console.log("xml null");
-      }
-      x=xml.getElementsByClassName("thedetial");
-      txt = "1.0";
-      if (x) {
-        console.log(x.length);
-      } else {
-        console.log("null");
-      }
-      //for (i=0;i<x.length;i++) {
-      //  txt=txt + "<tr>" +  xx[i].firstChild.nodeValue + "</tr>";
-      //}
-      document.getElementById('txtCDInfo').innerHTML = txt;
-      //document.getElementById('txtCDInfo').innerHTML=xmlhttp.responseText;
+      /*txt = xmlhttp.responseText.split("</head>");*/
+      /*console.log ("split " + txt.length);*/
+      /**//*console.log("xmlhttp.responseText " + txt[1]);*/
+      /*xml = (new DOMParser()).parseFromString(txt[1], "text/xml");*/
+      /*// x=xmlhttp.responseXML.documentElement.getElementsByTagName("CD");*/
+      /*if (xml) {*/
+      /*console.log(xml.documentElement);*/
+      /*} else {*/
+      /*console.log("xml null");*/
+      /*}*/
+      /*x=xml.documentElement.getElementsByClassName("thedetial");*/
+      /*if (x) {*/
+      /*console.log(x.length);*/
+      /*} else {*/
+      /*console.log("null");*/
+      /*}*/
+      /*for (i=0;i<x.length;i++) {*/
+      /*txt=txt + "<tr>" +  xx[i].firstChild.nodeValue + "</tr>";*/
+      /*document.getElementById('fundInfo').innerHTML = txt[1];*/
+      document.getElementById('fundInfo').innerHTML = xmlhttp.responseText;
     }
   };
   xmlhttp.open("GET",url,true);
@@ -39,7 +39,13 @@ function loadXMLDoc(url)
 }
 
 $(document).ready(function() {
-  $("#btnLoad").click(function() {
-    loadXMLDoc('https://direct.aia.co.th/btob/FundQueryServlet?actionType=show');
-  });
+    /*$("#btnLoad").click(function() {*/
+  loadXMLDoc('https://direct.aia.co.th/btob/FundQueryServlet?actionType=show');
+    /*});*/
+    $("#aialink").click(function() {
+      chrome.tabs.create({
+        'url':'https://portal.aia.co.th/futuregoals/sec/portal/public/fund-selection/fund-price',
+        'selected':true
+      });
+    });
 });

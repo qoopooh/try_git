@@ -1,0 +1,37 @@
+<style>
+
+.thtitle {font-family: "Tahoma";color: #336699; font-size: 17px;  }
+
+.thdetail { font-family: "Tahoma";font-size: 11px; }
+
+.thdetails { font-family: "Tahoma";font-size: 12px; }
+
+.thcontent {  font-family: "Tahoma"; font-size: 12px}
+
+.thsubhead {  font-family: "Tahoma"; font-size: 12px; font-weight: bold; color: #000066}
+
+.thfaq {  font-family: "Tahoma"; font-size: 13px; font-weight: bold; color: #009900}
+
+.thfooter {  font-family: "Tahoma"; font-size: 11px}
+
+.ethfooter {  font-family: "Tahoma"; font-size: 11px}
+
+.form-blue { font-family: "Tahoma";border-width: 1px; border-style: solid; border-color: #666EB0 }
+
+.details {  font-family: "Tahoma";font-size: 12px;}
+
+.smalls { font-family: "Tahoma";font-size: 5px; }
+
+.esmalls { font-family: "Tahoma";font-size:12px;}
+
+.menu:hover {font-family: "Tahoma";color: #0066CC;  font-size: 11px;  }
+
+.thpartner {  font-family: "Tahoma"; font-size: 12px; color: #000099; font-style: normal; font-weight: normal; text-decoration: none}
+
+.thparter {  font-family: "Tahoma"; font-size: 16px; font-style: normal; font-weight: normal; color: #000099}
+
+body, table, tr, th, p { font-family: "Tahoma"; font-size: 12px; }
+.tblHeader { font-family: "Tahoma"; font-size: 13px; color:#FFFFFF; font-weight: bold; background-color:"#808080";}
+.header { font-family: "Tahoma"; font-size: 13px; color:#ffffff; font-weight: bold;}
+
+</style>
