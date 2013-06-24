@@ -1,6 +1,6 @@
 {
   "name": "AIA Link",
-  "version": "0.2",
+  "version": "0.3",
   "manifest_version": 2,
 
   "description": "Check online status of AIA Open-Ended Mutual Funds",
@@ -16,6 +16,6 @@
     "tabs",
     "https://portal.aia.co.th/",
     "https://direct.aia.co.th/"
-  ],
+  ]
 }
 
