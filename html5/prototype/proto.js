@@ -21,7 +21,8 @@ function Student(gender) {
   this.gender = gender;
 }
 
-Student.prototype = new Person();
+/*Student.prototype = new Person();*/
+Student.prototype = Object.create(Person.prototype);
 Student.prototype.constructor = Student;
 
 Student.prototype.sayHello = function() {
@@ -50,11 +51,16 @@ function initStudent() {
   student1.sayHello();
   student1.walk();
   student1.sayGender();
+  console.log(student1 instanceof Person);
+  console.log(student1 instanceof Student);
 }
 
 function init() {
   /*initPerson();*/
-  initStudent();
+  /*initStudent();*/
+  var foo = function(){};
+  console.log('foo is a Function: ' + (foo instanceof Function));
+  console.log('foo.prototype is an Object: ' + (foo.prototype instanceof Object));
 }
 
 $(document).ready(init());
