@@ -98,7 +98,7 @@ function writeCommand(cmd, cb) {
 
 function sendCommand(cmd, callback) {
   if (isEncryptionCommand(cmd)) {
-    var id = getCurrentGateway().phone_id;
+    var id = getCurrentPhoneId();
 
     if ((id !== '0') && !$("#uid").is(":checked")) {
       setPhoneId(id, function() {
@@ -134,8 +134,8 @@ function requestPhoneId(callback) {
       return;
     }
     setPhoneId(res[4], function() {
-      getCurrentGateway().phone_id = res[4];
-      gws.sync();
+      setCurrentPhoneId(res[4]);
+      storeGateways();
       return callback();
     });
   });
@@ -230,43 +230,34 @@ function waitResponse(on) {
 //////////////////////////
 // Gateway
 //////////////////////////
-Gws.CurrentVersion = 2;
 
 var gws = null;
 var current_gateway = "192.168.1.39";
+var command = "E,V";
 
-function Gws() {
-  this.gateways = {};
-  this.gateways[current_gateway] = Gateway(current_gateway);
-  this.version = Gws.CurrentVersion;
-}
-function Gateway(address) {
-  var gw = {
-    id:address,
-    command:"E,V",
-    phone_id:'0'
-    /*date: new Date()*/
-  };
-
-  return gw;
-}
-function getCurrentGateway() {
-  var gw = gws.gateways[current_gateway];
-
-  if (!gw) {
-    gws.gateways[current_gateway] = Gateway(current_gateway);
-    gws.sync();
-    gw = gws.gateways[current_gateway];
-  }
-  return gw;
-}
-function selectGateway(gateway) {
-  $("#ip").val(gateway.id);
-  $("#command").val(gateway.command);
-}
-Gws.prototype.sync = function() {
-  chrome.storage.sync.set({ 'gws': this });
+storeGateways = function() {
+  chrome.storage.sync.set({ 'gws': gws });
   chrome.storage.sync.set({ 'current_gateway': current_gateway });
+  chrome.storage.sync.set({ 'command': command });
+}
+
+function getCurrentPhoneId() {
+  var id = gws[current_gateway].phone_id;
+
+  if (!id) {
+    id = '0';
+    gws[current_gateway].phone_id = id;
+  }
+  return id;
+}
+
+function setCurrentPhoneId(id) {
+  gws[current_gateway].phone_id = id;
+}
+
+function selectGateway() {
+  $("#ip").val(current_gateway);
+  $("#command").val(command);
 }
 
 
@@ -282,7 +273,7 @@ function startJqm() {
       
       if (ip !== current_gateway) {
         current_gateway = ip;
-        getCurrentGateway().command = $("#command").val();
+        command = $("#command").val();
       }
       $("#write-button").click();
     }
@@ -290,7 +281,7 @@ function startJqm() {
   $("#ip").focusout(function (e) {
     if (ip !== current_gateway) {
       current_gateway = ip;
-      getCurrentGateway().command = $("#command").val();
+      command = $("#command").val();
     }
   });
   /*$("#connect").change(function() {*/
@@ -324,18 +315,25 @@ function startJqm() {
       clearTimeout(timer1);
       waitResponse(false);
     });
-    getCurrentGateway().command = cmd;
+    command = cmd;
     gws.sync();
   });
   chrome.storage.sync.get(function(items) {
-    if (items.gws !== undefined && items.gws.version == Gws.CurrentVersion) {
-      gws = items.gws;
-    } else {
-      gws = new Gws();
-    }
-    /*current_gateway = items.current_gateway;*/
+    current_gateway = items.current_gateway;
+    command = items.command;
+    gws = items.gws;
 
-    selectGateway(getCurrentGateway());
+    if (!current_gateway) {
+      current_gateway = "192.168.1.39";
+    }
+    if (!command) {
+      command = "E,L,1";
+    }
+    if (!gws) {
+      gws[current_gateway].phone_id = '0';
+    }
+
+    selectGateway();
     disableOnConnect(false);
   });
 }

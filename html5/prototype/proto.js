@@ -22,7 +22,7 @@ function Student(gender) {
 }
 
 /*Student.prototype = new Person();*/
-Student.prototype = Object.create(Person.prototype);
+Student.prototype = Object.create(Person.prototype); // Replace above line
 Student.prototype.constructor = Student;
 
 Student.prototype.sayHello = function() {
