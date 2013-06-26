@@ -355,6 +355,8 @@ function startJqm() {
       console.log("timeout");
       disableOnConnect(false);
       waitResponse(false);
+      chrome.socket.destroy(sockId);
+      sockId = -1;
     }, 3000);
     sendCommand(cmd, function() {
       clearTimeout(timer1);
