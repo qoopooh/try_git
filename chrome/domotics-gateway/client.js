@@ -50,7 +50,7 @@ function readData(cb) {
         return;
       }
     extractReadMessage(readInfo.data, function(str) {
-      document.getElementById('read-info').innerText = str;
+      document.getElementById('read-info').innerText = str.replace(/\r/g, "");
       document.getElementById('read-count').innerText = ++readCount;
       if (cb) {
         return cb(str);
@@ -325,6 +325,12 @@ function startJqm() {
       $("#write-button").click();
     }
   });
+  $("#ip").focusout(function (e) {
+    if (ip !== current_gateway) {
+      current_gateway = ip;
+      getCurrentGateway().command = $("#command").val();
+    }
+  });
   $("#connect").change(function() {
     if ($(this).is(":checked")) {
       console.log("connecting");
@@ -344,7 +350,14 @@ function startJqm() {
   $("#write-button").click(function() {
     var cmd = $("#command").val();
     waitResponse(true);
+    var timer1 = setTimeout(function() {
+      document.getElementById('read-info').innerText = "Timeout";
+      console.log("timeout");
+      disableOnConnect(false);
+      waitResponse(false);
+    }, 3000);
     sendCommand(cmd, function() {
+      clearTimeout(timer1);
       waitResponse(false);
     });
     getCurrentGateway().command = cmd;
