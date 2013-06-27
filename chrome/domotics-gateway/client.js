@@ -21,19 +21,15 @@ function writeData(data, cb) {
   chrome.socket.write(sockId, buffer, function(writeInfo) {
     var i = writeInfo.bytesWritten;
     console.log("written length:", i);
-    
+
     if (i<0) {
       document.getElementById('write-info').innerText = "-";
       setStatus("Cannot write data");
-      if (cb) {
-        return cb();
-      } else {
-        return;
-      }
+      return cb("-");
+    } else {
+      document.getElementById('write-info').innerText = data;
+      readData(cb);
     }
-
-    document.getElementById('write-info').innerText = data;
-    readData(cb);
   });
 }
 
@@ -44,19 +40,12 @@ function readData(cb) {
   chrome.socket.read(sockId, function(readInfo) {
     console.log("read length:", readInfo.data.byteLength);
     if (!readInfo.data.byteLength)
-      if (cb) {
-        return cb("-");
-      } else {
-        return;
-      }
+      return cb("-");
     extractReadMessage(readInfo.data, function(str) {
       document.getElementById('read-info').innerText = str.replace(/\r/g, "");
       document.getElementById('read-count').innerText = ++readCount;
-      if (cb) {
-        return cb(str);
-      } else {
-        return;
-      }
+      setStatus("-");
+      return cb(str);
     });
   });
 }
@@ -76,20 +65,20 @@ function extractReadMessage(data, callback) {
 
 function writeCommand(cmd, cb) {
   if (f_manualConnect) {
-    writeData($("#command").val(), function(res) {
-      cb(res);
+    writeData($("#command").val(), function(str) {
+      cb(str);
     });
   } else {
     connectTcp(true, function(res) {
       if (res !== 0) {
         console.log("there is some error");
         chrome.socket.disconnect(sockId);
-        return cb(res);
+        return cb("" + res);
       }
-      writeData(cmd, function(res) {
+      writeData(cmd, function(str) {
         console.log("Send without connection");
         connectTcp(false, function() {
-          cb(res);
+          cb(str);
         });
       });
     });
@@ -103,40 +92,42 @@ function sendCommand(cmd, callback) {
     if ((id !== '0') && !$("#uid").is(":checked")) {
       setPhoneId(id, function() {
         writeCommand(encrypt(cmd), function(str) {
-          if (callback)
-            return callback(str);
+          return callback();
         });
       });
     } else {
-      requestPhoneId(function() {
-        writeCommand(encrypt(cmd), function(str) {
-          if (callback)
-            return callback(str);
-        });
+      requestPhoneId(function(success) {
+        if (success)
+          writeCommand(encrypt(cmd), function(str) {
+            return callback();
+          });
+        else
+          return callback();
       });
     }
   } else {
     writeCommand(cmd, function(str) {
-      if (callback)
-        return callback(str);
+      return callback();
     });
   }
 }
 
 function requestPhoneId(callback) {
-  writeCommand("R,U," + uuid, function(res) {
-    if (res.length < 9) {
+  writeCommand("R,U," + uuid, function(str) {
+    if (str[0] === '-')
+      return callback(false);
+    if (str.length < 9) {
       setStatus("R,U response error");
-      return;
+      return callback(false);
     }
-    if (res[6] !== '1') {
+    /*console.log("requestPhoneId", res, res.length);*/
+    if (str[6] !== '1') {
       setStatus("Cannot get Phone ID");
-      return;
+      return callback(false);
     }
-    setPhoneId(res[4], function() {
+    setPhoneId(str[4], function() {
       setCurrentPhoneId(res[4]);
-      storeGateways();
-      return callback();
+      return callback(true);
     });
   });
 }
@@ -231,28 +222,41 @@ function waitResponse(on) {
 // Gateway
 //////////////////////////
 
-var gws = null;
+var gws = {};
 var current_gateway = "192.168.1.39";
 var command = "E,V";
 
-storeGateways = function() {
+storeGateways = function(cb) {
+  current_gateway = $("#ip").val();
+  command = $("#command").val();
   chrome.storage.sync.set({ 'gws': gws });
   chrome.storage.sync.set({ 'current_gateway': current_gateway });
   chrome.storage.sync.set({ 'command': command });
+  if (cb)
+    cb();
 }
 
 function getCurrentPhoneId() {
-  var id = gws[current_gateway].phone_id;
-
-  if (!id) {
-    id = '0';
-    gws[current_gateway].phone_id = id;
+  if (!gws[current_gateway]) {
+    gws[current_gateway] = '0';
+    storeGateways();
   }
-  return id;
+  return gws[current_gateway];
 }
 
 function setCurrentPhoneId(id) {
-  gws[current_gateway].phone_id = id;
+  if (gws[current_gateway] !== id)
+    return;
+  gws[current_gateway] = id;
+  storeGateways();
+}
+
+function setCurrentGateway(cb) {
+  if ($("#ip").val() !== current_gateway) {
+    storeGateways(cb);
+  } else if (cb) {
+    cb();
+  }
 }
 
 function selectGateway() {
@@ -266,23 +270,16 @@ function selectGateway() {
 //////////////////////////
 
 function startJqm() {
-  $("#ip").keypress(function (e) {
+  $("#ip").keypress(function(e) {
     if (e.which === 13) {
       e.preventDefault();
-      var ip = $(this).val();
-      
-      if (ip !== current_gateway) {
-        current_gateway = ip;
-        command = $("#command").val();
-      }
-      $("#write-button").click();
+      setCurrentGateway(function() {
+        $("#write-button").click();
+      });
     }
   });
   $("#ip").focusout(function (e) {
-    if (ip !== current_gateway) {
-      current_gateway = ip;
-      command = $("#command").val();
-    }
+    setCurrentGateway();
   });
   /*$("#connect").change(function() {*/
   /*if ($(this).is(":checked")) {*/
@@ -297,6 +294,9 @@ function startJqm() {
     if (e.which === 13) {
       e.preventDefault();
       $(this).select();
+      if ($(this).val() !== command) {
+        storeGateways();
+      }
       $("#write-button").click();
     }
   });
@@ -304,7 +304,7 @@ function startJqm() {
     var cmd = $("#command").val();
     waitResponse(true);
     var timer1 = setTimeout(function() {
-      document.getElementById('read-info').innerText = "Timeout";
+      setStatus("Timeout");
       console.log("timeout");
       disableOnConnect(false);
       waitResponse(false);
@@ -315,13 +315,14 @@ function startJqm() {
       clearTimeout(timer1);
       waitResponse(false);
     });
-    command = cmd;
-    gws.sync();
+    if (cmd !== command)
+      storeGateways();
   });
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
     command = items.command;
     gws = items.gws;
+    console.log('chrome.storage.sync.get: ' + current_gateway + ':' + command);
 
     if (!current_gateway) {
       current_gateway = "192.168.1.39";
@@ -329,10 +330,11 @@ function startJqm() {
     if (!command) {
       command = "E,L,1";
     }
-    if (!gws) {
-      gws[current_gateway].phone_id = '0';
+    if (!gws[0]) {
+      gws[current_gateway] ='0';
     }
 
+    console.log('gws:', gws);
     selectGateway();
     disableOnConnect(false);
   });
