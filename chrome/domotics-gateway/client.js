@@ -120,13 +120,12 @@ function requestPhoneId(callback) {
       setStatus("R,U response error");
       return callback(false);
     }
-    /*console.log("requestPhoneId", res, res.length);*/
     if (str[6] !== '1') {
       setStatus("Cannot get Phone ID");
       return callback(false);
     }
     setPhoneId(str[4], function() {
-      setCurrentPhoneId(res[4]);
+      setCurrentPhoneId(str[4]);
       return callback(true);
     });
   });
@@ -226,34 +225,30 @@ var gws = {};
 var current_gateway = "192.168.1.39";
 var command = "E,V";
 
-storeGateways = function(cb) {
-  current_gateway = $("#ip").val();
-  command = $("#command").val();
-  chrome.storage.sync.set({ 'gws': gws });
-  chrome.storage.sync.set({ 'current_gateway': current_gateway });
-  chrome.storage.sync.set({ 'command': command });
-  if (cb)
-    cb();
-}
-
 function getCurrentPhoneId() {
+  current_gateway = $("#ip").val();
   if (!gws[current_gateway]) {
     gws[current_gateway] = '0';
-    storeGateways();
   }
+  console.log("getCurrentPhoneId", current_gateway, gws);
   return gws[current_gateway];
 }
 
 function setCurrentPhoneId(id) {
-  if (gws[current_gateway] !== id)
+  if (gws[current_gateway] === id)
     return;
+  current_gateway = $("#ip").val();
   gws[current_gateway] = id;
-  storeGateways();
+  chrome.storage.sync.set({ 'gws': gws });
+  console.log("setCurrentPhoneId", current_gateway, id, gws);
 }
 
 function setCurrentGateway(cb) {
   if ($("#ip").val() !== current_gateway) {
-    storeGateways(cb);
+    current_gateway = $("#ip").val();
+    chrome.storage.sync.set({ 'current_gateway': current_gateway });
+    if (cb)
+      cb();
   } else if (cb) {
     cb();
   }
@@ -276,6 +271,9 @@ function startJqm() {
       setCurrentGateway(function() {
         $("#write-button").click();
       });
+    } else if (e.which === 96) { // ` undo
+      e.preventDefault();
+      $(this).val(current_gateway);
     }
   });
   $("#ip").focusout(function (e) {
@@ -294,10 +292,10 @@ function startJqm() {
     if (e.which === 13) {
       e.preventDefault();
       $(this).select();
-      if ($(this).val() !== command) {
-        storeGateways();
-      }
       $("#write-button").click();
+    } else if (e.which === 0x60) { // ` undo
+      e.preventDefault();
+      $(this).val(command);
     }
   });
   $("#write-button").click(function() {
@@ -315,14 +313,15 @@ function startJqm() {
       clearTimeout(timer1);
       waitResponse(false);
     });
-    if (cmd !== command)
-      storeGateways();
+    if (cmd !== command) {
+      command = cmd;
+      chrome.storage.sync.set({ 'command': cmd });
+    }
   });
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
     command = items.command;
-    gws = items.gws;
-    console.log('chrome.storage.sync.get: ' + current_gateway + ':' + command);
+    gws = items.gws; // comment out to clear storage
 
     if (!current_gateway) {
       current_gateway = "192.168.1.39";
@@ -330,13 +329,11 @@ function startJqm() {
     if (!command) {
       command = "E,L,1";
     }
-    if (!gws[0]) {
-      gws[current_gateway] ='0';
-    }
 
-    console.log('gws:', gws);
     selectGateway();
     disableOnConnect(false);
+    console.log('chrome.storage.sync.get: ' + current_gateway + ':' + command);
+    console.log('gws:', gws);
   });
 }
 
