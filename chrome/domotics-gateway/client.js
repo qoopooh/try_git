@@ -3,6 +3,7 @@ var readCount = 0;
 var IP = "192.168.1.101";
 var PORT = 1470;
 var f_manualConnect = false;
+var f_zero = false;
 
 /**
   * write data(string)
@@ -317,6 +318,12 @@ function startJqm() {
       command = cmd;
       chrome.storage.sync.set({ 'command': cmd });
     }
+  });
+  $("#zero").change(function() {
+    if ($(this).is(":checked"))
+      f_zero = true;
+    else
+      f_zero = false;
   });
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
