@@ -3,7 +3,7 @@ var read_string = "";
 var read_count = 0;
 var previous_position = 0;
 var position_count = 0;
-var readBuffSize = 24;
+var readBuffSize = 128;
 var readBuff = new ArrayBuffer(readBuffSize);
 var readArray = new Uint8Array(readBuff);
 var readIndex = 0;
@@ -40,23 +40,24 @@ function onRead(readInfo) {
     return;
   }
   var uint8View = new Uint8Array(readInfo.data);
+  var len = uint8View.length;
 
-  if (!uint8View.length) {
+  if (!len) {
     console.log('read null');
     var timer1 = setTimeout(function() {
       chrome.serial.read(conn_id, 1, onRead);
-    }, 300);
+    }, 400);
     return;
   }
-  if (readIndex < readBuffSize) {
+  setPosition(uint8View[0]);
+  if (readIndex + len < readBuffSize) {
     readArray.set(uint8View, readIndex);
-    ++readIndex;
+    readIndex += len;
   } else {
-    /*for (var i = 0; i < readBuffSize; i++) {*/
-    /*console.log(readArray[i].toString(16));*/
-    /*}*/
+    for (var i = 0; i < readBuffSize; i++) {
+      console.log(readArray[i].toString(16));
+    }
     log(ab2str(readBuff));
-    /*log('count');*/
     readIndex = 0;
   }
 
@@ -188,7 +189,7 @@ function setPosition(position) {
     previous_position = position;
     if (++position_count > 20) {
       position_count = 0;
-      log('pos ' + position);
+      /*log('pos ' + position);*/
     }
   }
 };
