@@ -11,6 +11,10 @@ function writeData(data) {
   var buffer = new ArrayBuffer(data.length + 1);
   var uint8View = new Uint8Array(buffer);
 
+  if (conn_id === -1) {
+    console.log('No connection to write');
+    return;
+  }
   console.log(data);
   var i=0;
   for (; i<data.length; i++) {
@@ -27,7 +31,7 @@ function writeData(data) {
  * designed for read 1 by 1
  */
 function onRead(readInfo) {
-  if (!conn_id) {
+  if (conn_id === -1) {
     return;
   }
   var uint8View = new Uint8Array(readInfo.data);
@@ -54,25 +58,17 @@ function onRead(readInfo) {
   chrome.serial.read(conn_id, 1, onRead);
 };
 
-function onOpen(openInfo) {
-  conn_id = openInfo.connectionId;
-  if (conn_id == -1) {
-    setStatus('Could not open');
-    return;
-  }
-  setStatus('Connected');
-
-  setPosition(0);
-  chrome.serial.read(conn_id, 1, onRead);
-};
-
 function setStatus(status) {
   document.getElementById('status').innerText = status;
 }
 
 function buildPortPicker(ports) {
   var eligiblePorts = ports.filter(function(port) {
-    return !port.match(/[Bb]luetooth/);
+    if (port.match(/[Bb]luetooth/))
+      return false;
+    else if (port.match(/cu./)) // Mac
+      return false;
+    return true;
   });
 
   var portPicker = document.getElementById('port-picker');
@@ -84,20 +80,47 @@ function buildPortPicker(ports) {
     ++portcount;
   });
   portPicker.selectedIndex = portcount;
-
-  portPicker.onchange = function() {
-    if (conn_id != -1) {
-      chrome.serial.close(conn_id, openSelectedPort);
-      return;
-    }
-    openSelectedPort();
-  };
 }
 
+function onOpen(openInfo) {
+  conn_id = openInfo.connectionId;
+  if (!conn_id) {
+    setStatus('Could not open');
+    return;
+  }
+  console.log('Connected', conn_id);
+  setStatus('Connected');
+
+  setPosition(0);
+  chrome.serial.read(conn_id, 1, onRead);
+};
+
 function openSelectedPort() {
+  if (conn_id !== -1) {
+    console.log("openSelectedPort", conn_id);
+    return;
+  }
   var portPicker = document.getElementById('port-picker');
+  if (!portPicker.length) {
+    console.log("there is no port");
+    return;
+  }
+  console.log("portPicker", portPicker, portPicker.length);
   var selectedPort = portPicker.options[portPicker.selectedIndex].value;
-  chrome.serial.open(selectedPort, { bitrate: 38400 }, onOpen);
+
+  console.log("selectedPort", selectedPort);
+  chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
+}
+function closePort() {
+  if (conn_id === -1) {
+    console.log("closePort", conn_id);
+    return;
+  }
+  console.log("closing", conn_id);
+  chrome.serial.close(conn_id, function() {
+    console.log("closed", conn_id);
+    conn_id = -1;
+  });
 }
 
 function ab2str(buf) {
@@ -166,15 +189,33 @@ function init() {
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
   });
+  $("#btnRefresh").click(function() {
+    var select = document.getElementById("port-picker");
+    var length = select.options.length;
+    for (i = 0; i < length; i++) {
+      select.options[i] = null;
+    }
+    onload();
+  });
+  $("#btnOpen").click(function() {
+    openSelectedPort();
+  });
+  $("#btnClose").click(function() {
+    closePort();
+  });
+  $("#port-picker").change(function() {
+    /*closePort(openSelectedPort);*/
+    closePort();
+  });
+
   $("#messagewindow").text('Start: ' + dateToString());
   resizeMessageWindow();
 }
 
 onload = function() {
-
   chrome.serial.getPorts(function(ports) {
     buildPortPicker(ports)
-    openSelectedPort();
+    /*openSelectedPort();*/
   });
 };
 
