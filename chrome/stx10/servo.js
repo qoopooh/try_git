@@ -1,8 +1,12 @@
-var conn_id = -1;
+var conn_id = 0;
 var read_string = "";
 var read_count = 0;
 var previous_position = 0;
 var position_count = 0;
+var readBuffSize = 24;
+var readBuff = new ArrayBuffer(readBuffSize);
+var readArray = new Uint8Array(readBuff);
+var readIndex = 0;
 
 /**
   * write data + return key
@@ -11,7 +15,7 @@ function writeData(data) {
   var buffer = new ArrayBuffer(data.length + 1);
   var uint8View = new Uint8Array(buffer);
 
-  if (conn_id === -1) {
+  if (!conn_id) {
     console.log('No connection to write');
     return;
   }
@@ -31,27 +35,38 @@ function writeData(data) {
  * designed for read 1 by 1
  */
 function onRead(readInfo) {
-  if (conn_id === -1) {
+  if (!conn_id) {
     return;
   }
   var uint8View = new Uint8Array(readInfo.data);
   var ch = uint8View[0];
 
   if (!uint8View.length) {
+    console.log('read null');
     chrome.serial.read(conn_id, 1, onRead);
     return;
   }
-  var value = uint8View[0] - '0'.charCodeAt(0);
-  setPosition(value);
-
-  if (ch !== 0x0d) {
-    read_string += String.fromCharCode(ch);
+  if (readIndex + 1 < readBuffSize) {
+    readArray.set(ch, readIndex);
+    ++readIndex;
   } else {
-    console.log("read_string: ", read_string);
-    document.getElementById('read-info').innerText = read_string;
-    document.getElementById('read-count').innerText = ++read_count;
-    read_string = "";
+    for (var i = 0; i < readBuffSize; i++) {
+      console.log(readBuff[i]);
+    }
+    readIndex = 0;
   }
+
+  /*var value = uint8View[0] - '0'.charCodeAt(0);*/
+  /*setPosition(value);*/
+
+  /*if (ch !== 0x0d) {*/
+  /*read_string += String.fromCharCode(ch);*/
+  /*} else {*/
+  /*console.log("read_string: ", read_string);*/
+  /*document.getElementById('read-info').innerText = read_string;*/
+  /*document.getElementById('read-count').innerText = ++read_count;*/
+  /*read_string = "";*/
+  /*}*/
 
   console.log("onRead size: ", uint8View.length);
   // Keep on reading.
@@ -84,7 +99,7 @@ function buildPortPicker(ports) {
 
 function onOpen(openInfo) {
   conn_id = openInfo.connectionId;
-  if (!conn_id) {
+  if (conn_id < 1) {
     setStatus('Could not open');
     return;
   }
@@ -96,7 +111,7 @@ function onOpen(openInfo) {
 };
 
 function openSelectedPort() {
-  if (conn_id !== -1) {
+  if (conn_id) {
     console.log("openSelectedPort", conn_id);
     return;
   }
@@ -112,14 +127,14 @@ function openSelectedPort() {
   chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
 }
 function closePort() {
-  if (conn_id === -1) {
+  if (!conn_id) {
     console.log("closePort", conn_id);
     return;
   }
   console.log("closing", conn_id);
   chrome.serial.close(conn_id, function() {
     console.log("closed", conn_id);
-    conn_id = -1;
+    conn_id = 0;
   });
 }
 
@@ -195,6 +210,7 @@ function init() {
     for (i = 0; i < length; i++) {
       select.options[i] = null;
     }
+    console.log("refresh");
     onload();
   });
   $("#btnOpen").click(function() {
