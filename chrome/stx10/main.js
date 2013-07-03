@@ -245,6 +245,12 @@ function resizeMessageWindow() {
   $("#image").css({ left: bodywidth - 90 });
 }
 
+function disableButton(open) {
+  $('#btnRefresh').prop('disabled', open);
+  $('#btnOpen').prop('disabled', open);
+  $('#btnClose').prop('disabled', !open);
+}
+
 function init() {
   $("#command").keypress(function (e) {
     if (e.which === 13) {
@@ -265,9 +271,11 @@ function init() {
   });
   $("#btnOpen").click(function() {
     openSelectedPort();
+    disableButton(true);
   });
   $("#btnClose").click(function() {
     closePort();
+    disableButton(false);
   });
   $("#btnStart").click(function() {
     log("Start");

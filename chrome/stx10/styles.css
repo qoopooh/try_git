@@ -45,6 +45,8 @@ background-color:#dfdfdf;
 }.css3button:active {
 position:relative;
 top:1px;
+}.css3button:disable {
+  background-color: blue;
 }
 
 #port-picker,
