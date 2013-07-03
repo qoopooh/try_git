@@ -35,30 +35,28 @@ var payloadBuffSize = 250
 var payloadBuff = new ArrayBuffer(payloadBuffSize);
 var payload = new Uint8Array(payloadBuff);
 
-function extractPackage(arr, idx) {
+function extractPackage(arr, idx, cb) {
   if (idx < 10)
-    return;
+    return cb();
   if ((arr[0] !== 0x41) || (arr[1] !== 0x41) || (arr[2] !== 0x45) || (arr[3] !== 0x01))
-    return;
+    return cb();
   if (arr[6] !== 0x02)
-    return;
+    return cb();
   len = arr[7];
-  console.log("Packet.Length", len);
   if (len < 1) {
     if (arr[8] !== 0x04)
-      return;
+      return cb();
     if (isSum(arr, 10)) { // not test
       cmd = (arr[4] << 8) | arr[5];
       payloadLen = len;
 
-      if (idx > 10)
-        extractPackage(arr.subarray(10), idx - 10);
       console.log("cmd", cmd.toString(16));
-      console.log("payloadLen", payloadLen);
+      if (idx > 10)
+        extractPackage(arr.subarray(10), idx - 10, cb);
     }
   } else {
     if (arr[8] !== 0x03)
-      return;
+      return cb();
     payload.set(arr.subarray(9, len), 0);
     var payloadStr = "";
     for (var i = 0; i < len; ++i) {
@@ -70,19 +68,18 @@ function extractPackage(arr, idx) {
     }
     console.log('payloadStr', payloadStr);
     if (arr[9 + len] !== 0x04)
-      return;
+      return cb();
     var pkgsize = 11 + len;
     if (isSum(arr, pkgsize)) {
       cmd = (arr[4] << 8) | arr[5];
       payloadLen = len;
 
-      if (idx > pkgsize)
-        extractPackage(arr.subarray(pkgsize), idx - pkgsize);
       console.log("cmd", cmd.toString(16));
-      console.log("payloadLen", payloadLen);
+      if (idx > pkgsize)
+        extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
     }
   }
-
+  cb();
 }
 
 function isSum(arr, idx) {
@@ -147,6 +144,14 @@ function getSoftwareRevision(cb) {
 
 function inventorySingle(cb) {
   var buf = buildPackage(Command.InventorySingle, 0);
+  cb(buf);
+}
+
+function inventoryCyclic(on, cb) {
+  if (on)
+    var buf = buildPackage(Command.InventoryCyclic, 1, new Uint8Array([1]));
+  else
+    var buf = buildPackage(Command.InventoryCyclic, 1, new Uint8Array([0]));
   cb(buf);
 }
 
