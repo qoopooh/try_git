@@ -47,7 +47,7 @@ function extractPackage(arr, idx) {
   if (len < 1) {
     if (arr[8] !== 0x04)
       return;
-    if (checksum(arr, idx)) {
+    if (isSum(arr, idx)) {
       cmd = (arr[4] << 8) | arr[5];
       console.log("cmd", cmd.toString(16));
       payloadLen = len;
@@ -68,7 +68,7 @@ function extractPackage(arr, idx) {
     console.log('payloadStr', payloadStr);
     if (arr[9 + len] !== 0x04)
       return;
-    if (checksum(arr, idx)) {
+    if (isSum(arr, idx)) {
       cmd = (arr[4] << 8) | arr[5];
       console.log("cmd", cmd.toString(16));
       payloadLen = len;
@@ -78,18 +78,63 @@ function extractPackage(arr, idx) {
 
 }
 
-function checksum(arr, idx) {
-  var sum = 0;
+function isSum(arr, idx) {
   var len = idx - 1;
+  var sum = checksum(arr, len);
+
+  console.log("Checksum", sum === arr[len]);
+  if (sum === arr[len]) {
+    return true;
+  }
+  return false;
+}
+
+function checksum(arr, len) {
+  var sum = 0;
+
   for (var i = 0; i < len; ++i) {
     sum ^= arr[i];
   }
-  console.log("Checksum", sum === arr[len]);
-  if (sum === arr[len]) {
-    return false;
-  }
-  return true;
+  console.log('sum', sum.toString(16));
+  return sum;
 }
 
-function 
+function buildPackage(cmd, len, payload) {
+  var bufLen = 10;
+  if (payload)
+    bufLen = payload.length + 11;
+  var buf = new ArrayBuffer(bufLen);
+  var arr = new Uint8Array(buf);
+  var cmd1 = cmd >> 8;
+  var cmd2 = cmd & 0x00ff;
+
+  arr.set([0x41, 0x41, 0x45, 0x01, cmd1, cmd2, 0x02, len]);
+  if (len) {
+    arr.set(new Uint8Array([0x03]), 8);
+    arr.set(payload, 9);
+    len += 9;
+  } else {
+    len = 8;
+  }
+  arr.set(new Uint8Array([0x04]), len);
+  ++len;
+  arr.set(new Uint8Array([checksum(arr, len)]), len);
+
+  var build = "";
+  for (var i = 0; i < bufLen; ++i) {
+    var val = arr[i];
+    if (val < 10)
+      build += '0' + val;
+    else
+      build += val.toString(16);
+  }
+  console.log('build', build);
+
+  return buf;
+}
+
+function getSoftwareRevision(cb) {
+  var buf = buildPackage(Command.GetSoftwareRevision, 0);
+  cb(buf);
+}
 

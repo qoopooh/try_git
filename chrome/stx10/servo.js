@@ -32,6 +32,16 @@ function writeData(data) {
   });
 }
 
+function writeArrayBuffer(buf) {
+  if (!conn_id) {
+    console.log('No connection to write');
+    return;
+  }
+  chrome.serial.write(conn_id, buf, function() {
+    document.getElementById('write-info').innerText = ab2hex(buf);
+  });
+}
+
 /**
  * designed for read 1 by 1
  */
@@ -45,6 +55,11 @@ function onRead(readInfo) {
 
   if (!len) {
     console.log('read null');
+    extractPackage(readArray, readIndex);
+    if (readIndex) {
+      log(u82hex(readArray.subarray(0, readIndex)));
+      readIndex = 0;
+    }
     var timer1 = setTimeout(function() {
       chrome.serial.read(conn_id, 1, onRead);
     }, 250);
@@ -66,13 +81,12 @@ function onRead(readInfo) {
   chrome.serial.read(conn_id, 64, onRead);
   clearTimeout(timeoutReadBuffer);
   timeoutReadBuffer = setTimeout(function() {
-      /*for (var i = 0; i < readIndex; i++) {*/
-      /*console.log(readArray[i].toString(16));*/
-      /*}*/
-    log(u82str(readArray.subarray(0, readIndex)));
     console.log("timeout", readIndex);
     extractPackage(readArray, readIndex);
-    readIndex = 0;
+    if (readIndex) {
+      log(u82hex(readArray.subarray(0, readIndex)));
+      readIndex = 0;
+    }
   }, 1000);
 };
 
@@ -153,12 +167,30 @@ function closePort() {
 }
 
 function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint8Array(buf));
+  return u82str(new Uint8Array(buf));
 }
+
 function u82str(uint) {
   return String.fromCharCode.apply(null, uint);
 }
 
+function ab2hex(buf) {
+  return u82hex(new Uint8Array(buf));
+}
+
+function u82hex(arr) {
+  var hex = "";
+  
+  for (var i = 0, len = arr.length; i < len; ++i) {
+    if (arr[i] < 10) {
+      hex += '0' + arr[i];
+    } else {
+      hex += arr[i].toString(16).toUpperCase();
+    }
+  }
+
+  return hex;
+}
 function zeroPad(number) {
   return (number < 10) ? '0' + number : number;
 }
@@ -241,6 +273,9 @@ function init() {
   });
   $("#btnSingle").click(function() {
     log("Single");
+    getSoftwareRevision(function (buf) {
+      writeArrayBuffer(buf);
+    });
   });
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
