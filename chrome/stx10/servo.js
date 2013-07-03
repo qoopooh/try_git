@@ -54,7 +54,7 @@ function onRead(readInfo) {
   var len = uint8View.length;
 
   if (!len) {
-    console.log('read null');
+    console.log('read null', readIndex);
     extractPackage(readArray, readIndex);
     if (readIndex) {
       log(u82hex(readArray.subarray(0, readIndex)));
@@ -273,7 +273,7 @@ function init() {
   });
   $("#btnSingle").click(function() {
     log("Single");
-    getSoftwareRevision(function (buf) {
+    inventorySingle(function (buf) {
       writeArrayBuffer(buf);
     });
   });
@@ -281,7 +281,6 @@ function init() {
     $("#messagewindow").text("");
   });
   $("#port-picker").change(function() {
-    /*closePort(openSelectedPort);*/
     closePort();
   });
 

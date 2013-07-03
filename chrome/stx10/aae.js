@@ -47,10 +47,13 @@ function extractPackage(arr, idx) {
   if (len < 1) {
     if (arr[8] !== 0x04)
       return;
-    if (isSum(arr, idx)) {
+    if (isSum(arr, 10)) { // not test
       cmd = (arr[4] << 8) | arr[5];
-      console.log("cmd", cmd.toString(16));
       payloadLen = len;
+
+      if (idx > 10)
+        extractPackage(arr.subarray(10), idx - 10);
+      console.log("cmd", cmd.toString(16));
       console.log("payloadLen", payloadLen);
     }
   } else {
@@ -68,10 +71,14 @@ function extractPackage(arr, idx) {
     console.log('payloadStr', payloadStr);
     if (arr[9 + len] !== 0x04)
       return;
-    if (isSum(arr, idx)) {
+    var pkgsize = 11 + len;
+    if (isSum(arr, pkgsize)) {
       cmd = (arr[4] << 8) | arr[5];
-      console.log("cmd", cmd.toString(16));
       payloadLen = len;
+
+      if (idx > pkgsize)
+        extractPackage(arr.subarray(pkgsize), idx - pkgsize);
+      console.log("cmd", cmd.toString(16));
       console.log("payloadLen", payloadLen);
     }
   }
@@ -135,6 +142,11 @@ function buildPackage(cmd, len, payload) {
 
 function getSoftwareRevision(cb) {
   var buf = buildPackage(Command.GetSoftwareRevision, 0);
+  cb(buf);
+}
+
+function inventorySingle(cb) {
+  var buf = buildPackage(Command.InventorySingle, 0);
   cb(buf);
 }
 
