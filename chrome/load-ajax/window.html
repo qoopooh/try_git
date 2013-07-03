@@ -12,6 +12,38 @@
   <div id='aialink'>
   <a href="https://portal.aia.co.th/futuregoals/sec/portal/public/fund-selection/fund-price">AIA Thailand Asset Accumulation</a>
   </div>
+  <ul>
+  <li>EAS command
+  <table>
+    <tr><th>   Byte</th><th>       0</th><th>         1</th><th> 2</th><th>   3  </th><th>   4 .. 7</th></tr>
+    <tr><th>Content</th><td>0x45(ID)</td><td>10(length)</td><td> 1</td><td>eas_on</td><td>access pw</td></tr>
+  </table>
+  </li>
+  <li>Set/Reset protect
+  <table>
+    <tr><th>   Byte</th><th>       0</th><th>         1</th><th> 2</th><th>   3  </th><th>   4 .. 7</th></tr>
+    <tr><th>Content</th><td>0x45(ID)</td><td>10(length)</td><td> 2</td><td>set_protect</td><td>access pw</td></tr>
+  </table>
+  </li>
+  <li>Calibrate
+  <table>
+    <tr><th>   Byte</th><th>       0</th><th>         1</th><th> 2</th><th>   3  </th><th>   4 .. 7</th></tr>
+    <tr><th>Content</th><td>0x45(ID)</td><td>10(length)</td><td> 8</td><td>not_used</td><td>access pw</td></tr>
+  </table>
+  </li>
+  <li>Change Config
+  <table>
+    <tr><th>   Byte</th><th>       0</th><th>         1</th><th> 2</th><th>   3  </th><th>   4 .. 7  </th><th> 8..9 </th></tr>
+    <tr><th>Content</th><td>0x45(ID)</td><td>10(length)</td><td> 9</td><td>not_used</td><td>access pw</td><td>config</td></tr>
+  </table>
+  where config is a mask of bit which should be flipped inside config word (XORed).
+  </li>
+  </ul>
+  To all the reader replies with this:
+  <table>
+    <tr><th>   Byte</th><th>       0</th><th>        1</th><th>     2</th><th>        3 .. 4</th></tr>
+    <tr><th>Content</th><td>0x46(ID)</td><td>5(length)</td><td>status</td><td>config word (only change config)</td></tr>
+  </table>
 
 </body>
 </html>

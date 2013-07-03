@@ -50,7 +50,6 @@ function onRead(readInfo) {
     }, 250);
     return;
   }
-  /*console.log(uint8View[0]);*/
   if (readIndex + len >= readBuffSize) {
     for (var i = 0; i < len; i++) {
       console.log(uint8View[i].toString(16));
@@ -62,30 +61,17 @@ function onRead(readInfo) {
   readIndex += len;
   readCount += len;
   document.getElementById('read-count').innerText = readCount.toString();
-
-  /*var value = uint8View[0] - '0'.charCodeAt(0);*/
-  /*setPosition(value);*/
-
-  /*if (ch !== 0x0d) {*/
-  /*read_string += String.fromCharCode(ch);*/
-  /*} else {*/
-  /*console.log("read_string: ", read_string);*/
-  /*document.getElementById('read-info').innerText = read_string;*/
-  /*document.getElementById('read-count').innerText = ++readCount;*/
-  /*read_string = "";*/
-  /*}*/
-
-  /*console.log("onRead size: ", uint8View.length);*/
   console.log('get', len);
   // Keep on reading.
   chrome.serial.read(conn_id, 64, onRead);
   clearTimeout(timeoutReadBuffer);
   timeoutReadBuffer = setTimeout(function() {
-    for (var i = 0; i < readIndex; i++) {
-      console.log(readArray[i].toString(16));
-    }
+      /*for (var i = 0; i < readIndex; i++) {*/
+      /*console.log(readArray[i].toString(16));*/
+      /*}*/
     log(u82str(readArray.subarray(0, readIndex)));
     console.log("timeout", readIndex);
+    extractPackage(readArray, readIndex);
     readIndex = 0;
   }, 1000);
 };
@@ -198,16 +184,16 @@ function dateToString(d) {
 }
 
 function setPosition(position) {
-  /*var rotation = position * 18.0;*/
-  /*document.getElementById('image').style.webkitTransform =*/
-  /*'rotateZ(' + rotation + 'deg)';*/
-  /*if (position !== previous_position) {*/
-  /*previous_position = position;*/
-  /*if (++position_count > 20) {*/
-  /*position_count = 0;*/
-  /**//*log('pos ' + position);*/
-  /*}*/
-  /*}*/
+  var rotation = position * 18.0;
+  document.getElementById('image').style.webkitTransform =
+    'rotateZ(' + rotation + 'deg)';
+  if (position !== previous_position) {
+    previous_position = position;
+    if (++position_count > 20) {
+      position_count = 0;
+      /*log('pos ' + position);*/
+    }
+  }
 };
 
 function log(msg) {
