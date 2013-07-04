@@ -228,6 +228,9 @@ var command = "E,V";
 
 function getCurrentPhoneId() {
   current_gateway = $("#ip").val();
+  if (!gws) {
+    gws = {};
+  }
   if (!gws[current_gateway]) {
     gws[current_gateway] = '0';
   }
