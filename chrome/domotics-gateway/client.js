@@ -259,11 +259,19 @@ function selectGateway() {
   $("#ip").val(current_gateway);
   $("#command").val(command);
 }
-
-
 //////////////////////////
 // Gateway
 //////////////////////////
+
+
+function clearStorage() {
+  chrome.storage.sync.set({
+      /*'myUuid': '',*/
+    'command': '',
+    'current_gateway': '',
+    'gws': {}
+  });
+}
 
 function startJqm() {
   $("#ip").keypress(function(e) {
@@ -325,6 +333,7 @@ function startJqm() {
     else
       f_zero = false;
   });
+  /*clearStorage();*/
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
     command = items.command;

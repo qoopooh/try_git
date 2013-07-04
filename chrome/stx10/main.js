@@ -1,36 +1,10 @@
 var conn_id = 0;
-var read_string = "";
-var previous_position = 0;
-var position_count = 0;
 var readBuffSize = 256;
 var readBuff = new ArrayBuffer(readBuffSize);
 var readArray = new Uint8Array(readBuff);
 var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
-
-/**
-  * write data + return key
-  */
-function writeData(data) {
-  var buffer = new ArrayBuffer(data.length + 1);
-  var uint8View = new Uint8Array(buffer);
-
-  if (!conn_id) {
-    console.log('No connection to write');
-    return;
-  }
-  console.log(data);
-  var i=0;
-  for (; i<data.length; i++) {
-    uint8View[i] = data.charCodeAt(i);
-  }
-  uint8View[i] = '\r'.charCodeAt(0);
-
-  chrome.serial.write(conn_id, buffer, function() {
-    document.getElementById('write-info').innerText = data;
-  });
-}
 
 function writeArrayBuffer(buf) {
   if (!conn_id) {
@@ -45,7 +19,6 @@ function writeArrayBuffer(buf) {
 /**
  * designed for read 1 by 1
  */
-var timeoutReadBuffer = 0;
 function onRead(readInfo) {
   if (conn_id < 1 || !f_openport) {
     return;
@@ -57,9 +30,9 @@ function onRead(readInfo) {
     console.log('read null', readIndex);
     extractPackage(readArray, readIndex, function() {
       readIndex = 0;
-      var timer1 = setTimeout(function() {
+      setTimeout(function() {
         chrome.serial.read(conn_id, 1, onRead);
-      }, 250);
+      }, 200);
     });
     return;
   }
@@ -72,10 +45,6 @@ function onRead(readInfo) {
   readIndex += len;
   // Keep on reading.
   chrome.serial.read(conn_id, 64, onRead);
-  clearTimeout(timeoutReadBuffer);
-  timeoutReadBuffer = setTimeout(function() {
-    console.log("timeout", readIndex);
-  }, 1000);
 };
 
 function setStatus(st) {
@@ -110,6 +79,7 @@ function onOpen(openInfo) {
     return;
   }
   console.log('Connected', conn_id);
+  disableButton(f_openport);
 
   setPosition(0);
   readIndex = 0;
@@ -118,8 +88,9 @@ function onOpen(openInfo) {
 };
 
 function openSelectedPort() {
-  setStatus('Connected');
   f_openport = true;
+  setStatus('Connected');
+  log('Opened');
   if (conn_id > 0) {
     console.log("openSelectedPort", conn_id);
     return;
@@ -134,12 +105,11 @@ function openSelectedPort() {
 
   console.log("selectedPort", selectedPort);
   chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
-  /*chrome.serial.open(selectedPort, { bitrate: 38400 }, onOpen);*/
-  /*chrome.serial.open(selectedPort, { bitrate: 9600 }, onOpen);*/
 }
+
 function closePort() {
   f_openport = false;
-  setStatus('Closed');
+  setStatus('Disconnected');
   log('Closed');
   if (conn_id < 1) {
     console.log("closePort", conn_id);
@@ -150,6 +120,7 @@ function closePort() {
     chrome.serial.close(conn_id, function() {
       console.log("closed", conn_id);
       conn_id = 0;
+      disableButton(f_openport);
     });
   });
 }
@@ -207,13 +178,6 @@ function setPosition(position) {
   var rotation = position * 18.0;
   document.getElementById('image').style.webkitTransform =
     'rotateZ(' + rotation + 'deg)';
-  if (position !== previous_position) {
-    previous_position = position;
-    if (++position_count > 20) {
-      position_count = 0;
-      /*log('pos ' + position);*/
-    }
-  }
 };
 
 function log(msg) {
@@ -223,7 +187,15 @@ function log(msg) {
 }
 
 function aaelog(msg) {
+  var dat = msg.split(':');
+
+  if (dat.length < 2) {
+    $("#read-info").text(dat[0]);
+  } else {
+    $("#read-info").text(dat[1]);
+  }
   ++readCount;
+  setPosition(readCount);
   document.getElementById('read-count').innerText = readCount.toString();
   log(msg);
 }
@@ -240,16 +212,14 @@ function disableButton(open) {
   $('#btnRefresh').prop('disabled', open);
   $('#btnOpen').prop('disabled', open);
   $('#btnClose').prop('disabled', !open);
+  $('#btnStart').prop('disabled', !open);
+  $('#btnStop').prop('disabled', !open);
+  $('#btnSingle').prop('disabled', !open);
+  $('#btnHB').prop('disabled', !open);
+  /*$('#readcontrol').prop('disabled', !open); // does not work*/
 }
 
 function init() {
-  $("#command").keypress(function (e) {
-    if (e.which === 13) {
-      e.preventDefault();
-      $(this).select();
-      writeData($(this).val());
-    }
-  });
   $("#btnRefresh").click(function() {
     var select = document.getElementById("port-picker");
     var len = select.options.length;
@@ -262,11 +232,9 @@ function init() {
   });
   $("#btnOpen").click(function() {
     openSelectedPort();
-    disableButton(true);
   });
   $("#btnClose").click(function() {
     closePort();
-    disableButton(false);
   });
   $("#btnStart").click(function() {
     log("Start");

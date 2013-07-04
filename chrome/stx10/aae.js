@@ -31,6 +31,7 @@ var Packet = { 'Start': 0, 'CommandStart': 1, 'Command': 2,
 var pState = Packet.Start;
 var cmd = 0x0000;
 var f_hb = false;
+var hbcount = 0;
 
 function extractPackage(arr, idx, cb) {
   var pkgsize = 10; // smallest posible package
@@ -39,17 +40,20 @@ function extractPackage(arr, idx, cb) {
     return cb();
   if ((arr[0] !== 0x41) || (arr[1] !== 0x41) || (arr[2] !== 0x45)
       || (arr[3] !== 0x01)
-      || (arr[6] !== 0x02))
+      || (arr[6] !== 0x02)) {
     return cb();
+  }
   cmd = (arr[4] << 8) | arr[5];
   len = arr[7];
   console.log("cmd", cmd.toString(16), len);
   if (len < 1) {
-    if (arr[8] !== 0x04)
+    if (arr[8] !== 0x04) {
       return cb();
+    }
   } else {
-    if ((arr[8] !== 0x03) || (arr[9 + len] !== 0x04))
+    if ((arr[8] !== 0x03) || (arr[9 + len] !== 0x04)) {
       return cb();
+    }
     var payload = new Uint8Array(len);
     payload.set(arr.subarray(9, 9 + len));
     pkgsize = 11 + len;
@@ -66,7 +70,6 @@ function extractPackage(arr, idx, cb) {
   });
 }
 
-var hbcount = 0;
 function execReceivingMessage(cmd, len, payload, cb) {
   var msg = "";
   switch (cmd) {
@@ -169,10 +172,12 @@ function inventoryCyclic(on, cb) {
 
 function toggleHeartbeat(cb) {
   f_hb = !f_hb;
-  if (f_hb)
+  if (f_hb) {
     var buf = buildPackage(Command.SetHeartBeat, 1, new Uint8Array([1]));
-  else
+    hbcount = 0;
+  } else {
     var buf = buildPackage(Command.SetHeartBeat, 1, new Uint8Array([0]));
+  }
   cb(buf);
 }
 
