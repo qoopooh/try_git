@@ -33,49 +33,37 @@ var cmd = 0x0000;
 var f_hb = false;
 
 function extractPackage(arr, idx, cb) {
-  if (idx < 10)
+  var pkgsize = 10; // smallest posible package
+
+  if (idx < pkgsize)
     return cb();
-  if ((arr[0] !== 0x41) || (arr[1] !== 0x41) || (arr[2] !== 0x45) || (arr[3] !== 0x01))
+  if ((arr[0] !== 0x41) || (arr[1] !== 0x41) || (arr[2] !== 0x45)
+      || (arr[3] !== 0x01)
+      || (arr[6] !== 0x02))
     return cb();
-  if (arr[6] !== 0x02)
-    return cb();
+  cmd = (arr[4] << 8) | arr[5];
   len = arr[7];
+  console.log("cmd", cmd.toString(16), len);
   if (len < 1) {
     if (arr[8] !== 0x04)
       return cb();
-    if (isSum(arr, 10)) { // not test
-      cmd = (arr[4] << 8) | arr[5];
-      execReceivingMessage(cmd, len, payload, function () {
-        if (idx > pkgsize)
-          extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
-        else
-          cb();
-      });
-
-      console.log("cmd", cmd.toString(16));
-    }
   } else {
-    if (arr[8] !== 0x03)
+    if ((arr[8] !== 0x03) || (arr[9 + len] !== 0x04))
       return cb();
     var payload = new Uint8Array(len);
-    payload.set(arr.subarray(9, len));
-    console.log('arr', u82hex(arr.subarray(0, idx)));
-    console.log('payload', u82hex(payload.subarray(0, len)));
-    if (arr[9 + len] !== 0x04)
-      return cb();
-    var pkgsize = 11 + len;
-    if (isSum(arr, pkgsize)) {
-      cmd = (arr[4] << 8) | arr[5];
-      execReceivingMessage(cmd, len, payload, function () {
-        if (idx > pkgsize)
-          extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
-        else
-          cb();
-      });
-
-      console.log("cmd", cmd.toString(16));
-    }
+    payload.set(arr.subarray(9, 9 + len));
+    pkgsize = 11 + len;
   }
+  /*console.log('arr', u82hex(arr.subarray(0, idx)));*/
+  /*console.log('payload', len, u82hex(payload));*/
+  if (!isSum(arr, pkgsize))
+    return cb();
+  execReceivingMessage(cmd, len, payload, function () {
+    if (idx > pkgsize)
+      extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
+    else
+      return cb();
+  });
 }
 
 var hbcount = 0;
@@ -93,7 +81,11 @@ function execReceivingMessage(cmd, len, payload, cb) {
       break;
     case Command.HearthbeatInterrupt:
       f_hb = true;
-      msg = 'HB:' + ++hbcount;
+      msg = 'HB: ' + ++hbcount;
+      aaelog(msg);
+      break;
+    case Command.InventoryCyclicInterrupt:
+      msg = 'EPC: ' + u82hex(payload.subarray(2));
       aaelog(msg);
       break;
     default:

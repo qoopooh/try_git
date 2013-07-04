@@ -56,10 +56,7 @@ function onRead(readInfo) {
   if (!len) {
     console.log('read null', readIndex);
     extractPackage(readArray, readIndex, function() {
-      if (readIndex) {
-      /*log(u82hex(readArray.subarray(0, readIndex)));*/
-        readIndex = 0;
-      }
+      readIndex = 0;
       var timer1 = setTimeout(function() {
         chrome.serial.read(conn_id, 1, onRead);
       }, 250);
@@ -67,10 +64,6 @@ function onRead(readInfo) {
     return;
   }
   if (readIndex + len >= readBuffSize) {
-    /*for (var i = 0; i < len; i++) {*/
-    /*console.log(uint8View[i].toString(16));*/
-    /*}*/
-    /*log(ab2str(readBuff));*/
     extractPackage(readArray, readIndex, function() {
       readIndex = 0;
     });
@@ -82,12 +75,6 @@ function onRead(readInfo) {
   clearTimeout(timeoutReadBuffer);
   timeoutReadBuffer = setTimeout(function() {
     console.log("timeout", readIndex);
-    /*extractPackage(readArray, readIndex, function() {*/
-    /*if (readIndex) {*/
-    /*log(u82hex(readArray.subarray(0, readIndex)));*/
-    /*readIndex = 0;*/
-    /*}*/
-    /*});*/
   }, 1000);
 };
 
@@ -312,7 +299,7 @@ function init() {
     closePort();
   });
 
-  $("#messagewindow").text('Start: ' + dateToString());
+  $("#messagewindow").html('Start: ' + dateToString() + '<br/>');
   resizeMessageWindow();
 }
 
