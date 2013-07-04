@@ -228,9 +228,6 @@ var command = "E,V";
 
 function getCurrentPhoneId() {
   current_gateway = $("#ip").val();
-  if (!gws) {
-    gws = {};
-  }
   if (!gws[current_gateway]) {
     gws[current_gateway] = '0';
   }
@@ -341,7 +338,9 @@ function startJqm() {
     current_gateway = items.current_gateway;
     command = items.command;
     gws = items.gws; // comment out to clear storage
-
+    if (!gws) {
+      gws = {};
+    }
     if (!current_gateway) {
       current_gateway = "192.168.1.39";
     }
