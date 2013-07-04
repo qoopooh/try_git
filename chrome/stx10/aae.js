@@ -30,10 +30,7 @@ var Packet = { 'Start': 0, 'CommandStart': 1, 'Command': 2,
 
 var pState = Packet.Start;
 var cmd = 0x0000;
-var payloadLen = 0;
-var payloadBuffSize = 250
-var payloadBuff = new ArrayBuffer(payloadBuffSize);
-var payload = new Uint8Array(payloadBuff);
+var f_hb = false;
 
 function extractPackage(arr, idx, cb) {
   if (idx < 10)
@@ -48,36 +45,59 @@ function extractPackage(arr, idx, cb) {
       return cb();
     if (isSum(arr, 10)) { // not test
       cmd = (arr[4] << 8) | arr[5];
-      payloadLen = len;
+      execReceivingMessage(cmd, len, payload, function () {
+        if (idx > pkgsize)
+          extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
+        else
+          cb();
+      });
 
       console.log("cmd", cmd.toString(16));
-      if (idx > 10)
-        extractPackage(arr.subarray(10), idx - 10, cb);
     }
   } else {
     if (arr[8] !== 0x03)
       return cb();
-    payload.set(arr.subarray(9, len), 0);
-    var payloadStr = "";
-    for (var i = 0; i < len; ++i) {
-      var val = payload[i];
-      if (val < 10)
-        payloadStr += '0' + val;
-      else
-        payloadStr += val.toString(16);
-    }
-    console.log('payloadStr', payloadStr);
+    var payload = new Uint8Array(len);
+    payload.set(arr.subarray(9, len));
+    console.log('arr', u82hex(arr.subarray(0, idx)));
+    console.log('payload', u82hex(payload.subarray(0, len)));
     if (arr[9 + len] !== 0x04)
       return cb();
     var pkgsize = 11 + len;
     if (isSum(arr, pkgsize)) {
       cmd = (arr[4] << 8) | arr[5];
-      payloadLen = len;
+      execReceivingMessage(cmd, len, payload, function () {
+        if (idx > pkgsize)
+          extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
+        else
+          cb();
+      });
 
       console.log("cmd", cmd.toString(16));
-      if (idx > pkgsize)
-        extractPackage(arr.subarray(pkgsize), idx - pkgsize, cb);
     }
+  }
+}
+
+var hbcount = 0;
+function execReceivingMessage(cmd, len, payload, cb) {
+  var msg = "";
+  switch (cmd) {
+    case Command.InventorySingle:
+      var tagcount = payload[1];
+      
+      if (tagcount)
+        msg = 'EPC: ' + u82hex(payload.subarray(6));
+      else
+        msg = 'EPC: -';
+      aaelog(msg);
+      break;
+    case Command.HearthbeatInterrupt:
+      f_hb = true;
+      msg = 'HB:' + ++hbcount;
+      aaelog(msg);
+      break;
+    default:
+      break;
   }
   cb();
 }
@@ -152,6 +172,15 @@ function inventoryCyclic(on, cb) {
     var buf = buildPackage(Command.InventoryCyclic, 1, new Uint8Array([1]));
   else
     var buf = buildPackage(Command.InventoryCyclic, 1, new Uint8Array([0]));
+  cb(buf);
+}
+
+function toggleHeartbeat(cb) {
+  f_hb = !f_hb;
+  if (f_hb)
+    var buf = buildPackage(Command.SetHeartBeat, 1, new Uint8Array([1]));
+  else
+    var buf = buildPackage(Command.SetHeartBeat, 1, new Uint8Array([0]));
   cb(buf);
 }
 

@@ -57,7 +57,7 @@ function onRead(readInfo) {
     console.log('read null', readIndex);
     extractPackage(readArray, readIndex, function() {
       if (readIndex) {
-        log(u82hex(readArray.subarray(0, readIndex)));
+      /*log(u82hex(readArray.subarray(0, readIndex)));*/
         readIndex = 0;
       }
       var timer1 = setTimeout(function() {
@@ -77,8 +77,6 @@ function onRead(readInfo) {
   }
   readArray.set(uint8View, readIndex);
   readIndex += len;
-  readCount += len;
-  document.getElementById('read-count').innerText = readCount.toString();
   // Keep on reading.
   chrome.serial.read(conn_id, 64, onRead);
   clearTimeout(timeoutReadBuffer);
@@ -185,7 +183,7 @@ function u82hex(arr) {
   var hex = "";
   
   for (var i = 0, len = arr.length; i < len; ++i) {
-    if (arr[i] < 10) {
+    if (arr[i] < 16) {
       hex += '0' + arr[i];
     } else {
       hex += arr[i].toString(16).toUpperCase();
@@ -235,6 +233,12 @@ function log(msg) {
   $("#messagewindow").append(timeToString() + ' ' + msg + '<br/>');
   var height = $("#messagewindow")[0].scrollHeight;
   $("#messagewindow").scrollTop(height);
+}
+
+function aaelog(msg) {
+  ++readCount;
+  document.getElementById('read-count').innerText = readCount.toString();
+  log(msg);
 }
 
 function resizeMessageWindow() {
@@ -292,6 +296,12 @@ function init() {
   $("#btnSingle").click(function() {
     log("Single");
     inventorySingle(function (buf) {
+      writeArrayBuffer(buf);
+    });
+  });
+  $("#btnHB").click(function() {
+    log("Heartbeat toggle");
+    toggleHeartbeat(function (buf) {
       writeArrayBuffer(buf);
     });
   });
