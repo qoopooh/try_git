@@ -5,10 +5,12 @@ var phone_id = '0';
 var f_debug = false;
 
 // others data will return true
+// check before sending command
 function isEncryptionCommand(data) {
   var code = data[2];
 
-  if ((code == 'U')
+  if ((data[0] == '0')
+      || (code == 'U')
       || (code == 'V')
       || (code == 'N')) {
     return false;
@@ -18,11 +20,12 @@ function isEncryptionCommand(data) {
 
 /*
 Input: ArrayBuffer
+Function: Check receiving message
 */
 function isEncryptedMessage(data) {
 var value = new Uint8Array(data)[0];
 
-  if ((value < 48)
+  if ((value < 49)
       || (value > 57)) {
     return false;
   }
