@@ -84,7 +84,7 @@ function execReceivingMessage(cmd, len, payload, cb) {
       break;
     case Command.HearthbeatInterrupt:
       f_hb = true;
-      msg = 'HB: ' + ++hbcount;
+      msg = 'HB ' + ++hbcount;
       aaelog(msg);
       break;
     case Command.InventoryCyclicInterrupt:

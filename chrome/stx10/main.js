@@ -189,9 +189,7 @@ function log(msg) {
 function aaelog(msg) {
   var dat = msg.split(':');
 
-  if (dat.length < 2) {
-    $("#read-info").text(dat[0]);
-  } else {
+  if (dat.length > 1) {
     $("#read-info").text(dat[1]);
   }
   ++readCount;
