@@ -16,8 +16,6 @@ background:#dddddd;
 
 <form action="">
 First name: <input id="mic" type="text" disabled value="Mickey" /><br>
-Country: <input type="text" value="Disneyland" /><br>
-</form>
 <select id='car' disabled>
   <option value="volvo">Volvo</option>
   <option value="saab">Saab</option>
@@ -28,6 +26,7 @@ Country: <input type="text" value="Disneyland" /><br>
 <textarea id='area' disabled rows="4" cols="50">
 At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies. 
 </textarea>
+</form>
 
 <!--Div and P do not work-->
 <!--<div id='ttt' disabled style="color:#0000FF">-->
@@ -37,9 +36,21 @@ At w3schools.com you will learn how to make a website. We offer free tutorials i
 <!--<p id='parag' disabled>-->
 <!--This is sample paragraph.-->
 <!--</p>-->
-
+<table id="myTable" border="1">
+<tr>
+  <td>cell 1</td>
+  <td>cell 2</td>
+</tr>
+<tr>
+  <td>cell 3</td>
+  <td>cell 4</td>
+</tr>
+</table>
 
 <br/>
+<br/>
+<button type="button" id="irow" disabled onclick="insertFirst()">Insert</button>
+<button type="button" id="drow" disabled onclick="deleteFirst()">Delete</button>
 <br/>
 <button type="button" id="dis" disabled onclick="disableElement(true)">disabled</button>
 <button type="button" id="ena" onclick="disableElement(false)">enabled</button>
@@ -48,9 +59,26 @@ At w3schools.com you will learn how to make a website. We offer free tutorials i
 function disableElement(dis)
 {
   document.getElementById("dis").disabled=dis;
+  document.getElementById("ena").disabled=!dis;
   document.getElementById("mic").disabled=dis;
   document.getElementById("car").disabled=dis;
   document.getElementById('area').disabled=dis;
+  document.getElementById('irow').disabled=dis;
+  document.getElementById('drow').disabled=dis;
+}
+function insertFirst()
+{
+  var table=document.getElementById("myTable");
+  var row=table.insertRow(0);
+  var cell1=row.insertCell(0);
+  var cell2=row.insertCell(1);
+  cell1.innerHTML="New";
+  cell2.innerHTML="New";
+}
+function deleteFirst()
+{
+  var table=document.getElementById("myTable");
+  var row=table.deleteRow(0);
 }
 </script>
 </body>
