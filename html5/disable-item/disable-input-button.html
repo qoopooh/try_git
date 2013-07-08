@@ -16,18 +16,41 @@ background:#dddddd;
 
 <form action="">
 First name: <input id="mic" type="text" disabled value="Mickey" /><br>
-Last name: <input type="text" value="Mouse" /><br>
 Country: <input type="text" value="Disneyland" /><br>
 </form>
-<button type="button" id="dis" onclick="disableElement(true)">Disable</button>
-<button type="button" id="ena" onclick="disableElement(false)">Enable</button>
+<select id='car' disabled>
+  <option value="volvo">Volvo</option>
+  <option value="saab">Saab</option>
+  <option value="mercedes">Mercedes</option>
+  <option value="audi">Audi</option>
+</select>
+<br/>
+<textarea id='area' disabled rows="4" cols="50">
+At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies. 
+</textarea>
+
+<!--Div and P do not work-->
+<!--<div id='ttt' disabled style="color:#0000FF">-->
+<!--<h3>This is a heading in a div element</h3>-->
+<!--<p>This is some text in a div element.</p>-->
+<!--</div>-->
+<!--<p id='parag' disabled>-->
+<!--This is sample paragraph.-->
+<!--</p>-->
+
+
+<br/>
+<br/>
+<button type="button" id="dis" disabled onclick="disableElement(true)">disabled</button>
+<button type="button" id="ena" onclick="disableElement(false)">enabled</button>
 
 <script>
-
 function disableElement(dis)
 {
   document.getElementById("dis").disabled=dis;
   document.getElementById("mic").disabled=dis;
+  document.getElementById("car").disabled=dis;
+  document.getElementById('area').disabled=dis;
 }
 </script>
 </body>
