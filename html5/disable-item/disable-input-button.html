@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style> 
+input[type="text"]:enabled
+{
+background:#ffff00;
+}
+input[type="text"]:disabled
+{
+background:#dddddd;
+}
+</style>
+</head>
+<body>
+
+<form action="">
+First name: <input id="mic" type="text" disabled value="Mickey" /><br>
+Last name: <input type="text" value="Mouse" /><br>
+Country: <input type="text" value="Disneyland" /><br>
+</form>
+<button type="button" id="dis" onclick="disableElement(true)">Disable</button>
+<button type="button" id="ena" onclick="disableElement(false)">Enable</button>
+
+<script>
+
+function disableElement(dis)
+{
+  document.getElementById("dis").disabled=dis;
+  document.getElementById("mic").disabled=dis;
+}
+</script>
+</body>
+</html>
+
