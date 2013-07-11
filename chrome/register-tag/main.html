@@ -1,48 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="jquery-1.9.1.min.js"></script>
   <!--<link rel="stylesheet" href="styles.css">-->
+  <style>
+  .ok { color: green; }
+  .fail { color: red; }
+  </style>
 </head>
 <body>
-  <div id="container">
-    <label>
-      Port:
-      <select id="port-picker"></select>
-      <button type="button" id="btnRefresh" class="css3button">Reload</button>
-      <button type="button" id="btnOpen" class="css3button">Open</button>
-      <button type="button" id="btnClose" class="css3button">Close</button>
-    </label>
 
-    <label>
-      Write:
-      <span id="write-info">-</span>
-    </label>
-    <label>
-      Tag:
-      <span id="read-info">-</span>
-    </label>
-    <label>
-      Read count:
-      <span id="read-count">-</span>
-    </label>
-    <label>
-      Status:
-      <span id="status">Loading</span>
-    </label>
-    <div id='readcontrol'>
-      <button type="button" id="btnStart" class="css3button">Start</button>
-      <button type="button" id="btnStop" class="css3button">Stop</button>
-      <button type="button" id="btnSingle" class="css3button">Single</button>
-      <button type="button" id="btnHB" class="css3button">HB</button>
-      <button type="button" id="btnClear" class="css3button">Clear</button>
-    </div>
-    <div id="messagewindow">
-    <!-- messages -->
-    </div>
-  </div>
+Port:
+<select id="port-picker"></select>
+<button type="button" id="btnRefresh" class="css3button">Reload</button>
+<button type="button" id="btnOpen" class="css3button">Open</button>
+<button type="button" id="btnClose" class="css3button">Close</button>
+
+<!--<div id='write'>-->
+<!--Write:-->
+<!--<span id="write-info">-</span>-->
+<!--</div>-->
+<!--<div id='tag'>-->
+<!--Tag:-->
+<!--<span id="read-info">-</span>-->
+<!--<br/>-->
+<!--Read count:-->
+<!--<span id="read-count">-</span>-->
+<!--</div>-->
+
+<form>
+Product code: <input type="text" id="productcode" value='00.000.000.0'><br>
+Batch number: <input type="text" id="batchnumber" value='LBA001/13'><br>
+Manufacture date: <input type="text" id="mandate" value='03/13'><br>
+Expiration date: <input type="text" id="expdate" value='03/14'><br>
+Quantity: <input type="text" id="quantity" value='9999,999k'><br>
+</form>
+<input type="submit" id="btnSubmit" value="Submit">
+
+<div id='main-status'>
+Status:
+<span id="status" class="ok">Loading</span>
+</div>
+
+<div id='readcontrol'>
+<button type="button" id="btnStart" class="css3button">Start</button>
+<button type="button" id="btnStop" class="css3button">Stop</button>
+<button type="button" id="btnSingle" class="css3button">Single</button>
+<button type="button" id="btnHB" class="css3button">HB</button>
+<button type="button" id="btnClear" class="css3button">Clear</button>
+</div>
+
+<div id="messagewindow">
+<!-- messages -->
+</div>
 
 </body>
+<script src="jquery-1.9.1.min.js"></script>
 <script src="aae.js"></script>
 <script src="main.js"></script>
 </html>

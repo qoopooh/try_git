@@ -5,6 +5,18 @@ var readArray = new Uint8Array(readBuff);
 var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
+var taginfo = {
+  productcode: [0, 0, 0, 0, 0, 0],
+  batchnumber: ['L', 'B', 'A', 0, 0, 0],
+  mandate: [0, 13],
+  expdate: [0, 14],
+  quantity: [0, 0, 0, 0, 0, 'k']
+};
+
+String.prototype.splice = function( idx, rem, s ) {
+  return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
+};
+
 
 function writeArrayBuffer(buf) {
   if (!conn_id) {
@@ -47,8 +59,10 @@ function onRead(readInfo) {
   chrome.serial.read(conn_id, 64, onRead);
 };
 
-function setStatus(st) {
+function setStatus(st, cls) {
   $('#status').text(st);
+  if (cls)
+    document.getElementById("status").className = cls;
 }
 
 function buildPortPicker(ports) {
@@ -217,6 +231,62 @@ function disableButton(open) {
   /*$('#readcontrol').prop('disabled', !open); // does not work*/
 }
 
+function verifyForm(cb) {
+  var res = false;
+  var val = $("#productcode").val();
+  var len = val.length;
+  var patt = /\d{2}\.\d{3}\.\d{3}/g;
+
+  if (len > 10)
+    patt = /\d{2}\.\d{3}\.\d{3}\.\d{1}/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Product code failed (00.000.000.0)", "fail");
+    return res;
+  }
+
+  
+  console.log('verifyForm', res);
+  if (res)
+    setStatus("Verified", "ok");
+  return res;
+}
+
+function writeInformation() {
+
+  console.log("writeInformation", taginfo);
+}
+
+function isMaxLength(o, len) {
+  return (o.val().length >= len);
+}
+function isNumChar(c) {
+  return (c >= 0x30 && c <= 0x39);
+}
+function isBatchLetter(c) {
+  if (c === 0x41 || c === 0x42
+      || c === 0x45 || c === 0x4C
+      || c === 0x4D || c === 0x50
+      || c === 0x53 || c === 0x54
+     )
+    return true;
+  return false;
+}
+function isDateFormat(o, e) {
+  if (isMaxLength(o, 5))
+    return false;
+  var c = (e.which) ? e.which : e.keyCode;
+  if (!isNumChar(c)
+    && c !== 0x2F // '/'
+    )
+    return false;
+  return true;
+}
+
+function validDate(d) {
+  var res = f
+}
+
 function init() {
   $("#btnRefresh").click(function() {
     var select = document.getElementById("port-picker");
@@ -260,6 +330,35 @@ function init() {
   });
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
+  });
+  $("#productcode").keypress(function (e) {
+    if (isMaxLength($(this), 12))
+      return false;
+    var c = (e.which) ? e.which : e.keyCode;
+    if (!isNumChar(c)
+      && c !== 0x2E // '.'
+      )
+      return false;
+  });
+  $("#batchnumber").keypress(function (e) {
+    if (isMaxLength($(this), 9))
+      return false;
+    var c = (e.which) ? e.which : e.keyCode;
+    if (!isNumChar(c)
+      && !isBatchLetter(c)
+      && c !== 0x2F // '/'
+      )
+      return false;
+  });
+  $("#mandate").keypress(function (e) {
+    return isDateFormat($(this), e);
+  });
+  $("#expdate").keypress(function (e) {
+    return isDateFormat($(this), e);
+  });
+  $("#btnSubmit").click(function() {
+    if (verifyForm())
+      writeInformation();
   });
   $("#port-picker").change(function() {
     closePort();
