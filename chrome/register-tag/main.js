@@ -12,6 +12,8 @@ var taginfo = {
   expdate: [0, 14],
   quantity: [0, 0, 0, 0, 0, 'k']
 };
+var progress = 0;
+var progressmax = 5;
 
 String.prototype.splice = function( idx, rem, s ) {
   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
@@ -237,6 +239,7 @@ function verifyForm(cb) {
   var len = val.length;
   var patt = /\d{2}\.\d{3}\.\d{3}/g;
 
+  updateProgress();
   if (len > 10)
     patt = /\d{2}\.\d{3}\.\d{3}\.\d{1}/g;
   res = patt.test(val);
@@ -244,6 +247,7 @@ function verifyForm(cb) {
     setStatus("Product code format failed (e.g. 00.000.000.0)", "fail");
     return res;
   }
+  updateProgress();
   val = $("#batchnumber").val();
   patt = /^[A-Z]+\d{3}\/\d{2}/g;
   res = patt.test(val);
@@ -251,6 +255,7 @@ function verifyForm(cb) {
     setStatus("Batch number format failed (e.g. ESE001/13)", "fail");
     return res;
   }
+  updateProgress();
   val = $("#mandate").val();
   /*log(val + ' ' + val.length);*/
   patt = /\d{2}\/\d{2}/g;
@@ -259,6 +264,7 @@ function verifyForm(cb) {
     setStatus("Manufacture date format failed (e.g. 01/13)", "fail");
     return res;
   }
+  updateProgress();
   val = $("#expdate").val();
   patt = /\d{2}\/\d{2}/g;
   res = patt.test(val);
@@ -266,6 +272,7 @@ function verifyForm(cb) {
     setStatus("Expiration date format failed (e.g. 01/14)", "fail");
     return res;
   }
+  updateProgress();
   val = $("#quantity").val();
   patt = /\d{4},\d{3}\w/g;
   res = patt.test(val);
@@ -274,6 +281,7 @@ function verifyForm(cb) {
     return res;
   }
   
+  /*log(progress);*/
   if (res)
     setStatus("Verified", "ok");
   return res;
@@ -326,6 +334,10 @@ function submit(c) {
     return true;
   }
   return false;
+}
+
+function updateProgress() {
+  $("#progress").val(++progress);
 }
 
 function init() {
@@ -430,9 +442,12 @@ function init() {
       return false;
   });
   $("#btnSubmit").click(function() {
+    progress = 0;
     if (verifyForm())
       writeInformation();
   });
+  $("#progress").val(0);
+  document.getElementById('progress').setAttribute('max', '' + progressmax);
   $("#port-picker").change(function() {
     closePort();
   });
