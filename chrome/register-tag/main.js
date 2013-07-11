@@ -241,28 +241,56 @@ function verifyForm(cb) {
     patt = /\d{2}\.\d{3}\.\d{3}\.\d{1}/g;
   res = patt.test(val);
   if (!res) {
-    setStatus("Product code failed (00.000.000.0)", "fail");
+    setStatus("Product code format failed (e.g. 00.000.000.0)", "fail");
     return res;
   }
-
+  val = $("#batchnumber").val();
+  patt = /^[A-Z]+\d{3}\/\d{2}/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Batch number format failed (e.g. ESE001/13)", "fail");
+    return res;
+  }
+  val = $("#mandate").val();
+  /*log(val + ' ' + val.length);*/
+  patt = /\d{2}\/\d{2}/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Manufacture date format failed (e.g. 01/13)", "fail");
+    return res;
+  }
+  val = $("#expdate").val();
+  patt = /\d{2}\/\d{2}/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Expiration date format failed (e.g. 01/14)", "fail");
+    return res;
+  }
+  val = $("#quantity").val();
+  patt = /\d{4},\d{3}\w/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Quantity format failed (e.g. 9999,999p)", "fail");
+    return res;
+  }
   
-  console.log('verifyForm', res);
   if (res)
     setStatus("Verified", "ok");
   return res;
 }
 
 function writeInformation() {
-
   console.log("writeInformation", taginfo);
 }
 
 function isMaxLength(o, len) {
   return (o.val().length >= len);
 }
+
 function isNumChar(c) {
   return (c >= 0x30 && c <= 0x39);
 }
+
 function isBatchLetter(c) {
   if (c === 0x41 || c === 0x42
       || c === 0x45 || c === 0x4C
@@ -272,6 +300,15 @@ function isBatchLetter(c) {
     return true;
   return false;
 }
+
+function isUnit(c) {
+  if (c === 0x6b || c === 0x70
+      || c === 0x75
+     )
+    return true;
+  return false;
+}
+
 function isDateFormat(o, e) {
   if (isMaxLength(o, 5))
     return false;
@@ -283,8 +320,12 @@ function isDateFormat(o, e) {
   return true;
 }
 
-function validDate(d) {
-  var res = f
+function submit(c) {
+  if (c === 13) {
+    $("#btnSubmit").click();
+    return true;
+  }
+  return false;
 }
 
 function init() {
@@ -332,18 +373,26 @@ function init() {
     $("#messagewindow").text("");
   });
   $("#productcode").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
     if (isMaxLength($(this), 12))
       return false;
-    var c = (e.which) ? e.which : e.keyCode;
     if (!isNumChar(c)
       && c !== 0x2E // '.'
       )
       return false;
   });
   $("#batchnumber").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
     if (isMaxLength($(this), 9))
       return false;
-    var c = (e.which) ? e.which : e.keyCode;
     if (!isNumChar(c)
       && !isBatchLetter(c)
       && c !== 0x2F // '/'
@@ -351,10 +400,34 @@ function init() {
       return false;
   });
   $("#mandate").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
     return isDateFormat($(this), e);
   });
   $("#expdate").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
     return isDateFormat($(this), e);
+  });
+  $("#quantity").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
+    if (isMaxLength($(this), 9))
+      return false;
+    if (!isNumChar(c)
+      && !isUnit(c)
+      && c !== 0x2C // ','
+      )
+      return false;
   });
   $("#btnSubmit").click(function() {
     if (verifyForm())
