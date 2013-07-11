@@ -13,7 +13,7 @@ var taginfo = {
   quantity: [0, 0, 0, 0, 0, 'k']
 };
 var progress = 0;
-var progressmax = 5;
+var progressmax = 6;
 
 String.prototype.splice = function( idx, rem, s ) {
   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
@@ -281,7 +281,7 @@ function verifyForm(cb) {
     return res;
   }
   
-  /*log(progress);*/
+  updateProgress();
   if (res)
     setStatus("Verified", "ok");
   return res;
@@ -338,6 +338,7 @@ function submit(c) {
 
 function updateProgress() {
   $("#progress").val(++progress);
+  console.log("progress", progress);
 }
 
 function init() {
