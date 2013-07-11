@@ -338,7 +338,10 @@ function submit(c) {
 
 function updateProgress() {
   $("#progress").val(++progress);
-  console.log("progress", progress);
+  var percent = progress * 100 / progressmax;
+  percent = percent.toFixed(2);
+  $("#percent").text('' + percent + ' %');
+  /*console.log("progress", progress, percent);*/
 }
 
 function init() {
