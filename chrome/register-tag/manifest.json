@@ -1,0 +1,23 @@
+{
+  "name": "Tag Register",
+  "version": "0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "description": "Register UHF RFID tag\nPut information to EPC and USER memory bank\nAdvanced ID Asia Engineering co., ltd.",
+
+  "app": {
+    "background": {
+      "scripts": [ "background.js" ]
+    }
+  },
+
+  "icons": {
+    "16": "assets/package_editors-16.png",
+    "128": "assets/package_editors-128.png"
+  },
+
+  "permissions": [
+    "serial"
+  ]
+}
+

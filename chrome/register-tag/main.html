@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="jquery-1.9.1.min.js"></script>
+  <!--<link rel="stylesheet" href="styles.css">-->
+</head>
+<body>
+  <div id="container">
+    <label>
+      Port:
+      <select id="port-picker"></select>
+      <button type="button" id="btnRefresh" class="css3button">Reload</button>
+      <button type="button" id="btnOpen" class="css3button">Open</button>
+      <button type="button" id="btnClose" class="css3button">Close</button>
+    </label>
+
+    <label>
+      Write:
+      <span id="write-info">-</span>
+    </label>
+    <label>
+      Tag:
+      <span id="read-info">-</span>
+    </label>
+    <label>
+      Read count:
+      <span id="read-count">-</span>
+    </label>
+    <label>
+      Status:
+      <span id="status">Loading</span>
+    </label>
+    <div id='readcontrol'>
+      <button type="button" id="btnStart" class="css3button">Start</button>
+      <button type="button" id="btnStop" class="css3button">Stop</button>
+      <button type="button" id="btnSingle" class="css3button">Single</button>
+      <button type="button" id="btnHB" class="css3button">HB</button>
+      <button type="button" id="btnClear" class="css3button">Clear</button>
+    </div>
+    <div id="messagewindow">
+    <!-- messages -->
+    </div>
+  </div>
+
+</body>
+<script src="aae.js"></script>
+<script src="main.js"></script>
+</html>
+
