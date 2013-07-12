@@ -1,0 +1,22 @@
+{
+  "name": "W1DimSerial",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "description": "Auto-increase serial number on def.h for W-1DIM",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+
+  "permissions": [
+    {"fileSystem": ["write"]},
+    "unlimitedStorage",
+    "contextMenus"
+  ],
+
+  "icons": {
+    "128": "assets/icon-128.png"
+  }
+}
