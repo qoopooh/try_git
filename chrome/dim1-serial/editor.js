@@ -124,15 +124,20 @@ function readFileIntoEditor(theFileEntry) {
 
 function writeEditorToFile(theFileEntry) {
   ++sn;
-  console.log(theFileEntry);
 
-  res.replace(SNRL, SNRL_NEW + (sn & 0xFF));
+  res = res.replace(LOT, LOT_NEW
+      + ((sn >> 16) & 0xFF).toString(16).toUpperCase());
+  res = res.replace(SNRH, SNRH_NEW
+      + ((sn >> 8) & 0xFF).toString(16).toUpperCase());
+  res = res.replace(SNRL, SNRL_NEW
+      + (sn & 0xFF).toString(16).toUpperCase());
+  console.log(theFileEntry);
   theFileEntry.createWriter(function(fileWriter) {
     fileWriter.onerror = function(e) {
       console.log("Write failed: " + e.toString());
     };
 
-    var blob = new Blob(res);
+    var blob = new Blob( [res], {type:'text/plain'});
     fileWriter.truncate(blob.size);
     fileWriter.onwriteend = function() {
       fileWriter.onwriteend = function(e) {
@@ -141,7 +146,6 @@ function writeEditorToFile(theFileEntry) {
       };
 
       fileWriter.write(blob);
-      console.log("Write", blob);
     }
   }, errorHandler);
   document.getElementById("serial").innerHTML =
