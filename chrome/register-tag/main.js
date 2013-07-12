@@ -6,14 +6,19 @@ var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
 var taginfo = {
-  productcode: [0, 0, 0, 0, 0, 0],
-  batchnumber: ['L', 'B', 'A', 0, 0, 0],
-  mandate: [0, 13],
-  expdate: [0, 14],
-  quantity: [0, 0, 0, 0, 0, 'k']
+  productcode: '',
+  batchnumber: '',
+  mandate: '',
+  expdate: '',
+  quantity: ''
 };
 var progress = 0;
-var progressmax = 6;
+var progressmax = 7;
+var regstate = 'Idle';
+var regtimeout;
+var regtimeoutCount = 0;
+var newepc = new Uint8Array(12);
+var user = new Uint8Array(10);
 
 String.prototype.splice = function( idx, rem, s ) {
   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
@@ -158,7 +163,7 @@ function u82hex(arr) {
   
   for (var i = 0, len = arr.length; i < len; ++i) {
     if (arr[i] < 16) {
-      hex += '0' + arr[i];
+      hex += '0' + arr[i].toString(16).toUpperCase();
     } else {
       hex += arr[i].toString(16).toUpperCase();
     }
@@ -239,7 +244,6 @@ function verifyForm(cb) {
   var len = val.length;
   var patt = /\d{2}\.\d{3}\.\d{3}/g;
 
-  updateProgress();
   if (len > 10)
     patt = /\d{2}\.\d{3}\.\d{3}\.\d{1}/g;
   res = patt.test(val);
@@ -247,6 +251,7 @@ function verifyForm(cb) {
     setStatus("Product code format failed (e.g. 00.000.000.0)", "fail");
     return res;
   }
+  taginfo.productcode = val;
   updateProgress();
   val = $("#batchnumber").val();
   patt = /^[A-Z]+\d{3}\/\d{2}/g;
@@ -255,6 +260,7 @@ function verifyForm(cb) {
     setStatus("Batch number format failed (e.g. ESE001/13)", "fail");
     return res;
   }
+  taginfo.batchnumber = val;
   updateProgress();
   val = $("#mandate").val();
   /*log(val + ' ' + val.length);*/
@@ -264,6 +270,7 @@ function verifyForm(cb) {
     setStatus("Manufacture date format failed (e.g. 01/13)", "fail");
     return res;
   }
+  taginfo.mandate = val;
   updateProgress();
   val = $("#expdate").val();
   patt = /\d{2}\/\d{2}/g;
@@ -272,6 +279,7 @@ function verifyForm(cb) {
     setStatus("Expiration date format failed (e.g. 01/14)", "fail");
     return res;
   }
+  taginfo.expdate = val;
   updateProgress();
   val = $("#quantity").val();
   patt = /\d{4},\d{3}\w/g;
@@ -280,15 +288,103 @@ function verifyForm(cb) {
     setStatus("Quantity format failed (e.g. 9999,999p)", "fail");
     return res;
   }
-  
+  taginfo.quantity = val;
   updateProgress();
   if (res)
     setStatus("Verified", "ok");
   return res;
 }
 
-function writeInformation() {
-  console.log("writeInformation", taginfo);
+function register() {
+  switch (regstate) {
+    case 'genepc':
+      setStatus("Generate EPC");
+      genepc(function () {
+        var hex = u82hex(newepc);
+        console.log('genepc done', hex);
+        $("#epc").val(hex);
+        updateProgress();
+        regstate = 'genuser';
+        register();
+      });
+      break;
+    case 'genuser':
+      setStatus("Generate USER memory");
+      genuser(function () {
+        var hex = u82hex(user);
+        console.log('genuser done', hex);
+        $("#user").val(hex);
+        updateProgress();
+        /*regstate = 'genuser';*/
+        /*register();*/
+      });
+      break;
+    default:
+      console.log(taginfo);
+      regstate = 'genepc';
+      register();
+      break;
+  }
+}
+
+function genepc(cb) {
+  var batch = taginfo.batchnumber;
+  var code = taginfo.productcode.split('.');
+  var i = 0;
+  var j = 0;
+  
+  newepc[0] = batch.charCodeAt(j);
+  if (isNumChar(batch.charCodeAt(++j))) {
+    newepc[1] = 0;
+    newepc[2] = 0;
+  } else {
+    newepc[1] = batch.charCodeAt(j);
+    if (isNumChar(batch.charCodeAt(++j)))
+      newepc[2] = 0;
+    else
+      newepc[2] = batch.charCodeAt(j++);
+  }
+  i = parseInt(batch.substr(j, 3));
+  newepc[3] = (i >> 8) & 0xFF;
+  newepc[4] = i & 0xFF;
+  i = parseInt(batch.substr(j += 4));
+  newepc[5] = i & 0xFF;
+
+  newepc[6] = parseInt(code[0]);
+  i = parseInt(code[1]);
+  newepc[7] = (i >> 8) & 0xFF;
+  newepc[8] = i & 0xFF;
+  i = parseInt(code[2]);
+  newepc[9] = (i >> 8) & 0xFF;
+  newepc[10] = i & 0xFF;
+  if (code.length < 4)
+    newepc[11] = 0;
+  else
+    newepc[11] = parseInt(code[3]);
+
+  cb();
+}
+
+function genuser(cb) {
+  var date = taginfo.mandate.split('/');
+  var quantity = taginfo.quantity.split(',');
+  var i = 0;
+  
+  user[0] = parseInt(date[0]);
+  user[1] = parseInt(date[1]);
+  date = taginfo.expdate.split('/');
+  user[2] = parseInt(date[0]);
+  user[3] = parseInt(date[1]);
+  i = parseInt(quantity[0]);
+  user[4] = (i >> 16) & 0xFF;
+  user[5] = (i >> 8) & 0xFF;
+  user[6] = i & 0xFF;
+  i = parseInt(quantity[1]);
+  user[7] = (i >> 8) & 0xFF;
+  user[8] = i & 0xFF;
+  user[9] = quantity[1].charCodeAt(3);
+
+  cb();
 }
 
 function isMaxLength(o, len) {
@@ -340,7 +436,10 @@ function updateProgress() {
   $("#progress").val(++progress);
   var percent = progress * 100 / progressmax;
   percent = percent.toFixed(2);
-  $("#percent").text('' + percent + ' %');
+  if (percent > 100)
+    $("#percent").text(progress);
+  else
+    $("#percent").text('' + percent + ' %');
   /*console.log("progress", progress, percent);*/
 }
 
@@ -448,7 +547,7 @@ function init() {
   $("#btnSubmit").click(function() {
     progress = 0;
     if (verifyForm())
-      writeInformation();
+      register();
   });
   $("#progress").val(0);
   document.getElementById('progress').setAttribute('max', '' + progressmax);

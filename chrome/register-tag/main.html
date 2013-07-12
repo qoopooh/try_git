@@ -23,12 +23,12 @@ Port:
 <!--<span id="read-count">-</span>-->
 <!--</div>-->
 
-<form>
-Product code: <input type="text" id="productcode" value='00.000.000.0'><br>
+<form id='fill'>
+Product code: <input type="text" id="productcode" value='12.345.678.9'><br>
 Batch number: <input type="text" id="batchnumber" value='LBA001/13'><br>
 Manufacture date: <input type="text" id="mandate" value='03/13'><br>
 Expiration date: <input type="text" id="expdate" value='03/14'><br>
-Quantity: <input type="text" id="quantity" value='9999,999k'><br>
+Quantity: <input type="text" id="quantity" value='1234,567p'><br>
 </form>
 <input type="submit" id="btnSubmit" value="Submit">
 
@@ -38,6 +38,11 @@ Status:
 </div>
 
 <meter id='progress' value='2' min='0' max='10'>Not support progress bar</meter> <span id='percent'>-</span>
+
+<div id='generate'>
+EPC: <input type="text" id="epc" value='-' size='25'><br>
+USER: <input type="text" id="user" value='-' size='23'><br>
+</div>
 
 <div id='readcontrol'>
 <button type="button" id="btnStart" class="css3button">Start</button>
