@@ -1,4 +1,4 @@
-var newButton, openButton, increaseButton;
+var reloadButton, openButton, increaseButton;
 var editor;
 var fileEntry;
 var hasWriteAccess;
@@ -79,7 +79,6 @@ function readFileIntoEditor(theFileEntry) {
 
       fileReader.onload = function(e) {
         handleDocumentChange(theFileEntry.fullPath);
-        /*editor.setValue(e.target.result);*/
       };
 
       fileReader.onerror = function(e) {
@@ -114,7 +113,8 @@ function readFileIntoEditor(theFileEntry) {
         sn += snrh << 8;
         sn += snrl & 0xFF;
         console.log('onloadend', sn, lot, snrh, snrl);
-        document.getElementById("serial").innerHTML = sn.toString(16);
+        document.getElementById("serial").innerHTML =
+          sn.toString(16).toUpperCase();
       };
 
       fileReader.readAsText(file);
@@ -123,12 +123,16 @@ function readFileIntoEditor(theFileEntry) {
 }
 
 function writeEditorToFile(theFileEntry) {
+  ++sn;
+  console.log(theFileEntry);
+
+  res.replace(SNRL, SNRL_NEW + (sn & 0xFF));
   theFileEntry.createWriter(function(fileWriter) {
     fileWriter.onerror = function(e) {
       console.log("Write failed: " + e.toString());
     };
 
-    var blob = new Blob([editor.getValue()]);
+    var blob = new Blob(res);
     fileWriter.truncate(blob.size);
     fileWriter.onwriteend = function() {
       fileWriter.onwriteend = function(e) {
@@ -137,8 +141,11 @@ function writeEditorToFile(theFileEntry) {
       };
 
       fileWriter.write(blob);
+      console.log("Write", blob);
     }
   }, errorHandler);
+  document.getElementById("serial").innerHTML =
+    sn.toString(16).toUpperCase();
 }
 
 var onWritableFileToOpen = function(theFileEntry) {
@@ -146,33 +153,18 @@ var onWritableFileToOpen = function(theFileEntry) {
   readFileIntoEditor(theFileEntry);
 };
 
-var onChosenFileToSave = function(theFileEntry) {
-  setFile(theFileEntry, true);
-  writeEditorToFile(theFileEntry);
-};
-
 function handleNewButton() {
-  if (false) {
-    newFile();
-    /*editor.setValue("");*/
-  } else {
-    chrome.app.window.create('main.html', {
-      frame: 'chrome', bounds: { width: 720, height: 400}
-    });
-  }
+  onWritableFileToOpen(fileEntry);
 }
 
 function handleOpenButton() {
   chrome.fileSystem.chooseEntry({ type: 'openWritableFile' }, onWritableFileToOpen);
-  /*chrome.fileSystem.getDisplayPath({ type: 'openWritableFile' }, onWritableFileToOpen);*/
 }
 
 function handleSaveButton() {
-  if (fileEntry && hasWriteAccess) {
-    writeEditorToFile(fileEntry);
-  } else {
-    chrome.fileSystem.chooseEntry({ type: 'saveFile' }, onChosenFileToSave);
-  }
+  /*if (fileEntry && hasWriteAccess) {*/
+  writeEditorToFile(fileEntry);
+  /*}*/
 }
 
 function initContextMenu() {
@@ -199,12 +191,12 @@ chrome.contextMenus.onClicked.addListener(function(info) {
 onload = function() {
   initContextMenu();
 
-  newButton = document.getElementById("new");
   openButton = document.getElementById("open");
+  reloadButton = document.getElementById("reload");
   increaseButton = document.getElementById("increase");
 
-  /*newButton.addEventListener("click", handleNewButton);*/
   openButton.addEventListener("click", handleOpenButton);
+  reloadButton.addEventListener("click", handleNewButton);
   increaseButton.addEventListener("click", handleSaveButton);
 
   /*editor = CodeMirror(*/
