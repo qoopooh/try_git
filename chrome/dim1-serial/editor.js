@@ -1,6 +1,8 @@
 var reloadButton, openButton, increaseButton;
 var editor;
 var fileEntry;
+var hexFileEntry;
+var hexchange;
 var hasWriteAccess;
 var sn = 0;
 var res = "";
@@ -35,35 +37,21 @@ function errorHandler(e) {
     break;
   };
 
-  console.log("Error: " + msg);
+  setStatus("Error: " + msg);
 }
 
-function handleDocumentChange(title) {
-  var mode = "javascript";
-  var modeName = "JavaScript";
-  if (title) {
-    title = title.match(/[^/]+$/)[0];
-    document.getElementById("title").innerHTML = title;
-    document.title = title;
-    if (title.match(/.json$/)) {
-      mode = {name: "javascript", json: true};
-      modeName = "JavaScript (JSON)";
-    } else if (title.match(/.html$/)) {
-      mode = "htmlmixed";
-      modeName = "HTML";
-    } else if (title.match(/.css$/)) {
-      mode = "css";
-      modeName = "CSS";
-    }
-  } else {
+function setStatus(title) {
+  if (!title)
     document.getElementById("title").innerHTML = "[no document loaded]";
-  }
+  else
+    document.getElementById("title").innerHTML = title;
+  console.log(title);
 }
 
 function newFile() {
   fileEntry = null;
   hasWriteAccess = false;
-  handleDocumentChange(null);
+  setStatus(null);
 }
 
 function setFile(theFileEntry, isWritable) {
@@ -78,32 +66,33 @@ function readFileIntoEditor(theFileEntry) {
       var fileReader = new FileReader();
 
       fileReader.onload = function(e) {
-        handleDocumentChange(theFileEntry.fullPath);
+        setStatus(theFileEntry.fullPath);
       };
 
       fileReader.onerror = function(e) {
-        console.log("Read failed: " + e.toString());
+        setStatus("Read failed: " + e.toString());
       };
 
       fileReader.onloadend = function(e) {
         res = this.result;
-        var n = res.match(LOT)[0];
-        if (!n) {
-          console.log("cannot find PROD_LOT");
+        var match = res.match(LOT);
+        if (!match) {
+          setStatus("cannot find PROD_LOT");
           return;
         }
+        var n = match[0]; 
         n = n.replace(/\s+/g, ' ');
         var lot = n.split(" ")[2];
         n = res.match(SNRH)[0];
         if (!n) {
-          console.log("cannot find SNRH");
+          setStatus("cannot find SNRH");
           return;
         }
         n = n.replace(/\s+/g, ' ');
         var snrh = n.split(" ")[2];
         n = res.match(SNRL)[0];
         if (!n) {
-          console.log("cannot find SNRL");
+          setStatus("cannot find SNRL");
           return;
         }
         n = n.replace(/\s+/g, ' ');
@@ -113,8 +102,9 @@ function readFileIntoEditor(theFileEntry) {
         sn += snrh << 8;
         sn += snrl & 0xFF;
         console.log('onloadend', sn, lot, snrh, snrl);
-        document.getElementById("serial").innerHTML =
-          sn.toString(16).toUpperCase();
+        document.getElementById("serial").innerHTML = i2hex(sn);
+        disableManualButtons(false);
+        setHexMenu();
       };
 
       fileReader.readAsText(file);
@@ -125,34 +115,33 @@ function readFileIntoEditor(theFileEntry) {
 function writeEditorToFile(theFileEntry) {
   ++sn;
 
-  res = res.replace(LOT, LOT_NEW
-      + ((sn >> 16) & 0xFF).toString(16).toUpperCase());
-  res = res.replace(SNRH, SNRH_NEW
-      + ((sn >> 8) & 0xFF).toString(16).toUpperCase());
-  res = res.replace(SNRL, SNRL_NEW
-      + (sn & 0xFF).toString(16).toUpperCase());
-  console.log(theFileEntry);
+  res = res.replace(LOT, LOT_NEW + i2hex((sn >> 16) & 0xFF));
+  res = res.replace(SNRH, SNRH_NEW + i2hex((sn >> 8) & 0xFF));
+  res = res.replace(SNRL, SNRL_NEW + i2hex(sn & 0xFF));
+  setStatus(theFileEntry);
   theFileEntry.createWriter(function(fileWriter) {
     fileWriter.onerror = function(e) {
-      console.log("Write failed: " + e.toString());
+      setStatus("Write failed: " + e.toString());
     };
 
     var blob = new Blob( [res], {type:'text/plain'});
     fileWriter.truncate(blob.size);
     fileWriter.onwriteend = function() {
       fileWriter.onwriteend = function(e) {
-        handleDocumentChange(theFileEntry.fullPath);
-        console.log("Write completed.");
+        setStatus("Write " + theFileEntry.fullPath + " completed.");
       };
 
       fileWriter.write(blob);
     }
   }, errorHandler);
-  document.getElementById("serial").innerHTML =
-    sn.toString(16).toUpperCase();
+  document.getElementById("serial").innerHTML = i2hex(sn);
 }
 
 var onWritableFileToOpen = function(theFileEntry) {
+  if (!theFileEntry) {
+    return;
+  }
+
   setFile(theFileEntry, true);
   readFileIntoEditor(theFileEntry);
 };
@@ -162,7 +151,10 @@ function handleNewButton() {
 }
 
 function handleOpenButton() {
-  chrome.fileSystem.chooseEntry({ type: 'openWritableFile' }, onWritableFileToOpen);
+  chrome.fileSystem.chooseEntry(
+      { type: 'openWritableFile',
+        accepts: [{ extensions: ['h'] }] 
+      }, onWritableFileToOpen);
 }
 
 function handleSaveButton() {
@@ -171,16 +163,90 @@ function handleSaveButton() {
   /*}*/
 }
 
-function initContextMenu() {
+function handleHexFile(open) {
+  if (open) {
+    chrome.fileSystem.chooseEntry(
+    { type: 'openFile', accepts: [{ extensions: ['hex'] }] }, function(fileentry) {
+      if (!fileentry)
+        return;
+      hexFileEntry = fileentry;
+      console.log('hex entry', hexFileEntry);
+      checkHex(hexFileEntry);
+      disableManualButtons(open);
+      unsetHexMenu();
+    });
+  } else {
+    setHexMenu();
+    disableManualButtons(open);
+  }
+}
+
+function checkHex(theFileEntry) {
+  theFileEntry.file(function(file) {
+    var fileReader = new FileReader();
+
+    fileReader.onerror = function(e) {
+      setStatus("Hex failed: " + e.toString());
+    };
+
+    fileReader.onloadend = function(e) {
+      hexchange = this.result;
+      console.log('hexchange', hexchange);
+    };
+
+    fileReader.readAsText(file);
+  }, errorHandler);
+}
+
+function setHexMenu() {
   chrome.contextMenus.removeAll(function() {
+    hexFileEntry = null;
+    hexchange = null;
       /*for (var snippetName in SNIPPETS) {*/
-      /*chrome.contextMenus.create({*/
-    /*title: snippetName,*/
-    /*id: snippetName,*/
-    /*contexts: ['all']*/
-    /*});*/
+    chrome.contextMenus.create({
+      title: "Set HEX",
+      id: "sethex",
+      contexts: ['all']
+    });
       /*}*/
   });
+}
+
+function unsetHexMenu() {
+  chrome.contextMenus.removeAll(function() {
+    chrome.contextMenus.create({
+      title: "Unset HEX",
+      id: "unsethex",
+      contexts: ['all']
+    });
+  });
+}
+
+function disableManualButtons(dis) {
+  reloadButton.disabled = dis;
+  increaseButton.disabled = dis;
+}
+
+/*function i2hex(i) {*/
+/*if (i < 16)*/
+/*return '0' + i.toString(16).toUpperCase();*/
+/*else if (i < 4096)*/
+/*return i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);*/
+/*else if (i < 1048575)*/
+/*return i2hex((i >> 16)  & 0xFF)+ i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);*/
+/*else*/
+/*return i.toString(16).toUpperCase();*/
+/*}*/
+
+function i2hex(i) {
+  if (i < 16)
+    return '0' + i.toString(16).toUpperCase();
+  else if (i < 256)
+    return i.toString(16).toUpperCase();
+  else if (i < 4096)
+    return i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);
+  else if (i < 1048575)
+    return i2hex((i >> 16)  & 0xFF)+ i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);
 }
 
 chrome.contextMenus.onClicked.addListener(function(info) {
@@ -189,12 +255,14 @@ chrome.contextMenus.onClicked.addListener(function(info) {
     return;
   }
 
-  /*editor.replaceSelection(SNIPPETS[info.menuItemId]);*/
+  if (info.menuItemId === 'sethex') {
+    handleHexFile(true);
+  } else if (info.menuItemId === 'unsethex') {
+    handleHexFile(false);
+  }
 });
 
 onload = function() {
-  initContextMenu();
-
   openButton = document.getElementById("open");
   reloadButton = document.getElementById("reload");
   increaseButton = document.getElementById("increase");
@@ -203,28 +271,7 @@ onload = function() {
   reloadButton.addEventListener("click", handleNewButton);
   increaseButton.addEventListener("click", handleSaveButton);
 
-  /*editor = CodeMirror(*/
-  /*document.getElementById("editor"),*/
-  /*{*/
-  /*mode: {name: "javascript", json: true },*/
-  /*lineNumbers: true,*/
-  /*theme: "lesser-dark",*/
-  /*fixedGutter: true,*/
-  /*extraKeys: {*/
-  /*"Cmd-S": function(instance) { handleSaveButton() },*/
-  /*"Ctrl-S": function(instance) { handleSaveButton() },*/
-  /*}*/
-  /*});*/
-
   newFile();
-  onresize();
+  disableManualButtons(true);
 };
-
-onresize = function() {
-  var container = document.getElementById('editor');
-  var containerWidth = container.offsetWidth;
-  var containerHeight = container.offsetHeight;
-
-  /*editor.refresh();*/
-}
 

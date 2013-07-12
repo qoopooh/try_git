@@ -4,7 +4,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('main.html', {
     id: 'dim1', // to remember position
     frame: 'chrome', bounds: { width: 320, height: 145 },
-    minWidth:200, minHeight:140
+    minWidth:200, minHeight:140, maxHeight:170
   });
 });
 
