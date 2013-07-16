@@ -13,6 +13,7 @@ var LOT_NEW  = "#define PROD_LOT 0x";
 var SNRH_NEW = "#define SNRH     0x";
 var SNRL_NEW = "#define SNRL     0x";
 var HEX = /\:08040000....0000../g;
+var timeout;
 
 function errorHandler(e) {
   var msg = "";
@@ -49,6 +50,10 @@ function setStatus(title) {
   console.log(title);
 }
 
+function showSerial(serial) {
+  document.getElementById("serial").innerHTML = i2hex(serial);
+}
+
 function newFile() {
   fileEntry = null;
   hexFileEntry = null;
@@ -57,13 +62,7 @@ function newFile() {
 }
 
 function setFile(theFileEntry, isWritable) {
-  hexFileEntry = theFileEntry;
-  chrome.fileSystem.getDisplayPath(hexFileEntry, function(str) {
-    console.log("getDisplayPath", str);
-  });
   fileEntry = theFileEntry;
-  fileEntry.name = "def.h";
-  fileEntry.fullPath = "/def.h";
   hasWriteAccess = isWritable;
   console.log(fileEntry, hasWriteAccess);
 }
@@ -74,7 +73,7 @@ function readFileIntoEditor(theFileEntry) {
       var fileReader = new FileReader();
 
       fileReader.onload = function(e) {
-        setStatus(theFileEntry.fullPath);
+        setStatus(theFileEntry.name);
       };
 
       fileReader.onerror = function(e) {
@@ -82,9 +81,8 @@ function readFileIntoEditor(theFileEntry) {
       };
 
       fileReader.onloadend = function(e) {
-      /*loadDef(fileReader.result);*/
-      /*loadHex(fileReader.result);*/
         res = fileReader.result;
+        openHexButton.disabled = false;
       };
 
       fileReader.readAsText(file);
@@ -93,6 +91,7 @@ function readFileIntoEditor(theFileEntry) {
 }
 
 function loadDef(res) {
+  var serial = 0;
   var match = res.match(LOT);
   if (!match) {
     setStatus("cannot find PROD_LOT");
@@ -116,17 +115,17 @@ function loadDef(res) {
   n = n.replace(/\s+/g, ' ');
   var snrl = n.split(" ")[2];
 
-  sn = lot << 16;
-  sn += snrh << 8;
-  sn += snrl & 0xFF;
-  var str = i2hex(sn);
-  console.log('onloadend', sn, lot, snrh, snrl, str);
-  document.getElementById("serial").innerHTML = str;
+  serial = lot << 16;
+  serial += snrh << 8;
+  serial += snrl & 0xFF;
+  console.log('onloadend', serial, lot, snrh, snrl);
+  showSerial(serial);
   disableManualButtons(false);
   /*setHexMenu();*/
 }
 
 function loadHex(res, cb) {
+  var serial = 0;
   var match = res.match(HEX);
   if (!match) {
     setStatus("cannot find HEX");
@@ -136,17 +135,14 @@ function loadHex(res, cb) {
   var snrh = match[0].substr(11, 2);
   var snrl = match[0].substr(9, 2);
 
-  sn = parseInt(lot, 16) << 16;
-  sn += parseInt(snrh, 16) << 8;
-  sn += parseInt(snrl, 16) & 0xFF;
-  var str = i2hex(sn);
-  console.log('onloadend', sn, lot, snrh, snrl, str);
-  document.getElementById("serial").innerHTML = str;
+  serial = parseInt(lot, 16) << 16;
+  serial += parseInt(snrh, 16) << 8;
+  serial += parseInt(snrl, 16) & 0xFF;
+  console.log('onloadend', serial, lot, snrh, snrl);
+  showSerial(serial);
   disableManualButtons(false);
-  /*setHexMenu();*/
-  /*handleIncreaseButton();*/
   if (cb)
-    cb();
+    cb(serial);
 }
 
 function writeEditorToFile(theFileEntry) {
@@ -155,7 +151,7 @@ function writeEditorToFile(theFileEntry) {
   res = res.replace(LOT, LOT_NEW + i2hex((sn >> 16) & 0xFF));
   res = res.replace(SNRH, SNRH_NEW + i2hex((sn >> 8) & 0xFF));
   res = res.replace(SNRL, SNRL_NEW + i2hex(sn & 0xFF));
-  console.log(res);
+  /*console.log(res);*/
   setStatus(theFileEntry);
   theFileEntry.createWriter(function(fileWriter) {
     fileWriter.onerror = function(e) {
@@ -166,13 +162,13 @@ function writeEditorToFile(theFileEntry) {
     fileWriter.truncate(blob.size);
     fileWriter.onwriteend = function() {
       fileWriter.onwriteend = function(e) {
-        setStatus("Write " + theFileEntry.fullPath + " completed.");
+        setStatus("Write " + theFileEntry.name + " completed.");
       };
 
       fileWriter.write(blob);
     }
   }, errorHandler);
-  document.getElementById("serial").innerHTML = i2hex(sn);
+  showSerial(sn);
 }
 
 var onWritableFileToOpen = function(theFileEntry) {
@@ -186,8 +182,15 @@ var onWritableFileToOpen = function(theFileEntry) {
 
 function handleReloadButton() {
   /*onWritableFileToOpen(fileEntry);*/
-  checkHex(hexFileEntry, function() {
-    handleIncreaseButton();
+  checkHex(hexFileEntry, function(serial) {
+    console.log(serial, sn);
+    if (serial < sn) {
+      sn = serial + 1;
+      showSerial(sn);
+      return;
+    }
+    /*if (serial > sn)*/
+      handleIncreaseButton();
   });
 }
 
@@ -220,8 +223,10 @@ function handleHexFile(open) {
         return;
       hexFileEntry = fileentry;
       console.log('hex entry', hexFileEntry);
-      checkHex(hexFileEntry);
-      /*disableManualButtons(open);*/
+      checkHex(hexFileEntry, function(serial) {
+        sn = serial;
+      });
+      disableManualButtons(open);
       /*unsetHexMenu();*/
     });
   } else {
@@ -234,14 +239,19 @@ function checkHex(theFileEntry, cb) {
   theFileEntry.file(function(file) {
     var fileReader = new FileReader();
 
+    fileReader.onload = function(e) {
+      setStatus(theFileEntry.name);
+    };
+
     fileReader.onerror = function(e) {
       setStatus("Hex failed: " + e.toString());
     };
 
     fileReader.onloadend = function(e) {
       loadHex(fileReader.result, cb);
+      delete file;
+      delete this;
     };
-
 
     fileReader.readAsText(file);
   }, errorHandler);
@@ -272,8 +282,8 @@ function unsetHexMenu() {
 }
 
 function disableManualButtons(dis) {
-  reloadButton.disabled = dis;
-  increaseButton.disabled = dis;
+  /*reloadButton.disabled = dis;*/
+  /*increaseButton.disabled = dis;*/
 }
 
 
@@ -289,6 +299,13 @@ function i2hex(i) {
   else
     return 'xx';
 }
+
+timeout = setInterval(function() {
+  if (fileEntry && hexFileEntry && res && sn) {
+    console.log("Check serial update");
+    handleReloadButton();
+  }
+}, 3000);
 
 chrome.contextMenus.onClicked.addListener(function(info) {
   // Context menu command wasn't meant for us.
@@ -306,15 +323,16 @@ chrome.contextMenus.onClicked.addListener(function(info) {
 onload = function() {
   openButton = document.getElementById("open");
   openHexButton = document.getElementById("openhex");
-  reloadButton = document.getElementById("reload");
-  increaseButton = document.getElementById("increase");
+  /*reloadButton = document.getElementById("reload");*/
+  /*increaseButton = document.getElementById("increase");*/
 
   openButton.addEventListener("click", handleOpenButton);
   openHexButton.addEventListener("click", handleOpenHexButton);
-  reloadButton.addEventListener("click", handleReloadButton);
-  increaseButton.addEventListener("click", handleIncreaseButton);
+  /*reloadButton.addEventListener("click", handleReloadButton);*/
+  /*increaseButton.addEventListener("click", handleIncreaseButton);*/
 
   newFile();
   disableManualButtons(true);
+  openHexButton.disabled = true;
 };
 
