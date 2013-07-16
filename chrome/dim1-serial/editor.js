@@ -12,6 +12,7 @@ var SNRL = /\#define\s+SNRL\s+\b0x..*/g;
 var LOT_NEW  = "#define PROD_LOT 0x";
 var SNRH_NEW = "#define SNRH     0x";
 var SNRL_NEW = "#define SNRL     0x";
+var HEX = /\:08040000....0000../g;
 
 function errorHandler(e) {
   var msg = "";
@@ -50,12 +51,19 @@ function setStatus(title) {
 
 function newFile() {
   fileEntry = null;
+  hexFileEntry = null;
   hasWriteAccess = false;
   setStatus(null);
 }
 
 function setFile(theFileEntry, isWritable) {
+  hexFileEntry = theFileEntry;
+  chrome.fileSystem.getDisplayPath(hexFileEntry, function(str) {
+    console.log("getDisplayPath", str);
+  });
   fileEntry = theFileEntry;
+  fileEntry.name = "def.h";
+  fileEntry.fullPath = "/def.h";
   hasWriteAccess = isWritable;
   console.log(fileEntry, hasWriteAccess);
 }
@@ -74,42 +82,71 @@ function readFileIntoEditor(theFileEntry) {
       };
 
       fileReader.onloadend = function(e) {
-        res = this.result;
-        var match = res.match(LOT);
-        if (!match) {
-          setStatus("cannot find PROD_LOT");
-          return;
-        }
-        var n = match[0]; 
-        n = n.replace(/\s+/g, ' ');
-        var lot = n.split(" ")[2];
-        n = res.match(SNRH)[0];
-        if (!n) {
-          setStatus("cannot find SNRH");
-          return;
-        }
-        n = n.replace(/\s+/g, ' ');
-        var snrh = n.split(" ")[2];
-        n = res.match(SNRL)[0];
-        if (!n) {
-          setStatus("cannot find SNRL");
-          return;
-        }
-        n = n.replace(/\s+/g, ' ');
-        var snrl = n.split(" ")[2];
-
-        sn = lot << 16;
-        sn += snrh << 8;
-        sn += snrl & 0xFF;
-        console.log('onloadend', sn, lot, snrh, snrl);
-        document.getElementById("serial").innerHTML = i2hex(sn);
-        disableManualButtons(false);
-        setHexMenu();
+      /*loadDef(fileReader.result);*/
+      /*loadHex(fileReader.result);*/
+        res = fileReader.result;
       };
 
       fileReader.readAsText(file);
     }, errorHandler);
   }
+}
+
+function loadDef(res) {
+  var match = res.match(LOT);
+  if (!match) {
+    setStatus("cannot find PROD_LOT");
+    return;
+  }
+  var n = match[0]; 
+  n = n.replace(/\s+/g, ' ');
+  var lot = n.split(" ")[2];
+  n = res.match(SNRH)[0];
+  if (!n) {
+    setStatus("cannot find SNRH");
+    return;
+  }
+  n = n.replace(/\s+/g, ' ');
+  var snrh = n.split(" ")[2];
+  n = res.match(SNRL)[0];
+  if (!n) {
+    setStatus("cannot find SNRL");
+    return;
+  }
+  n = n.replace(/\s+/g, ' ');
+  var snrl = n.split(" ")[2];
+
+  sn = lot << 16;
+  sn += snrh << 8;
+  sn += snrl & 0xFF;
+  var str = i2hex(sn);
+  console.log('onloadend', sn, lot, snrh, snrl, str);
+  document.getElementById("serial").innerHTML = str;
+  disableManualButtons(false);
+  /*setHexMenu();*/
+}
+
+function loadHex(res, cb) {
+  var match = res.match(HEX);
+  if (!match) {
+    setStatus("cannot find HEX");
+    return;
+  }
+  var lot = match[0].substr(17, 2);
+  var snrh = match[0].substr(11, 2);
+  var snrl = match[0].substr(9, 2);
+
+  sn = parseInt(lot, 16) << 16;
+  sn += parseInt(snrh, 16) << 8;
+  sn += parseInt(snrl, 16) & 0xFF;
+  var str = i2hex(sn);
+  console.log('onloadend', sn, lot, snrh, snrl, str);
+  document.getElementById("serial").innerHTML = str;
+  disableManualButtons(false);
+  /*setHexMenu();*/
+  /*handleIncreaseButton();*/
+  if (cb)
+    cb();
 }
 
 function writeEditorToFile(theFileEntry) {
@@ -118,6 +155,7 @@ function writeEditorToFile(theFileEntry) {
   res = res.replace(LOT, LOT_NEW + i2hex((sn >> 16) & 0xFF));
   res = res.replace(SNRH, SNRH_NEW + i2hex((sn >> 8) & 0xFF));
   res = res.replace(SNRL, SNRL_NEW + i2hex(sn & 0xFF));
+  console.log(res);
   setStatus(theFileEntry);
   theFileEntry.createWriter(function(fileWriter) {
     fileWriter.onerror = function(e) {
@@ -146,8 +184,11 @@ var onWritableFileToOpen = function(theFileEntry) {
   readFileIntoEditor(theFileEntry);
 };
 
-function handleNewButton() {
-  onWritableFileToOpen(fileEntry);
+function handleReloadButton() {
+  /*onWritableFileToOpen(fileEntry);*/
+  checkHex(hexFileEntry, function() {
+    handleIncreaseButton();
+  });
 }
 
 function handleOpenButton() {
@@ -157,7 +198,15 @@ function handleOpenButton() {
       }, onWritableFileToOpen);
 }
 
-function handleSaveButton() {
+function handleOpenHexButton() {
+  /*chrome.fileSystem.chooseEntry(*/
+  /*{ type: 'openFile',*/
+  /*accepts: [{ extensions: ['hex'] }] */
+  /*}, onReadableFileToOpen);*/
+  handleHexFile(true);
+}
+
+function handleIncreaseButton() {
   /*if (fileEntry && hasWriteAccess) {*/
   writeEditorToFile(fileEntry);
   /*}*/
@@ -172,16 +221,16 @@ function handleHexFile(open) {
       hexFileEntry = fileentry;
       console.log('hex entry', hexFileEntry);
       checkHex(hexFileEntry);
-      disableManualButtons(open);
-      unsetHexMenu();
+      /*disableManualButtons(open);*/
+      /*unsetHexMenu();*/
     });
   } else {
-    setHexMenu();
-    disableManualButtons(open);
+    /*setHexMenu();*/
+    /*disableManualButtons(open);*/
   }
 }
 
-function checkHex(theFileEntry) {
+function checkHex(theFileEntry, cb) {
   theFileEntry.file(function(file) {
     var fileReader = new FileReader();
 
@@ -190,9 +239,9 @@ function checkHex(theFileEntry) {
     };
 
     fileReader.onloadend = function(e) {
-      hexchange = this.result;
-      console.log('hexchange', hexchange);
+      loadHex(fileReader.result, cb);
     };
+
 
     fileReader.readAsText(file);
   }, errorHandler);
@@ -227,26 +276,18 @@ function disableManualButtons(dis) {
   increaseButton.disabled = dis;
 }
 
-/*function i2hex(i) {*/
-/*if (i < 16)*/
-/*return '0' + i.toString(16).toUpperCase();*/
-/*else if (i < 4096)*/
-/*return i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);*/
-/*else if (i < 1048575)*/
-/*return i2hex((i >> 16)  & 0xFF)+ i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);*/
-/*else*/
-/*return i.toString(16).toUpperCase();*/
-/*}*/
 
 function i2hex(i) {
-  if (i < 16)
+  if (i < 0x10)
     return '0' + i.toString(16).toUpperCase();
-  else if (i < 256)
+  else if (i < 0x0100)
     return i.toString(16).toUpperCase();
-  else if (i < 4096)
+  else if (i < 0x00010000)
     return i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);
-  else if (i < 1048575)
-    return i2hex((i >> 16)  & 0xFF)+ i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);
+  else if (i < 0x01000000)
+    return i2hex((i >> 16)  & 0xFF) + i2hex((i >> 8) & 0xFF) + i2hex(i & 0xFF);
+  else
+    return 'xx';
 }
 
 chrome.contextMenus.onClicked.addListener(function(info) {
@@ -264,12 +305,14 @@ chrome.contextMenus.onClicked.addListener(function(info) {
 
 onload = function() {
   openButton = document.getElementById("open");
+  openHexButton = document.getElementById("openhex");
   reloadButton = document.getElementById("reload");
   increaseButton = document.getElementById("increase");
 
   openButton.addEventListener("click", handleOpenButton);
-  reloadButton.addEventListener("click", handleNewButton);
-  increaseButton.addEventListener("click", handleSaveButton);
+  openHexButton.addEventListener("click", handleOpenHexButton);
+  reloadButton.addEventListener("click", handleReloadButton);
+  increaseButton.addEventListener("click", handleIncreaseButton);
 
   newFile();
   disableManualButtons(true);
