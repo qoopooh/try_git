@@ -181,8 +181,31 @@ function u82hex(arr) {
 
   return hex;
 }
-function zeroPad(number) {
-  return (number < 10) ? '0' + number : number;
+
+function zeroPad(number, d) {
+  if (!d)
+    d = 2;
+  if (d === 2) {
+    return (number < 10) ? '0' + number : number;
+  } else if (d === 3) {
+    if (number < 10)
+      return '00' + number;
+    else if (number < 100)
+      return '0' + number;
+    else
+      return number;
+  } else if (d === 4) {
+    if (number < 10)
+      return '000' + number;
+    else if (number < 100)
+      return '00' + number;
+    else if (number < 1000)
+      return '0' + number;
+    else
+      return number;
+  }
+  
+  return number;
 }
 
 function timeToString(d) {
@@ -493,7 +516,7 @@ function genepc(cb) {
   newepc[9] = (i >> 8) & 0xFF;
   newepc[10] = i & 0xFF;
   if (code.length < 4)
-    newepc[11] = 0;
+    newepc[11] = 0xFF;
   else
     newepc[11] = parseInt(code[3]);
 
@@ -511,13 +534,12 @@ function genuser(cb) {
   user[2] = parseInt(date[0]);
   user[3] = parseInt(date[1]);
   i = parseInt(quantity[0]);
-  user[4] = (i >> 16) & 0xFF;
-  user[5] = (i >> 8) & 0xFF;
-  user[6] = i & 0xFF;
+  user[4] = (i >> 8) & 0xFF;
+  user[5] = i & 0xFF;
   i = parseInt(quantity[1]);
-  user[7] = (i >> 8) & 0xFF;
-  user[8] = i & 0xFF;
-  user[9] = quantity[1].charCodeAt(3);
+  user[6] = (i >> 8) & 0xFF;
+  user[7] = i & 0xFF;
+  user[8] = quantity[1].charCodeAt(3);
 
   cb();
 }
@@ -606,6 +628,7 @@ function readTagInfo() {
           state = 'single';
         break;
       }
+      extractEpcInfo();
       state = 'readUser';
       break;
     case 'readUser':
@@ -622,10 +645,10 @@ function readTagInfo() {
           state = 'readUser';
         break;
       }
+      extractUserInfo();
       state = 'noop';
       break;
     default:
-      log('Done');
       closePort();
       process = '';
       break;
@@ -633,6 +656,47 @@ function readTagInfo() {
   if (tempstate !== state)
     prev_regstate = tempstate;
   readtaginfo_state = state;
+}
+
+function extractEpcInfo() {
+  var batch = '';
+  var code = '';
+  var i = 0;
+
+  batch = String.fromCharCode(epc[0]);
+  if (epc[1])
+    batch += String.fromCharCode(epc[1]);
+  if (epc[2])
+    batch += String.fromCharCode(epc[2]);
+  i = ((epc[3] << 8) + epc[4]) & 0x03FF;
+  batch += zeroPad(i, 3) + '/' + zeroPad(epc[5]);
+
+  i = ((epc[7] << 8) + epc[8]) & 0x03FF;
+  code = zeroPad(epc[6]) + '.' + zeroPad(i, 3) + '.';
+  i = ((epc[9] << 8) + epc[10]) & 0x03FF;
+  code += zeroPad(i, 3);
+  if (epc[11] !== 255)
+  code += '.' + epc[11];
+
+  log('Product code: ' + code);
+  log('Batch: ' + batch);
+}
+
+function extractUserInfo() {
+  var mandate = '';
+  var expdate = '';
+  var quantity = '';
+  var i = 0;
+
+  mandate = zeroPad(readdata[0]) + '/' + zeroPad(readdata[1]);
+  log('Manufacture date: ' + mandate);
+  expdate = zeroPad(readdata[2]) + '/' + zeroPad(readdata[3]);
+  log('Expiration date: ' + expdate);
+  i = ((readdata[4] << 8) + readdata[5]) & 0x3FFF;
+  quantity = zeroPad(i, 4) + ',';
+  i = ((readdata[6] << 8) + readdata[7]) & 0x3FFF;
+  quantity += zeroPad(i, 3) + String.fromCharCode(readdata[8]);
+  log('Quantity: ' + quantity);
 }
 
 setInterval(function() {
