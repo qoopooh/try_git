@@ -5,6 +5,7 @@ var readArray = new Uint8Array(readBuff);
 var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
+var f_regis = false;
 var taginfo = {
   productcode: '',
   batchnumber: '',
@@ -14,7 +15,8 @@ var taginfo = {
 };
 var progress = 0;
 var progressmax = 7;
-var regstate = 'Idle';
+var regstate = '';
+var prev_regstate = regstate;
 var regtimeout;
 var regtimeoutCount = 0;
 var newepc = new Uint8Array(12);
@@ -31,7 +33,7 @@ function writeArrayBuffer(buf) {
     return;
   }
   chrome.serial.write(conn_id, buf, function() {
-    document.getElementById('write-info').innerText = ab2hex(buf);
+      /*document.getElementById('write-info').innerText = ab2hex(buf);*/
   });
 }
 
@@ -110,22 +112,22 @@ function onOpen(openInfo) {
 
 function openSelectedPort() {
   f_openport = true;
-  setStatus('Connected');
   log('Opened');
   if (conn_id > 0) {
     console.log("openSelectedPort", conn_id);
     return;
   }
   var portPicker = document.getElementById('port-picker');
+  console.log("portPicker", portPicker, portPicker.length);
   if (!portPicker.length) {
-    console.log("there is no port");
+    log("there is no port");
     return;
   }
-  console.log("portPicker", portPicker, portPicker.length);
   var selectedPort = portPicker.options[portPicker.selectedIndex].value;
-
   console.log("selectedPort", selectedPort);
+
   chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
+  setStatus('Connected');
 }
 
 function closePort() {
@@ -196,15 +198,15 @@ function dateToString(d) {
 }
 
 function setPosition(position) {
-  var rotation = position * 18.0;
-  document.getElementById('image').style.webkitTransform =
-    'rotateZ(' + rotation + 'deg)';
+  /*var rotation = position * 18.0;*/
+  /*document.getElementById('image').style.webkitTransform =*/
+  /*'rotateZ(' + rotation + 'deg)';*/
 };
 
 function log(msg) {
-  $("#messagewindow").append(timeToString() + ' ' + msg + '<br/>');
-  var height = $("#messagewindow")[0].scrollHeight;
-  $("#messagewindow").scrollTop(height);
+  $("#messagewindow").prepend(timeToString() + ' ' + msg + '<br/>');
+  /*var height = $("#messagewindow")[0].scrollHeight;*/
+  /*$("#messagewindow").scrollTop(height);*/
 }
 
 function aaelog(msg) {
@@ -215,7 +217,7 @@ function aaelog(msg) {
   }
   ++readCount;
   setPosition(readCount);
-  document.getElementById('read-count').innerText = readCount.toString();
+  /*document.getElementById('read-count').innerText = readCount.toString();*/
   log(msg);
 }
 
@@ -223,7 +225,7 @@ function resizeMessageWindow() {
   var bodyheight = $(window).height();
   var bodywidth = $(window).width();
 
-  $("#messagewindow").width(bodywidth - 360);
+  /*$("#messagewindow").width(bodywidth - 360);*/
   $("#image").css({ left: bodywidth - 90 });
 }
 
@@ -296,6 +298,8 @@ function verifyForm(cb) {
 }
 
 function register() {
+  var tempstate = regstate;
+
   switch (regstate) {
     case 'genepc':
       setStatus("Generate EPC");
@@ -305,7 +309,6 @@ function register() {
         $("#epc").val(hex);
         updateProgress();
         regstate = 'genuser';
-        register();
       });
       break;
     case 'genuser':
@@ -315,16 +318,82 @@ function register() {
         console.log('genuser done', hex);
         $("#user").val(hex);
         updateProgress();
-        /*regstate = 'genuser';*/
-        /*register();*/
+        regstate = 'openport';
       });
       break;
+    case 'openport':
+      setStatus("Open " + $("#port-picker").val());
+      openSelectedPort();
+      updateProgress();
+      regstate = 'waitport';
+      break;
+    case 'waitport':
+      if (conn_id < 1)
+        break;
+      setHeartbeat(true, function (buf) {
+        writeArrayBuffer(buf);
+        updateProgress();
+        regstate = 'waithb';
+      });
+      break;
+    case 'single':
+      inventorySingle(function (buf) {
+        writeArrayBuffer(buf);
+        f_single = false;
+        regstate = 'waithb';
+      });
+      break;
+    case 'writeEpc':
+      writeEpc(epc, new Uint8Array([ 0x00, 0x00, 0x00, 0x00 ]),
+          newepc, function (buf) {
+        writeArrayBuffer(buf);
+        console.log(regstate, buf);
+        regstate = 'waithb';
+      });
+      break;
+    case 'writeUser':
+      regstate = 'waithb';
+      break;
+    case 'waithb':
+      if (!f_hb_read)
+        break;
+      f_hb_read = false;
+      log("f_hb_read " + prev_regstate);
+      switch (prev_regstate) {
+        case 'waitport':
+          regstate = 'single';
+          break;
+        case 'single':
+          if (!f_single)
+            break;
+          if (epc.length < 1) {
+            regstate = 'single';
+          } else {
+            regstate = 'writeEpc';
+          }
+          break;
+        case 'writeEpc':
+          if (!f_written)
+            break;
+          if (f_success)
+            regstate = 'writeUser';
+          else
+            regstate = 'single';
+          break;
+        default:
+          regstate = 'noop';
+      }
+      break;
+    case 'noop':
     default:
+      log('No operation');
+      closePort();
+      f_regis = false;
       console.log(taginfo);
-      regstate = 'genepc';
-      register();
       break;
   }
+  if (tempstate !== regstate)
+    prev_regstate = tempstate;
 }
 
 function genepc(cb) {
@@ -435,13 +504,19 @@ function submit(c) {
 function updateProgress() {
   $("#progress").val(++progress);
   var percent = progress * 100 / progressmax;
-  percent = percent.toFixed(2);
-  if (percent > 100)
+  if (percent > 100) {
     $("#percent").text(progress);
-  else
+  } else {
+    percent = percent.toFixed(2);
     $("#percent").text('' + percent + ' %');
-  /*console.log("progress", progress, percent);*/
+  }
 }
+
+setInterval(function() {
+  if (f_regis) {
+    register();
+  }
+}, 200);
 
 function init() {
   $("#btnRefresh").click(function() {
@@ -546,8 +621,10 @@ function init() {
   });
   $("#btnSubmit").click(function() {
     progress = 0;
-    if (verifyForm())
-      register();
+    if (verifyForm()) {
+      f_regis = true;
+      regstate = 'genepc';
+    }
   });
   $("#progress").val(0);
   document.getElementById('progress').setAttribute('max', '' + progressmax);

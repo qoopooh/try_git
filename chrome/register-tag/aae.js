@@ -31,7 +31,13 @@ var Packet = { 'Start': 0, 'CommandStart': 1, 'Command': 2,
 var pState = Packet.Start;
 var cmd = 0x0000;
 var f_hb = false;
+var f_hb_read = false;
+var f_single = false;
+var f_written = false;
+var f_success = false;
 var hbcount = 0;
+var epc = null;
+var epcstr = '';
 
 function extractPackage(arr, idx, cb) {
   var pkgsize = 10; // smallest posible package
@@ -75,20 +81,34 @@ function execReceivingMessage(cmd, len, payload, cb) {
   switch (cmd) {
     case Command.InventorySingle:
       var tagcount = payload[1];
-      
-      if (tagcount)
-        msg = 'EPC: ' + u82hex(payload.subarray(6));
-      else
+
+      f_single = true;
+      if (tagcount) {
+        epc = payload.subarray(6);
+        epcstr = u82hex(epc);
+        msg = 'EPC: ' + epcstr;
+      } else {
+        epc = null;
+        epcstr = '';
         msg = 'EPC: -';
+      }
       aaelog(msg);
+      break;
+    case Command.WriteToTag:
+      f_written = true;
+      if (payload[0] === 0)
+        f_success = true;
       break;
     case Command.HearthbeatInterrupt:
       f_hb = true;
+      f_hb_read = true;
       msg = 'HB ' + ++hbcount;
       aaelog(msg);
       break;
     case Command.InventoryCyclicInterrupt:
-      msg = 'EPC: ' + u82hex(payload.subarray(2));
+      epc = payload.subarray(2);
+      epcstr = u82hex(epc);
+      msg = 'EPC: ' + epcstr;
       aaelog(msg);
       break;
     default:
@@ -118,10 +138,13 @@ function checksum(arr, len) {
   return sum;
 }
 
-function buildPackage(cmd, len, payload) {
+function buildPackage(cmd, payload) {
   var bufLen = 10;
-  if (payload)
+  var len = 0;
+  if (payload) {
     bufLen = payload.length + 11;
+    len = payload.length;
+  }
   var buf = new ArrayBuffer(bufLen);
   var arr = new Uint8Array(buf);
   var cmd1 = cmd >> 8;
@@ -139,45 +162,82 @@ function buildPackage(cmd, len, payload) {
   ++len;
   arr.set(new Uint8Array([checksum(arr, len)]), len);
 
-  var build = "";
-  for (var i = 0; i < bufLen; ++i) {
-    var val = arr[i];
-    if (val < 10)
-      build += '0' + val;
-    else
-      build += val.toString(16);
-  }
-  console.log('build', build);
+  console.log('build', u82hex(arr));
 
   return buf;
 }
 
 function getSoftwareRevision(cb) {
-  var buf = buildPackage(Command.GetSoftwareRevision, 0);
+  var buf = buildPackage(Command.GetSoftwareRevision);
   cb(buf);
 }
 
 function inventorySingle(cb) {
-  var buf = buildPackage(Command.InventorySingle, 0);
+  var buf = buildPackage(Command.InventorySingle);
   cb(buf);
 }
 
 function inventoryCyclic(on, cb) {
   if (on)
-    var buf = buildPackage(Command.InventoryCyclic, 1, new Uint8Array([1]));
+    var buf = buildPackage(Command.InventoryCyclic, new Uint8Array([1]));
   else
-    var buf = buildPackage(Command.InventoryCyclic, 1, new Uint8Array([0]));
+    var buf = buildPackage(Command.InventoryCyclic, new Uint8Array([0]));
+  cb(buf);
+}
+
+function setHeartbeat(on, cb) {
+  f_hb = on;
+  if (f_hb) {
+    var buf = buildPackage(Command.SetHeartBeat, new Uint8Array([1]));
+    hbcount = 0;
+  } else {
+    var buf = buildPackage(Command.SetHeartBeat, new Uint8Array([0]));
+  }
   cb(buf);
 }
 
 function toggleHeartbeat(cb) {
-  f_hb = !f_hb;
-  if (f_hb) {
-    var buf = buildPackage(Command.SetHeartBeat, 1, new Uint8Array([1]));
-    hbcount = 0;
-  } else {
-    var buf = buildPackage(Command.SetHeartBeat, 1, new Uint8Array([0]));
-  }
+  setHeartbeat(!f_hb, cb);
+}
+
+function writeToTag(epc, bank, addr, pass, data, cb) {
+  var epclen = epc.length;
+  var datalen = data.length;
+  var payload = new Uint8Array(epclen + 9 + datalen);
+  var i = 0;
+
+  payload.set(new Uint8Array([epclen]), i);
+  payload.set(epc, ++i);
+  payload.set(new Uint8Array([bank]), epclen + i);
+  if (!addr)
+    addr = new Uint8Array([0, 0]);
+  payload.set(addr, epclen + (++i));
+  if (!pass)
+    pass = new Uint8Array([0, 0, 0, 0]);
+  payload.set(pass, epclen + (i += 2));
+  payload.set(new Uint8Array([datalen]), epclen + (i += 4));
+  payload.set(data, epclen + (++i));
+
+  f_written = false;
+  f_success = false;
+  var buf = buildPackage(Command.WriteToTag, payload);
   cb(buf);
+}
+
+function writeEpc(epc, pass, newepc, cb) {
+  var pc = new Uint8Array([0x30, 0x00]); // default is 12 byte
+  var newepclen = newepc.length;
+
+  if (newepclen !== 12) {
+    var epcwordlen = Math.round(newepclen / 2);
+    console.log("newepclen", newepclen);
+    pc[0] = epcwordlen << 3;
+    if (newepclen % 2)
+      ++newepclen;
+  }
+  var data = new Uint8Array(newepclen + 2);
+  data.set(pc);
+  data.set(newepc, 2);
+  writeToTag(epc, 1, new Uint8Array([0, 1]), pass, data, cb);
 }
 
