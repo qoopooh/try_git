@@ -33,11 +33,13 @@ var cmd = 0x0000;
 var f_hb = false;
 var f_hb_read = false;
 var f_single = false;
+var f_readtag = false;
 var f_written = false;
 var f_success = false;
 var hbcount = 0;
 var epc = null;
 var epcstr = '';
+var readdata = null;
 
 function extractPackage(arr, idx, cb) {
   var pkgsize = 10; // smallest posible package
@@ -91,6 +93,18 @@ function execReceivingMessage(cmd, len, payload, cb) {
         epc = null;
         epcstr = '';
         msg = 'EPC: -';
+      }
+      aaelog(msg);
+      break;
+    case Command.ReadFromTag:
+      f_readtag = true;
+
+      if (payload[0] === 0 && payload[1] > 0) {
+        readdata = payload.subarray(2);
+        msg = 'USER: ' + u82hex(readdata);
+      } else {
+        readdata = null;
+        msg = 'USER: -';
       }
       aaelog(msg);
       break;
@@ -174,6 +188,8 @@ function getSoftwareRevision(cb) {
 
 function inventorySingle(cb) {
   var buf = buildPackage(Command.InventorySingle);
+
+  epc = null;
   cb(buf);
 }
 
@@ -182,6 +198,8 @@ function inventoryCyclic(on, cb) {
     var buf = buildPackage(Command.InventoryCyclic, new Uint8Array([1]));
   else
     var buf = buildPackage(Command.InventoryCyclic, new Uint8Array([0]));
+
+  epc = null;
   cb(buf);
 }
 
@@ -200,6 +218,31 @@ function toggleHeartbeat(cb) {
   setHeartbeat(!f_hb, cb);
 }
 
+function readFromTag(epc, bank, addr, pass, count, cb) {
+  var epclen = epc.length;
+  var payload = new Uint8Array(epclen + 9);
+  var i = 0;
+
+  payload.set(new Uint8Array([epclen]), i);
+  payload.set(epc, ++i);
+  payload.set(new Uint8Array([bank]), epclen + i);
+  if (!addr)
+    addr = new Uint8Array([0, 0]);
+  else
+    addr = new Uint8Array([(addr >> 8) & 0xFF, addr & 0xFF]);
+  payload.set(addr, epclen + (++i));
+  if (!pass)
+    pass = new Uint8Array([0, 0, 0, 0]);
+  payload.set(pass, epclen + (i += 2));
+  payload.set(new Uint8Array([count]), epclen + (i += 4));
+
+  f_readtag = false;
+  f_success = false;
+  readdata = null;
+  var buf = buildPackage(Command.ReadFromTag, payload);
+  cb(buf);
+}
+
 function writeToTag(epc, bank, addr, pass, data, cb) {
   var epclen = epc.length;
   var datalen = data.length;
@@ -211,6 +254,8 @@ function writeToTag(epc, bank, addr, pass, data, cb) {
   payload.set(new Uint8Array([bank]), epclen + i);
   if (!addr)
     addr = new Uint8Array([0, 0]);
+  else
+    addr = new Uint8Array([(addr >> 8) & 0xFF, addr & 0xFF]);
   payload.set(addr, epclen + (++i));
   if (!pass)
     pass = new Uint8Array([0, 0, 0, 0]);
@@ -238,6 +283,7 @@ function writeEpc(epc, pass, newepc, cb) {
   var data = new Uint8Array(newepclen + 2);
   data.set(pc);
   data.set(newepc, 2);
-  writeToTag(epc, 1, new Uint8Array([0, 1]), pass, data, cb);
+  writeToTag(epc, 1, 1, pass, data, cb);
 }
+
 

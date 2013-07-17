@@ -5,7 +5,6 @@ var readArray = new Uint8Array(readBuff);
 var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
-var f_regis = false;
 var taginfo = {
   productcode: '',
   batchnumber: '',
@@ -14,13 +13,18 @@ var taginfo = {
   quantity: ''
 };
 var progress = 0;
-var progressmax = 7;
+var progressmax = 15;
 var regstate = '';
 var prev_regstate = regstate;
+var readtaginfo_state = '';
 var regtimeout;
 var regtimeoutCount = 0;
 var newepc = new Uint8Array(12);
 var user = new Uint8Array(10);
+var userwriting = new Uint8Array(2);
+var userword = 0;
+var commandtimeout = 0;
+var process = '';
 
 String.prototype.splice = function( idx, rem, s ) {
   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
@@ -72,6 +76,8 @@ function setStatus(st, cls) {
   $('#status').text(st);
   if (cls)
     document.getElementById("status").className = cls;
+  /*else*/
+  /*document.getElementById("status").className = 'normal';*/
 }
 
 function buildPortPicker(ports) {
@@ -130,12 +136,13 @@ function openSelectedPort() {
   setStatus('Connected');
 }
 
-function closePort() {
+function closePort(cb) {
   f_openport = false;
   setStatus('Disconnected');
   log('Closed');
   if (conn_id < 1) {
     console.log("closePort", conn_id);
+    if (cb) return cb();
     return;
   }
   chrome.serial.flush(conn_id, function() {
@@ -144,6 +151,7 @@ function closePort() {
       console.log("closed", conn_id);
       conn_id = 0;
       disableButton(f_openport);
+      if (cb) return cb();
     });
   });
 }
@@ -212,9 +220,9 @@ function log(msg) {
 function aaelog(msg) {
   var dat = msg.split(':');
 
-  if (dat.length > 1) {
-    $("#read-info").text(dat[1]);
-  }
+  /*if (dat.length > 1) {*/
+  /*$("#read-info").text(dat[1]);*/
+  /*}*/
   ++readCount;
   setPosition(readCount);
   /*document.getElementById('read-count').innerText = readCount.toString();*/
@@ -298,17 +306,18 @@ function verifyForm(cb) {
 }
 
 function register() {
-  var tempstate = regstate;
+  var state = regstate;
+  var tempstate = state;
 
-  switch (regstate) {
+  switch (state) {
     case 'genepc':
       setStatus("Generate EPC");
       genepc(function () {
         var hex = u82hex(newepc);
         console.log('genepc done', hex);
-        $("#epc").val(hex);
+        $("#epc").text(hex);
         updateProgress();
-        regstate = 'genuser';
+        state = 'genuser';
       });
       break;
     case 'genuser':
@@ -316,43 +325,88 @@ function register() {
       genuser(function () {
         var hex = u82hex(user);
         console.log('genuser done', hex);
-        $("#user").val(hex);
+        $("#user").text(hex);
         updateProgress();
-        regstate = 'openport';
+        state = 'openport';
       });
       break;
     case 'openport':
       setStatus("Open " + $("#port-picker").val());
       openSelectedPort();
       updateProgress();
-      regstate = 'waitport';
+      state = 'waitport';
       break;
     case 'waitport':
       if (conn_id < 1)
         break;
+      setStatus('Set Heartbeat');
       setHeartbeat(true, function (buf) {
         writeArrayBuffer(buf);
         updateProgress();
-        regstate = 'waithb';
+        state = 'waithb';
       });
       break;
     case 'single':
+      commandtimeout = 20;
       inventorySingle(function (buf) {
         writeArrayBuffer(buf);
         f_single = false;
-        regstate = 'waithb';
+        state = 'waithb';
       });
       break;
     case 'writeEpc':
       writeEpc(epc, new Uint8Array([ 0x00, 0x00, 0x00, 0x00 ]),
           newepc, function (buf) {
         writeArrayBuffer(buf);
-        console.log(regstate, buf);
-        regstate = 'waithb';
+        console.log(state, buf);
+        state = 'waithb';
       });
       break;
     case 'writeUser':
-      regstate = 'waithb';
+      userwriting = user.subarray(userword * 2, userword * 2 + 2);
+      writeToTag(epc, 3, userword, null, userwriting, function (buf) {
+        writeArrayBuffer(buf);
+        console.log(state, buf);
+        state = 'waitwrite';
+      });
+      break;
+    case 'waitwrite':
+      if (!f_written)
+        break;
+      if (f_success) {
+        state = 'readUser';
+      } else {
+        state = 'writeUser';
+      }
+      break;
+    case 'readUser':
+      readFromTag(epc, 3, userword, null, 2, function (buf) {
+        writeArrayBuffer(buf);
+        console.log(state, buf);
+        state = 'waitread';
+      });
+      break;
+    case 'waitread':
+      if (!f_readtag)
+        break;
+      if (!readdata) {
+        state = 'writeUser';
+        break;
+      }
+      if (userwriting[0] === readdata[0]
+          && userwriting[1] === readdata[1]) {
+        updateProgress();
+        ++userword;
+        if (userword < 5) {
+          state = 'writeUser';
+        } else {
+          closePort(function () {
+            setStatus('Finished');
+            log('Succeed');
+            process = '';
+          });
+        }
+      }
       break;
     case 'waithb':
       if (!f_hb_read)
@@ -361,39 +415,51 @@ function register() {
       log("f_hb_read " + prev_regstate);
       switch (prev_regstate) {
         case 'waitport':
-          regstate = 'single';
+          setStatus('Read EPC');
+          state = 'single';
           break;
         case 'single':
           if (!f_single)
             break;
-          if (epc.length < 1) {
-            regstate = 'single';
+          if (!epc || epc.length < 1) {
+            state = 'single';
           } else {
-            regstate = 'writeEpc';
+            setStatus('Write EPC');
+            state = 'writeEpc';
           }
           break;
         case 'writeEpc':
           if (!f_written)
             break;
-          if (f_success)
-            regstate = 'writeUser';
-          else
-            regstate = 'single';
+          if (f_success) {
+            epc = newepc;
+            userword = 0;
+            updateProgress();
+            state = 'writeUser';
+            setStatus('Write USER');
+          } else {
+            state = 'single';
+          }
+          break;
+        case 'readUser':
+          break;
+        case 'writeUser':
           break;
         default:
-          regstate = 'noop';
+          state = 'noop';
       }
       break;
     case 'noop':
     default:
       log('No operation');
       closePort();
-      f_regis = false;
+      process = '';
       console.log(taginfo);
       break;
   }
-  if (tempstate !== regstate)
+  if (tempstate !== state)
     prev_regstate = tempstate;
+  regstate = state;
 }
 
 function genepc(cb) {
@@ -512,11 +578,77 @@ function updateProgress() {
   }
 }
 
-setInterval(function() {
-  if (f_regis) {
-    register();
+function readTagInfo() {
+  var state = readtaginfo_state;
+  var tempstate = state;
+
+  switch (state) {
+    case 'openport':
+      setStatus("Open " + $("#port-picker").val());
+      openSelectedPort();
+      state = 'waitport';
+      break;
+    case 'waitport':
+      if (conn_id < 1)
+        break;
+      state = 'single';
+      break;
+    case 'single':
+      commandtimeout = 10;
+      inventorySingle(function (buf) {
+        writeArrayBuffer(buf);
+        state = 'waitepc';
+      });
+      break;
+    case 'waitepc':
+      if (!epc || epc.length < 1) {
+        if (!commandtimeout)
+          state = 'single';
+        break;
+      }
+      state = 'readUser';
+      break;
+    case 'readUser':
+      commandtimeout = 10;
+      readFromTag(epc, 3, null, null, 10, function (buf) {
+        writeArrayBuffer(buf);
+        console.log(state, buf);
+        state = 'waitread';
+      });
+      break;
+    case 'waitread':
+      if (!readdata) {
+        if (!commandtimeout)
+          state = 'readUser';
+        break;
+      }
+      state = 'noop';
+      break;
+    default:
+      log('Done');
+      closePort();
+      process = '';
+      break;
   }
-}, 200);
+  if (tempstate !== state)
+    prev_regstate = tempstate;
+  readtaginfo_state = state;
+}
+
+setInterval(function() {
+  switch (process) {
+    case 'register':
+      register();
+      break;
+    case 'readTagInfo':
+      readTagInfo();
+      break;
+    default:
+      break;
+  }
+  if (commandtimeout)
+    --commandtimeout;
+}, 100);
 
 function init() {
   $("#btnRefresh").click(function() {
@@ -622,9 +754,13 @@ function init() {
   $("#btnSubmit").click(function() {
     progress = 0;
     if (verifyForm()) {
-      f_regis = true;
+      process = 'register';
       regstate = 'genepc';
     }
+  });
+  $("#btnReadTag").click(function() {
+    process = 'readTagInfo';
+    readtaginfo_state = 'openport';
   });
   $("#progress").val(0);
   document.getElementById('progress').setAttribute('max', '' + progressmax);

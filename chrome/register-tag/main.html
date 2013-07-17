@@ -31,6 +31,7 @@ Expiration date: <input type="text" id="expdate" value='03/14'><br>
 Quantity: <input type="text" id="quantity" value='1234,567p'><br>
 </form>
 <input type="submit" id="btnSubmit" value="Submit">
+<input type="button" id="btnReadTag" value="Read Tag">
 
 <div id='main-status'>
 Status:
@@ -40,8 +41,10 @@ Status:
 <meter id='progress' value='2' min='0' max='10'>Not support progress bar</meter> <span id='percent'>-</span>
 
 <div id='generate'>
-EPC: <input type="text" id="epc" value='-' size='25'><br>
-USER: <input type="text" id="user" value='-' size='23'><br>
+<!--EPC: <input type="text" id="epc" value='-' size='25'><br>-->
+<!--USER: <input type="text" id="user" value='-' size='23'><br>-->
+EPC: <span id="epc">-</span><br />
+USER: <span id="user">-</span>
 </div>
 
 <div id='readcontrol'>
