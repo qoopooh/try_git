@@ -97,7 +97,8 @@ function buildPortPicker(ports) {
     portPicker.appendChild(portOption);
     ++portcount;
   });
-  portPicker.selectedIndex = portcount - 1;
+  portPicker.selectedIndex = portcount;
+  $("#port-picker").selectmenu('refresh', true);
   setStatus('Refresh ' + portcount + ' port(s)');
 }
 
@@ -263,7 +264,7 @@ function resizeMessageWindow() {
 
 function disableButton(open) {
   if (open) {
-    $('#btnRefresh').button('disable');
+    /*$('#btnRefresh').button('disable');*/
     $('#btnOpen').button('disable');
     $('#btnClose').button('enable');
     $('#btnStart').button('enable');
@@ -271,7 +272,7 @@ function disableButton(open) {
     $('#btnSingle').button('enable');
     $('#btnHB').button('enable');
   } else {
-    $('#btnRefresh').button('enable');
+    /*$('#btnRefresh').button('enable');*/
     $('#btnOpen').button('enable');
     $('#btnClose').button('disable');
     $('#btnStart').button('disable');
@@ -664,7 +665,11 @@ function readTagInfo() {
         break;
       }
       extractUserInfo();
-      state = 'noop';
+      closePort(function() {
+        setStatus(taginfo.productcode + ' ' + taginfo.batchnumber
+          + ' ' + taginfo.quantity);
+        process = '';
+      });
       break;
     default:
       closePort();
@@ -698,6 +703,8 @@ function extractEpcInfo() {
 
   log('Product code: ' + code);
   log('Batch: ' + batch);
+  taginfo.productcode = code;
+  taginfo.batchnumber = batch;
 }
 
 function extractUserInfo() {
@@ -707,14 +714,28 @@ function extractUserInfo() {
   var i = 0;
 
   mandate = zeroPad(readdata[0]) + '/' + zeroPad(readdata[1]);
-  log('Manufacture date: ' + mandate);
   expdate = zeroPad(readdata[2]) + '/' + zeroPad(readdata[3]);
-  log('Expiration date: ' + expdate);
   i = ((readdata[4] << 8) + readdata[5]) & 0x3FFF;
   quantity = zeroPad(i, 4) + ',';
   i = ((readdata[6] << 8) + readdata[7]) & 0x3FFF;
   quantity += zeroPad(i, 3) + String.fromCharCode(readdata[8]);
+  log('Manufacture date: ' + mandate);
+  log('Expiration date: ' + expdate);
   log('Quantity: ' + quantity);
+  taginfo.mandate = mandate;
+  taginfo.expdate = expdate;
+  taginfo.quantity = quantity;
+}
+
+function refreshPort() {
+  var select = document.getElementById("port-picker");
+  var len = select.options.length;
+
+  for (i = len - 1; i > 0; i--) {
+    select.options[i] = null;
+  }
+  console.log("refresh");
+  onload();
 }
 
 setInterval(function() {
@@ -733,16 +754,7 @@ setInterval(function() {
 }, 100);
 
 function init() {
-  $("#btnRefresh").click(function() {
-    var select = document.getElementById("port-picker");
-    var len = select.options.length;
-
-    for (i = len - 1; i > 0; i--) {
-      select.options[i] = null;
-    }
-    console.log("refresh");
-    onload();
-  });
+  /*$("#btnRefresh").click(refreshPort());*/
   $("#btnOpen").click(function() {
     openSelectedPort();
   });
@@ -775,6 +787,9 @@ function init() {
   });
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
+  });
+  $("#port-picker").change(function() {
+    closePort();
   });
   $("#productcode").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -846,9 +861,6 @@ function init() {
   });
   $("#progress").val(0);
   document.getElementById('progress').setAttribute('max', '' + progressmax);
-  $("#port-picker").change(function() {
-    closePort();
-  });
 
   $("#messagewindow").html('Start: ' + dateToString() + '<br/>');
   resizeMessageWindow();

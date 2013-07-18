@@ -5,36 +5,45 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div data-role="header">
+  <h1>Biomin Bag V0.1</h1>
+  <button id='save' data-icon="check">Save</button>
+</div>
 
-<!--<label for="port-picker" class="select">Port:</label>-->
 <select id="port-picker" data-inline="true">
   <option>Reader Port</option>
 </select>
-<div data-role="controlgroup" data-type="horizontal">
-<button type="button" id="btnRefresh" data-icon="refresh">Reload</button>
-<button type="button" id="btnOpen" data-icon="plus">Open</button>
-<button type="button" id="btnClose" data-icon="minus">Close</button>
+<div data-role="controlgroup" data-type="horizontal" class='center-wrapper'>
+<!--<button type="button" id="btnRefresh" data-icon="refresh">Reload</button>-->
+<button type="button" id="btnOpen" data-icon="plus" data-mini='true'>Open</button>
+<button type="button" id="btnClose" data-icon="minus" data-mini='true'>Close</button>
 </div>
 
 <!--<form id='fill'>-->
 <div data-role="fieldcontain">
   <label for="productcode">Product code:</label>
-  <input type="text" name="productcode" id="productcode" placeholder='00.000.000.0'>
+  <input type="text" id="productcode"  placeholder='00.000.000.0' value='00.000.000'>
+  <label for='batchnumber'>Batch number:</label>
+  <input type="text" id="batchnumber" placeholder='LBA001/13' value='M001/13'>
+  <label for='mandate'>Manufacture date:</label>
+  <input type="text" id="mandate" placeholder='03/13' value='03/13'>
+  <label for='expdate'>Expiration date:</label>
+  <input type="text" id="expdate" placeholder='03/14' value='03/14'>
+  <label for='quantity'>Quantity:</label>
+  <input type="text" id="quantity" placeholder='9999,999k' value='9999,999u'>
 </div>
-Batch number: <input type="text" id="batchnumber" placeholder='LBA001/13'>
-Manufacture date: <input type="text" id="mandate" placeholder='03/13'>
-Expiration date: <input type="text" id="expdate" placeholder='03/14'>
-Quantity: <input type="text" id="quantity" placeholder='9999,999k'>
-<!--</form>-->
-<input type="submit" id="btnSubmit" value="Submit" data-inline="true" data-icon="edit">
-<input type="button" id="btnReadTag" value="Read Tag" data-inline="true" data-icon="check">
-
+<div class='ui-body ui-body-b'>
+  <input type="submit" id="btnSubmit" value="Write Tag" data-inline="true" data-icon="edit">
+  <input type="button" id="btnReadTag" value="Read Tag" data-inline="true" data-icon="check">
+</div>
 <div id='main-status'>
-Status:
-<span id="status" class="ok">Loading</span>
+  <label for="status">Status:</label>
+  <span id="status" class="ok">Loading</span>
 </div>
-
 <meter id='progress' value='2' min='0' max='10'>Not support progress bar</meter> <span id='percent'>-</span>
+<!--</form>-->
+
+
 
 <div id='generate'>
 <!--EPC: <input type="text" id="epc" value='-' size='25'><br>-->
@@ -43,12 +52,12 @@ EPC: <span id="epc">-</span><br />
 USER: <span id="user">-</span>
 </div>
 
-<div data-role="controlgroup" data-type="horizontal">
-<button type="button" id="btnStart" class="css3button">Start</button>
-<button type="button" id="btnStop" class="css3button">Stop</button>
-<button type="button" id="btnSingle" class="css3button">Single</button>
-<button type="button" id="btnHB" class="css3button">HB</button>
-<button type="button" id="btnClear" class="css3button">Clear</button>
+<div data-role="controlgroup" data-type="horizontal" class='center-wrapper'>
+<button type="button" id="btnStart" data-mini='true'>Start</button>
+<button type="button" id="btnStop" data-mini='true'>Stop</button>
+<button type="button" id="btnSingle" data-mini='true'>Single</button>
+<button type="button" id="btnHB" data-mini='true'>HB</button>
+<button type="button" id="btnClear" data-mini='true'>Clear</button>
 </div>
 
 <div id="messagewindow">

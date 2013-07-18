@@ -2,13 +2,13 @@ var appWindow;
 
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('main.html', {
-    minWidth: 360,
-    minHeight: 400,
+    minWidth: 330,
+    minHeight: 355,
     bounds: {
       top: 20,
       left: 20,
-      width: 400,
-      height: 600
+      width: 720,
+      height: 473
     }
   }, function(app) {
     app.contentWindow.onclose = function() {
