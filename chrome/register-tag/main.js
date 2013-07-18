@@ -738,6 +738,28 @@ function refreshPort() {
   onload();
 }
 
+function restoreData() {
+  chrome.storage.sync.get(function(items) {
+    taginfo = items.taginfo;
+    console.log('taginfo:', taginfo);
+    if (!taginfo) {
+      taginfo = {
+        productcode: '00.000.000',
+        batchnumber: 'M001/13',
+        mandate: '03/13',
+        expdate: '03/14',
+        quantity: '9999,999u'
+      };
+    }
+    /*$("#productcode").text(tag.productcode);*/
+    /*$("#batchnumber").val(tag.batchnumber);*/
+    /*$("#mandate").val(tag.mandate);*/
+    /*$("#expdate").val(tag.expdate);*/
+    /*$("#quantity").val(tag.quantity);*/
+    console.log('taginfo:', taginfo);
+  });
+}
+
 setInterval(function() {
   switch (process) {
     case 'register':
@@ -755,6 +777,10 @@ setInterval(function() {
 
 function init() {
   /*$("#btnRefresh").click(refreshPort());*/
+  $("#btnSave").click(function() {
+    chrome.storage.sync.set({ 'taginfo': taginfo });
+    console.log('save', taginfo);
+  });
   $("#btnOpen").click(function() {
     openSelectedPort();
   });
@@ -797,6 +823,7 @@ function init() {
       e.preventDefault();
       return;
     }
+    taginfo.productcode = $(this).val();
     if (isMaxLength($(this), 12))
       return false;
     if (!isNumChar(c)
@@ -810,6 +837,7 @@ function init() {
       e.preventDefault();
       return;
     }
+    taginfo.batchnumber = $(this).val();
     if (isMaxLength($(this), 9))
       return false;
     if (!isNumChar(c)
@@ -824,6 +852,7 @@ function init() {
       e.preventDefault();
       return;
     }
+    taginfo.mandate = $(this).val();
     return isDateFormat($(this), e);
   });
   $("#expdate").keypress(function (e) {
@@ -832,6 +861,7 @@ function init() {
       e.preventDefault();
       return;
     }
+    taginfo.expdate = $(this).val();
     return isDateFormat($(this), e);
   });
   $("#quantity").keypress(function (e) {
@@ -840,6 +870,7 @@ function init() {
       e.preventDefault();
       return;
     }
+    taginfo.quantity = $(this).val();
     if (isMaxLength($(this), 9))
       return false;
     if (!isNumChar(c)
@@ -864,6 +895,8 @@ function init() {
 
   $("#messagewindow").html('Start: ' + dateToString() + '<br/>');
   resizeMessageWindow();
+
+  restoreData();
 }
 
 onload = function() {

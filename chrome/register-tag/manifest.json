@@ -1,9 +1,9 @@
 {
-  "name": "Tag Register",
+  "name": "Biomin Bag",
   "version": "0.1",
   "manifest_version": 2,
   "minimum_chrome_version": "23",
-  "description": "Register UHF RFID tag\nPut information to EPC and USER memory bank\nAdvanced ID Asia Engineering co., ltd.",
+  "description": "Read/Write UHF RFID tag\nPut information to EPC and USER memory bank\nAdvanced ID Asia Engineering co., ltd.",
 
   "app": {
     "background": {
@@ -17,7 +17,8 @@
   },
 
   "permissions": [
-    "serial"
+    "serial",
+    "storage"
   ]
 }
 
