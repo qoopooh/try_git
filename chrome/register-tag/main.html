@@ -1,42 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!--<link href="assets/metro/modern.css" rel="stylesheet">-->
-<!--<link href="assets/metro/modern-responsive.css" rel="stylesheet">-->
-<!--<link href="assets/metro/site.css" rel="stylesheet" type="text/css">-->
-<!--<link href="assets/metro/prettify.css" rel="stylesheet" type="text/css">-->
-
+  <link href="assets/jqm/jquery.mobile-1.3.1.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-Port:
-<select id="port-picker"></select>
-<button type="button" id="btnRefresh" class="css3button">Reload</button>
-<button type="button" id="btnOpen" class="css3button">Open</button>
-<button type="button" id="btnClose" class="css3button" disabled>Close</button>
+<!--<label for="port-picker" class="select">Port:</label>-->
+<select id="port-picker" data-inline="true">
+  <option>Reader Port</option>
+</select>
+<div data-role="controlgroup" data-type="horizontal">
+<button type="button" id="btnRefresh" data-icon="refresh">Reload</button>
+<button type="button" id="btnOpen" data-icon="plus">Open</button>
+<button type="button" id="btnClose" data-icon="minus">Close</button>
+</div>
 
-<!--<div id='write'>-->
-<!--Write:-->
-<!--<span id="write-info">-</span>-->
-<!--</div>-->
-<!--<div id='tag'>-->
-<!--Tag:-->
-<!--<span id="read-info">-</span>-->
-<!--<br/>-->
-<!--Read count:-->
-<!--<span id="read-count">-</span>-->
-<!--</div>-->
-
-<form id='fill'>
-Product code: <input type="text" id="productcode" value='12.345.678.9'><br>
-Batch number: <input type="text" id="batchnumber" value='LBA001/13'><br>
-Manufacture date: <input type="text" id="mandate" value='03/13'><br>
-Expiration date: <input type="text" id="expdate" value='03/14'><br>
-Quantity: <input type="text" id="quantity" value='1234,567p'><br>
-</form>
-<input type="submit" id="btnSubmit" value="Submit">
-<input type="button" id="btnReadTag" value="Read Tag">
+<!--<form id='fill'>-->
+<div data-role="fieldcontain">
+  <label for="productcode">Product code:</label>
+  <input type="text" name="productcode" id="productcode" placeholder='00.000.000.0'>
+</div>
+Batch number: <input type="text" id="batchnumber" placeholder='LBA001/13'>
+Manufacture date: <input type="text" id="mandate" placeholder='03/13'>
+Expiration date: <input type="text" id="expdate" placeholder='03/14'>
+Quantity: <input type="text" id="quantity" placeholder='9999,999k'>
+<!--</form>-->
+<input type="submit" id="btnSubmit" value="Submit" data-inline="true" data-icon="edit">
+<input type="button" id="btnReadTag" value="Read Tag" data-inline="true" data-icon="check">
 
 <div id='main-status'>
 Status:
@@ -52,7 +43,7 @@ EPC: <span id="epc">-</span><br />
 USER: <span id="user">-</span>
 </div>
 
-<div id='readcontrol'>
+<div data-role="controlgroup" data-type="horizontal">
 <button type="button" id="btnStart" class="css3button">Start</button>
 <button type="button" id="btnStop" class="css3button">Stop</button>
 <button type="button" id="btnSingle" class="css3button">Single</button>
@@ -66,20 +57,7 @@ USER: <span id="user">-</span>
 
 </body>
 <script src="assets/jquery-1.9.1.min.js"></script>
-<!--<script type="text/javascript" src="assets/jquery.mousewheel.min.js"></script>-->
-<!--<script type="text/javascript" src="assets/moment.js"></script>-->
-<!--<script type="text/javascript" src="assets/moment_langs.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/dropdown.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/accordion.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/buttonset.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/carousel.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/input-control.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/pagecontrol.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/rating.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/slider.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/tile-slider.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/tile-drag.js"></script>-->
-<!--<script type="text/javascript" src="assets/metro/calendar.js"></script>-->
+<script src="assets/jqm/jquery.mobile-1.3.1.min.js"></script>
 <script src="aae.js"></script>
 <script src="main.js"></script>
 </html>

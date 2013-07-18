@@ -138,6 +138,7 @@ function openSelectedPort() {
 
 function closePort(cb) {
   f_openport = false;
+  process = '';
   setStatus('Disconnected');
   log('Closed');
   if (conn_id < 1) {
@@ -261,13 +262,30 @@ function resizeMessageWindow() {
 }
 
 function disableButton(open) {
-  $('#btnRefresh').prop('disabled', open);
-  $('#btnOpen').prop('disabled', open);
-  $('#btnClose').prop('disabled', !open);
-  $('#btnStart').prop('disabled', !open);
-  $('#btnStop').prop('disabled', !open);
-  $('#btnSingle').prop('disabled', !open);
-  $('#btnHB').prop('disabled', !open);
+  if (open) {
+    $('#btnRefresh').button('disable');
+    $('#btnOpen').button('disable');
+    $('#btnClose').button('enable');
+    $('#btnStart').button('enable');
+    $('#btnStop').button('enable');
+    $('#btnSingle').button('enable');
+    $('#btnHB').button('enable');
+  } else {
+    $('#btnRefresh').button('enable');
+    $('#btnOpen').button('enable');
+    $('#btnClose').button('disable');
+    $('#btnStart').button('disable');
+    $('#btnStop').button('disable');
+    $('#btnSingle').button('disable');
+    $('#btnHB').button('disable');
+  }
+  /*$('#btnRefresh').prop('disabled', open);*/
+  /*$('#btnOpen').prop('disabled', open);*/
+  /*$('#btnClose').prop('disabled', !open);*/
+  /*$('#btnStart').prop('disabled', !open);*/
+  /*$('#btnStop').prop('disabled', !open);*/
+  /*$('#btnSingle').prop('disabled', !open);*/
+  /*$('#btnHB').prop('disabled', !open);*/
   /*$('#readcontrol').prop('disabled', !open); // does not work*/
 }
 
@@ -719,8 +737,8 @@ function init() {
     var select = document.getElementById("port-picker");
     var len = select.options.length;
 
-    for (i = 0; i < len; i++) {
-      select.options[select.selectedIndex] = null;
+    for (i = len - 1; i > 0; i--) {
+      select.options[i] = null;
     }
     console.log("refresh");
     onload();
@@ -840,6 +858,7 @@ onload = function() {
   chrome.serial.getPorts(function(ports) {
     buildPortPicker(ports)
     /*openSelectedPort();*/
+    disableButton(false);
   });
 };
 
