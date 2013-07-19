@@ -1,6 +1,7 @@
 .ok { color: green; }
 .fail { color: red; }
 .normal { color: black; }
+.disable { color: gray; }
 
 .center-button{
 margin: 0 auto;
@@ -10,6 +11,11 @@ text-align: center;
 }
 .center-wrapper * {
 margin: 0 auto;
+}
+
+.circle:before {
+content: ' \25CF';
+font-size: 50px;
 }
 
 

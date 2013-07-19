@@ -6,11 +6,15 @@ var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
 var taginfo = {
+  type: '',
   productcode: '',
   batchnumber: '',
   mandate: '',
   expdate: '',
-  quantity: ''
+  quantity: '',
+  qc: false,
+  cabinetcode: '',
+  cabinetname: '',
 };
 var progress = 0;
 var progressmax = 15;
@@ -72,12 +76,16 @@ function onRead(readInfo) {
   chrome.serial.read(conn_id, 64, onRead);
 };
 
-function setStatus(st, cls) {
-  $('#status').text(st);
-  if (cls)
-    document.getElementById("status").className = cls;
-  /*else*/
-  /*document.getElementById("status").className = 'normal';*/
+function setStatus(msg, cls) {
+  var status1 = document.getElementById("status");
+  var status2 = document.getElementById("status2");
+
+  status1.innerText = msg;
+  status2.innerText = msg;
+  if (cls) {
+    status1.className = cls;
+    status2.className = cls;
+  }
 }
 
 function buildPortPicker(ports) {
@@ -134,7 +142,7 @@ function openSelectedPort() {
   console.log("selectedPort", selectedPort);
 
   chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
-  setStatus('Connected');
+  setStatus('Connected ' + selectedPort);
 }
 
 function closePort(cb) {
@@ -144,6 +152,7 @@ function closePort(cb) {
   log('Closed');
   if (conn_id < 1) {
     console.log("closePort", conn_id);
+    disableButton(f_openport);
     if (cb) return cb();
     return;
   }
@@ -262,7 +271,13 @@ function resizeMessageWindow() {
   $("#image").css({ left: bodywidth - 90 });
 }
 
+/**
+  * Disable open button when the port is open
+  */
 function disableButton(open) {
+  console.log($("btnOpen").hasClass('[button]'));
+  console.log($("btnOpen").button('option', 'disabled'));
+  console.log('Elements', document.getElementsByTagName('*').length );
   if (open) {
     /*$('#btnRefresh').button('disable');*/
     $('#btnOpen').button('disable');
@@ -280,14 +295,6 @@ function disableButton(open) {
     $('#btnSingle').button('disable');
     $('#btnHB').button('disable');
   }
-  /*$('#btnRefresh').prop('disabled', open);*/
-  /*$('#btnOpen').prop('disabled', open);*/
-  /*$('#btnClose').prop('disabled', !open);*/
-  /*$('#btnStart').prop('disabled', !open);*/
-  /*$('#btnStop').prop('disabled', !open);*/
-  /*$('#btnSingle').prop('disabled', !open);*/
-  /*$('#btnHB').prop('disabled', !open);*/
-  /*$('#readcontrol').prop('disabled', !open); // does not work*/
 }
 
 function verifyForm(cb) {
@@ -666,8 +673,11 @@ function readTagInfo() {
       }
       extractUserInfo();
       closePort(function() {
-        setStatus(taginfo.productcode + ' ' + taginfo.batchnumber
-          + ' ' + taginfo.quantity);
+        setStatus(taginfo.type + ' '
+          + taginfo.productcode + ' '
+          + taginfo.batchnumber + ' '
+          + taginfo.quantity + ' qc:'
+          + taginfo.qc);
         process = '';
       });
       break;
@@ -684,6 +694,8 @@ function readTagInfo() {
 function extractEpcInfo() {
   var batch = '';
   var code = '';
+  var type = '';
+  var qc = false;
   var i = 0;
 
   batch = String.fromCharCode(epc[0]);
@@ -694,7 +706,20 @@ function extractEpcInfo() {
   i = ((epc[3] << 8) + epc[4]) & 0x03FF;
   batch += zeroPad(i, 3) + '/' + zeroPad(epc[5]);
 
-  i = ((epc[7] << 8) + epc[8]) & 0x03FF;
+  /*Byte 7:*/
+  /*  bit 7: 1 is Bag, 0 is Cabinet*/
+  /*  bit 6: 1 is QC passed*/
+  var i = epc[7];
+  if (i & 0x80)
+    type = 'cabinet';
+  else
+    type = 'bag';
+  if (i & 0x40)
+    qc = true;
+  else
+    qc = false;
+
+  i = (((epc[7] & 0x03) << 8) + epc[8]) & 0x03FF;
   code = zeroPad(epc[6]) + '.' + zeroPad(i, 3) + '.';
   i = ((epc[9] << 8) + epc[10]) & 0x03FF;
   code += zeroPad(i, 3);
@@ -705,6 +730,8 @@ function extractEpcInfo() {
   log('Batch: ' + batch);
   taginfo.productcode = code;
   taginfo.batchnumber = batch;
+  taginfo.type = type;
+  taginfo.qc = qc;
 }
 
 function extractUserInfo() {
@@ -735,29 +762,37 @@ function refreshPort() {
     select.options[i] = null;
   }
   console.log("refresh");
-  onload();
+  onLoad();
 }
 
 function restoreData() {
   chrome.storage.sync.get(function(items) {
     taginfo = items.taginfo;
-    console.log('taginfo:', taginfo);
     if (!taginfo) {
       taginfo = {
+        type: 'bag', /* 'bag' or 'cabinet' */
         productcode: '00.000.000',
         batchnumber: 'M001/13',
         mandate: '03/13',
         expdate: '03/14',
-        quantity: '9999,999u'
+        quantity: '9999,999u',
+        qc: false, /* passed is true */
+        cabinetcode: '',
+        cabinetname: ''
       };
     }
-    /*$("#productcode").text(tag.productcode);*/
-    /*$("#batchnumber").val(tag.batchnumber);*/
-    /*$("#mandate").val(tag.mandate);*/
-    /*$("#expdate").val(tag.expdate);*/
-    /*$("#quantity").val(tag.quantity);*/
+    $("#productcode").val(taginfo.productcode);
+    $('input[id=batchnumber]').val(taginfo.batchnumber);
+    $("#mandate").val(taginfo.mandate);
+    $("#expdate").val(taginfo.expdate);
+    $("#quantity").val(taginfo.quantity);
     console.log('taginfo:', taginfo);
   });
+}
+
+function clearData() {
+  taginfo = null;
+  chrome.storage.sync.set({ 'taginfo': taginfo });
 }
 
 setInterval(function() {
@@ -823,7 +858,6 @@ function init() {
       e.preventDefault();
       return;
     }
-    taginfo.productcode = $(this).val();
     if (isMaxLength($(this), 12))
       return false;
     if (!isNumChar(c)
@@ -831,13 +865,15 @@ function init() {
       )
       return false;
   });
+  $("#productcode").change(function () {
+    taginfo.productcode = $(this).val();
+  });
   $("#batchnumber").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
     if (submit(c)) {
       e.preventDefault();
       return;
     }
-    taginfo.batchnumber = $(this).val();
     if (isMaxLength($(this), 9))
       return false;
     if (!isNumChar(c)
@@ -846,14 +882,19 @@ function init() {
       )
       return false;
   });
+  $("#batchnumber").change(function () {
+    taginfo.batchnumber = $(this).val();
+  });
   $("#mandate").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
     if (submit(c)) {
       e.preventDefault();
       return;
     }
-    taginfo.mandate = $(this).val();
     return isDateFormat($(this), e);
+  });
+  $("#mandate").change(function () {
+    taginfo.mandate = $(this).val();
   });
   $("#expdate").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -863,6 +904,9 @@ function init() {
     }
     taginfo.expdate = $(this).val();
     return isDateFormat($(this), e);
+  });
+  $("#expdate").change(function () {
+    taginfo.expdate = $(this).val();
   });
   $("#quantity").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -878,6 +922,9 @@ function init() {
       && c !== 0x2C // ','
       )
       return false;
+  });
+  $("#quantity").change(function () {
+    taginfo.quantity = $(this).val();
   });
   $("#btnSubmit").click(function() {
     progress = 0;
@@ -896,10 +943,19 @@ function init() {
   $("#messagewindow").html('Start: ' + dateToString() + '<br/>');
   resizeMessageWindow();
 
+  $("#debug").on("pageinit", function(e) {
+    console.log('load debug page');
+    closePort();
+  });
+
   restoreData();
+  /*clearData();*/
+  chrome.serial.getPorts(function(ports) {
+    buildPortPicker(ports)
+  });
 }
 
-onload = function() {
+function onLoad() {
   chrome.serial.getPorts(function(ports) {
     buildPortPicker(ports)
     /*openSelectedPort();*/
@@ -907,7 +963,10 @@ onload = function() {
   });
 };
 
-$(document).ready(init());
+/*$(document).bind('pageinit', function() {*/
+/*init();*/
+/*});*/
+$(document).ready(init()); // for only jQuery
 $(window).resize(function() {
   resizeMessageWindow();
 });
