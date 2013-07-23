@@ -29,6 +29,14 @@ var userwriting = new Uint8Array(2);
 var userword = 0;
 var commandtimeout = 0;
 var process = '';
+var sBtnSave = null;
+var sBtnOpen = null;
+var sBtnClose = null;
+var sBtnStart = null;
+var sBtnStop = null;
+var sBtnSingle = null;
+var sBtnHB = null;
+var sPortPicker = null;
 
 String.prototype.splice = function( idx, rem, s ) {
   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
@@ -106,7 +114,7 @@ function buildPortPicker(ports) {
     ++portcount;
   });
   portPicker.selectedIndex = portcount;
-  $("#port-picker").selectmenu('refresh', true);
+  sPortPicker.selectmenu('refresh', true);
   setStatus('Refresh ' + portcount + ' port(s)');
 }
 
@@ -132,13 +140,14 @@ function openSelectedPort() {
     console.log("openSelectedPort", conn_id);
     return;
   }
-  var portPicker = document.getElementById('port-picker');
-  console.log("portPicker", portPicker, portPicker.length);
-  if (!portPicker.length) {
+  /*var portPicker = document.getElementById('port-picker');*/
+  /*console.log("portPicker", sPortPicker, sPortPicker.length);*/
+  if (!sPortPicker.length) {
     log("there is no port");
     return;
   }
-  var selectedPort = portPicker.options[portPicker.selectedIndex].value;
+  /*var selectedPort = portPicker.options[portPicker.selectedIndex].value;*/
+  var selectedPort = sPortPicker.val();
   console.log("selectedPort", selectedPort);
 
   chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
@@ -275,25 +284,23 @@ function resizeMessageWindow() {
   * Disable open button when the port is open
   */
 function disableButton(open) {
-  console.log($("btnOpen").hasClass('[button]'));
-  console.log($("btnOpen").button('option', 'disabled'));
-  console.log('Elements', document.getElementsByTagName('*').length );
+  console.log('Elements disableButton', document.getElementsByTagName('*').length );
   if (open) {
     /*$('#btnRefresh').button('disable');*/
-    $('#btnOpen').button('disable');
-    $('#btnClose').button('enable');
-    $('#btnStart').button('enable');
-    $('#btnStop').button('enable');
-    $('#btnSingle').button('enable');
-    $('#btnHB').button('enable');
+    sBtnOpen.button('disable');
+    sBtnClose.button('enable');
+    sBtnStart.button('enable');
+    sBtnStop.button('enable');
+    sBtnSingle.button('enable');
+    sBtnHB.button('enable');
   } else {
     /*$('#btnRefresh').button('enable');*/
-    $('#btnOpen').button('enable');
-    $('#btnClose').button('disable');
-    $('#btnStart').button('disable');
-    $('#btnStop').button('disable');
-    $('#btnSingle').button('disable');
-    $('#btnHB').button('disable');
+    sBtnOpen.button('enable');
+    sBtnClose.button('disable');
+    sBtnStart.button('disable');
+    sBtnStop.button('disable');
+    sBtnSingle.button('disable');
+    sBtnHB.button('disable');
   }
 }
 
@@ -380,7 +387,7 @@ function register() {
       });
       break;
     case 'openport':
-      setStatus("Open " + $("#port-picker").val());
+      setStatus("Open " + sPortPicker.val());
       openSelectedPort();
       updateProgress();
       state = 'waitport';
@@ -632,7 +639,7 @@ function readTagInfo() {
 
   switch (state) {
     case 'openport':
-      setStatus("Open " + $("#port-picker").val());
+      setStatus("Open " + sPortPicker.val());
       openSelectedPort();
       state = 'waitport';
       break;
@@ -810,37 +817,56 @@ setInterval(function() {
     --commandtimeout;
 }, 100);
 
+function onLoad() {
+  chrome.serial.getPorts(function(ports) {
+    buildPortPicker(ports)
+    /*openSelectedPort();*/
+    disableButton(false);
+  });
+};
+
+function initButton() {
+}
+
 function init() {
+  sBtnSave = $("#btnSave");
+  sBtnOpen = $("#btnOpen");
+  sBtnClose = $("#btnClose");
+  sBtnStart = $("#btnStart");
+  sBtnStop = $("#btnStop");
+  sBtnSingle = $("#btnSingle");
+  sBtnHB = $("#btnHB");
+  sPortPicker = $("#port-picker");
   /*$("#btnRefresh").click(refreshPort());*/
-  $("#btnSave").click(function() {
+  sBtnSave.click(function() {
     chrome.storage.sync.set({ 'taginfo': taginfo });
     console.log('save', taginfo);
   });
-  $("#btnOpen").click(function() {
+  sBtnOpen.click(function() {
     openSelectedPort();
   });
-  $("#btnClose").click(function() {
+  sBtnClose.click(function() {
     closePort();
   });
-  $("#btnStart").click(function() {
+  sBtnStart.click(function() {
     log("Start");
     inventoryCyclic(true, function (buf) {
       writeArrayBuffer(buf);
     });
   });
-  $("#btnStop").click(function() {
+  sBtnStop.click(function() {
     log("Stop");
     inventoryCyclic(false, function (buf) {
       writeArrayBuffer(buf);
     });
   });
-  $("#btnSingle").click(function() {
+  sBtnSingle.click(function() {
     log("Single");
     inventorySingle(function (buf) {
       writeArrayBuffer(buf);
     });
   });
-  $("#btnHB").click(function() {
+  sBtnHB.click(function() {
     log("Heartbeat toggle");
     toggleHeartbeat(function (buf) {
       writeArrayBuffer(buf);
@@ -849,7 +875,7 @@ function init() {
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
   });
-  $("#port-picker").change(function() {
+  sPortPicker.change(function() {
     closePort();
   });
   $("#productcode").keypress(function (e) {
@@ -937,33 +963,30 @@ function init() {
     process = 'readTagInfo';
     readtaginfo_state = 'openport';
   });
+  $("#btnBagCancel").click(function() {
+    regstate = '';
+    readtaginfo_state = '';
+  });
   $("#progress").val(0);
   document.getElementById('progress').setAttribute('max', '' + progressmax);
 
   $("#messagewindow").html('Start: ' + dateToString() + '<br/>');
   resizeMessageWindow();
 
-  $("#debug").on("pageinit", function(e) {
-    console.log('load debug page');
-    closePort();
+  $("#debug").off("pageinit").on("pageinit", function(e) {
+    $.mobile.changePage( $("#main"), { transition: "none", reverse: false,
+      changeHash: false });
   });
+
+
+  onLoad();
 
   restoreData();
   /*clearData();*/
-  chrome.serial.getPorts(function(ports) {
-    buildPortPicker(ports)
-  });
 }
 
-function onLoad() {
-  chrome.serial.getPorts(function(ports) {
-    buildPortPicker(ports)
-    /*openSelectedPort();*/
-    disableButton(false);
-  });
-};
-
 /*$(document).bind('pageinit', function() {*/
+/*$(document).bind('mobileinit', function() {*/
 /*init();*/
 /*});*/
 $(document).ready(init()); // for only jQuery

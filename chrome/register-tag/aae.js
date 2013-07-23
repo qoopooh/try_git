@@ -270,7 +270,7 @@ function writeToTag(epc, bank, addr, pass, data, cb) {
 }
 
 function writeEpc(epc, pass, newepc, cb) {
-  var pc = new Uint8Array([0x30, 0x00]); // default is 12 byte
+  /*var pc = new Uint8Array([0x30, 0x00]); // default is 12 byte*/
   var newepclen = newepc.length;
 
   if (newepclen !== 12) {
@@ -280,10 +280,11 @@ function writeEpc(epc, pass, newepc, cb) {
     if (newepclen % 2)
       ++newepclen;
   }
-  var data = new Uint8Array(newepclen + 2);
-  data.set(pc);
-  data.set(newepc, 2);
-  writeToTag(epc, 1, 1, pass, data, cb);
+  /*var data = new Uint8Array(newepclen + 2);*/
+  /*data.set(pc);*/
+  /*data.set(newepc, 2);*/
+  /*writeToTag(epc, 1, 1, pass, data, cb);*/
+  writeToTag(epc, 1, 2, pass, newepc, cb);
 }
 
 
