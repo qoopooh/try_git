@@ -16,7 +16,12 @@ var baginfo = {
   cabinetcode: '',
   cabinetname: '',
 };
-var arrBag = [];
+var cabinetinfo = {
+  type: '',
+  cabinetcode: '',
+  cabinetname: '',
+};
+var tagarr = [];
 var progress = 0;
 var progressmax = 15;
 var regstate = '';
@@ -423,7 +428,8 @@ function register() {
       });
       break;
     case 'writeUser':
-      userwriting = user.subarray(userword * 2, userword * 2 + 2);
+      var w = userword * 2;
+      userwriting = user.subarray(w, w + 2);
       writeToTag(epc, 3, userword, null, userwriting, function (buf) {
         writeArrayBuffer(buf);
         console.log(state, buf);
@@ -599,6 +605,11 @@ function isBatchLetter(c) {
   return false;
 }
 
+function isUpperCase(c) {
+  return (c >= 0x41 && c <= 0x5A);
+}
+
+
 function isUnit(c) {
   if (c === 0x6b || c === 0x70
       || c === 0x75
@@ -682,16 +693,7 @@ function readTagInfo() {
           state = 'readUser';
         break;
       }
-      extractUserInfo(function() {
-        for (var i = 0, len = arrBag.length; i < len; ++i) {
-          var bag = arrBag[i];
-          if ((bag.productcode === baginfo.productcode)
-            && (bag.batchnumber === baginfo.batchnumber))
-            return;
-        }
-        arrBag.push(jQuery.extend({}, baginfo)); // copy new object
-        console.log('save arr', arrBag);
-      });
+      extractUserInfo(collectReadbag);
       closePort(function() {
         setStatus(baginfo.type + ' '
           + baginfo.productcode + ' '
@@ -711,33 +713,89 @@ function readTagInfo() {
   readtaginfo_state = state;
 }
 
-function extractEpcInfo() {
+function readCabinet() {
+  var state = readtaginfo_state;
+  var tempstate = state;
+
+  switch (state) {
+    case 'openport':
+      setStatus("Open " + sPortPicker.val());
+      openSelectedPort();
+      state = 'waitport';
+      break;
+    case 'waitport':
+      if (conn_id < 1)
+        break;
+      state = 'single';
+      break;
+    case 'single':
+      commandtimeout = 10;
+      inventorySingle(function (buf) {
+        writeArrayBuffer(buf);
+        state = 'waitepc';
+      });
+      break;
+    case 'waitepc':
+      if (!epc || epc.length < 1) {
+        if (!commandtimeout)
+          state = 'single';
+        break;
+      }
+      extractEpcInfo(collectReadcabinet);
+      closePort(function() {
+        setStatus(cabinetinfo.type + ' '
+          + cabinetinfo.cabinetcode + ' '
+          + cabinetinfo.cabinetname + ' '
+          );
+        process = '';
+      });
+      break;
+    default:
+      closePort();
+      process = '';
+      break;
+  }
+  if (tempstate !== state)
+    prev_regstate = tempstate;
+  readtaginfo_state = state;
+}
+
+function extractEpcInfo(cb) {
   var batch = '';
   var code = '';
   var type = '';
   var qc = false;
   var i = 0;
 
-  batch = String.fromCharCode(epc[0]);
-  if (epc[1])
-    batch += String.fromCharCode(epc[1]);
-  if (epc[2])
-    batch += String.fromCharCode(epc[2]);
-  i = ((epc[3] << 8) + epc[4]) & 0x03FF;
-  batch += zeroPad(i, 3) + '/' + zeroPad(epc[5]);
-
   /*Byte 7:*/
   /*  bit 7: 1 is Bag, 0 is Cabinet*/
   /*  bit 6: 1 is QC passed*/
-  var i = epc[7];
+  i = epc[7];
   if (i & 0x80)
     type = 'cabinet';
   else
     type = 'bag';
-  if (i & 0x40)
-    qc = true;
-  else
-    qc = false;
+  if (type === 'bag') {
+    if (i & 0x40)
+      qc = true;
+    else
+      qc = false;
+
+    batch = String.fromCharCode(epc[0]);
+    if (epc[1])
+      batch += String.fromCharCode(epc[1]);
+    if (epc[2])
+      batch += String.fromCharCode(epc[2]);
+    i = ((epc[3] << 8) + epc[4]) & 0x03FF;
+    batch += zeroPad(i, 3) + '/' + zeroPad(epc[5]);
+  } else {
+    batch = String.fromCharCode(epc[0]);
+    if (epc[1])
+      batch += String.fromCharCode(epc[1]);
+    i = ((epc[2] << 8) + epc[3]) & 0x03FF;
+    batch += zeroPad(i, 4);
+  }
+
 
   i = (((epc[7] & 0x03) << 8) + epc[8]) & 0x03FF;
   code = zeroPad(epc[6]) + '.' + zeroPad(i, 3) + '.';
@@ -748,10 +806,19 @@ function extractEpcInfo() {
 
   log('Product code: ' + code);
   log('Batch: ' + batch);
-  baginfo.productcode = code;
-  baginfo.batchnumber = batch;
-  baginfo.type = type;
-  baginfo.qc = qc;
+  if (type === 'bag') {
+    baginfo.productcode = code;
+    baginfo.batchnumber = batch;
+    baginfo.type = type;
+    baginfo.qc = qc;
+  } else {
+    cabinetinfo.cabinetcode = code;
+    cabinetinfo.cabinetname = batch;
+    cabinetinfo.type = type;
+  }
+
+  if (cb)
+    cb();
 }
 
 function extractUserInfo(cb) {
@@ -808,12 +875,25 @@ function restoreData() {
     $("#expdate").val(baginfo.expdate);
     $("#quantity").val(baginfo.quantity);
     console.log('baginfo:', baginfo);
+    cabinetinfo = items.cabinetinfo;
+    if (!cabinetinfo) {
+      cabinetinfo = {
+        type: 'cabinet',
+        cabinetcode: '00.000.000',
+        cabinetname: 'AB0001'
+      };
+    }
+    $("#cabinetcode").val(cabinetinfo.cabinetcode);
+    $("#cabinetname").val(cabinetinfo.cabinetname);
+    console.log('cabinetinfo:', cabinetinfo);
   });
 }
 
 function clearData() {
   baginfo = null;
+  cabinetinfo = null;
   chrome.storage.sync.set({ 'baginfo': baginfo });
+  chrome.storage.sync.set({ 'cabinetinfo': cabinetinfo });
 }
 
 function writeToFile(theFileEntry) {
@@ -822,7 +902,7 @@ function writeToFile(theFileEntry) {
       console.log("Write failed: " + e.toString());
     };
 
-    var res = JSON.stringify(arrBag, undefined, 2);
+    var res = JSON.stringify(tagarr, undefined, 2);
     var blob = new Blob([res]);
     fileWriter.truncate(blob.size);
     fileWriter.onwriteend = function() {
@@ -873,20 +953,43 @@ function handleOpenJson() {
       }, openFile);
 }
 
-setInterval(function() {
-  switch (process) {
-    case 'register':
-      register();
-      break;
-    case 'readTagInfo':
-      readTagInfo();
-      break;
-    default:
-      break;
+function collectReadbag() {
+  var tag = {};
+
+  for (var i = 0, len = tagarr.length; i < len; ++i) {
+    tag = tagarr[i];
+
+    if (tag.type !== 'bag')
+      continue;
+    if ((tag.productcode === baginfo.productcode)
+      && (tag.batchnumber === baginfo.batchnumber))
+      return;
   }
-  if (commandtimeout)
-    --commandtimeout;
-}, 100);
+  tagarr.push(jQuery.extend({}, baginfo)); // copy new object
+  console.log('collectReadbag', tagarr);
+}
+
+function collectReadcabinet() {
+  var tag = {};
+
+  for (var i = 0, len = tagarr.length; i < len; ++i) {
+    tag = tagarr[i];
+
+    if (tag.type !== 'cabinet')
+      continue;
+    if ((tag.cabinetcode === cabinetinfo.cabinetcode)
+      && (tag.cabinetname === cabinetinfo.cabinetname))
+      return;
+  }
+  tagarr.push(jQuery.extend({}, cabinetinfo)); // copy new object
+  console.log('collectReadcabinet', tagarr);
+}
+
+function saveToStorage() {
+  chrome.storage.sync.set({ 'baginfo': baginfo });
+  chrome.storage.sync.set({ 'cabinetinfo': cabinetinfo });
+  console.log('save', baginfo, cabinetinfo);
+}
 
 function onLoad() {
   chrome.serial.getPorts(function(ports) {
@@ -895,6 +998,27 @@ function onLoad() {
     disableButton(false);
   });
 };
+
+setInterval(function() {
+  switch (process) {
+    case 'register':
+      register();
+      break;
+    case 'readTagInfo':
+      readTagInfo();
+      break;
+    case 'writCabinet':
+      writCabinet();
+      break;
+    case 'readCabinet':
+      readCabinet();
+      break;
+    default:
+      break;
+  }
+  if (commandtimeout)
+    --commandtimeout;
+}, 100);
 
 function init() {
   sBtnSave = $("#btnSave");
@@ -906,13 +1030,9 @@ function init() {
   sBtnHB = $("#btnHB");
   sPortPicker = $("#port-picker");
   /*$("#btnRefresh").click(refreshPort());*/
-  sBtnSave.click(function() {
-    chrome.storage.sync.set({ 'baginfo': baginfo });
-    console.log('save', baginfo);
-  });
-  sBtnOpen.click(function() {
-    openSelectedPort();
-  });
+  sBtnSave.click(saveToStorage);
+  $("#btnCabinetSave").click(saveToStorage);
+  sBtnOpen.click(openSelectedPort);
   sBtnClose.click(function() {
     closePort();
   });
@@ -1020,6 +1140,39 @@ function init() {
   $("#quantity").change(function () {
     baginfo.quantity = $(this).val();
   });
+  $("#cabinetcode").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
+    if (isMaxLength($(this), 12))
+      return false;
+    if (!isNumChar(c)
+      && c !== 0x2E // '.'
+      )
+      return false;
+  });
+  $("#cabinetcode").change(function () {
+    cabinetinfo.cabinetcode = $(this).val();
+  });
+  $("#cabinetname").keypress(function (e) {
+    var c = (e.which) ? e.which : e.keyCode;
+    if (submit(c)) {
+      e.preventDefault();
+      return;
+    }
+    if (isMaxLength($(this), 6))
+      return false;
+    if (!isNumChar(c)
+      && !isUpperCase(c)
+      )
+      return false;
+  });
+  $("#cabinetname").change(function () {
+    cabinetinfo.cabinetname = $(this).val();
+  });
+
   $("#btnSubmit").click(function() {
     progress = 0;
     if (verifyForm()) {
