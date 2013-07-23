@@ -5,7 +5,7 @@ var readArray = new Uint8Array(readBuff);
 var readIndex = 0;
 var readCount = 0;
 var f_openport = false;
-var taginfo = {
+var baginfo = {
   type: '',
   productcode: '',
   batchnumber: '',
@@ -16,6 +16,7 @@ var taginfo = {
   cabinetcode: '',
   cabinetname: '',
 };
+var arrBag = [];
 var progress = 0;
 var progressmax = 15;
 var regstate = '';
@@ -317,7 +318,7 @@ function verifyForm(cb) {
     setStatus("Product code format failed (e.g. 00.000.000.0)", "fail");
     return res;
   }
-  taginfo.productcode = val;
+  baginfo.productcode = val;
   updateProgress();
   val = $("#batchnumber").val();
   patt = /^[A-Z]+\d{3}\/\d{2}/g;
@@ -326,7 +327,7 @@ function verifyForm(cb) {
     setStatus("Batch number format failed (e.g. ESE001/13)", "fail");
     return res;
   }
-  taginfo.batchnumber = val;
+  baginfo.batchnumber = val;
   updateProgress();
   val = $("#mandate").val();
   /*log(val + ' ' + val.length);*/
@@ -336,7 +337,7 @@ function verifyForm(cb) {
     setStatus("Manufacture date format failed (e.g. 01/13)", "fail");
     return res;
   }
-  taginfo.mandate = val;
+  baginfo.mandate = val;
   updateProgress();
   val = $("#expdate").val();
   patt = /\d{2}\/\d{2}/g;
@@ -345,7 +346,7 @@ function verifyForm(cb) {
     setStatus("Expiration date format failed (e.g. 01/14)", "fail");
     return res;
   }
-  taginfo.expdate = val;
+  baginfo.expdate = val;
   updateProgress();
   val = $("#quantity").val();
   patt = /\d{4},\d{3}\w/g;
@@ -354,7 +355,7 @@ function verifyForm(cb) {
     setStatus("Quantity format failed (e.g. 9999,999p)", "fail");
     return res;
   }
-  taginfo.quantity = val;
+  baginfo.quantity = val;
   updateProgress();
   if (res)
     setStatus("Verified", "ok");
@@ -510,7 +511,7 @@ function register() {
       log('No operation');
       closePort();
       process = '';
-      console.log(taginfo);
+      console.log(baginfo);
       break;
   }
   if (tempstate !== state)
@@ -519,8 +520,8 @@ function register() {
 }
 
 function genepc(cb) {
-  var batch = taginfo.batchnumber;
-  var code = taginfo.productcode.split('.');
+  var batch = baginfo.batchnumber;
+  var code = baginfo.productcode.split('.');
   var i = 0;
   var j = 0;
   
@@ -557,13 +558,13 @@ function genepc(cb) {
 }
 
 function genuser(cb) {
-  var date = taginfo.mandate.split('/');
-  var quantity = taginfo.quantity.split(',');
+  var date = baginfo.mandate.split('/');
+  var quantity = baginfo.quantity.split(',');
   var i = 0;
   
   user[0] = parseInt(date[0]);
   user[1] = parseInt(date[1]);
-  date = taginfo.expdate.split('/');
+  date = baginfo.expdate.split('/');
   user[2] = parseInt(date[0]);
   user[3] = parseInt(date[1]);
   i = parseInt(quantity[0]);
@@ -678,13 +679,23 @@ function readTagInfo() {
           state = 'readUser';
         break;
       }
-      extractUserInfo();
+      extractUserInfo(function() {
+        for (var i = 0, len = arrBag.length; i < len; ++i) {
+          var bag = JSON.parse(arrBag[i]);
+          if ((bag.productcode === baginfo.productcode)
+            && (bag.batchnumber === baginfo.batchnumber))
+            return;
+        }
+        var bagstr = JSON.stringify(baginfo);
+        arrBag.push(bagstr);
+        console.log('save arr', arrBag);
+      });
       closePort(function() {
-        setStatus(taginfo.type + ' '
-          + taginfo.productcode + ' '
-          + taginfo.batchnumber + ' '
-          + taginfo.quantity + ' qc:'
-          + taginfo.qc);
+        setStatus(baginfo.type + ' '
+          + baginfo.productcode + ' '
+          + baginfo.batchnumber + ' '
+          + baginfo.quantity + ' qc:'
+          + baginfo.qc);
         process = '';
       });
       break;
@@ -735,13 +746,13 @@ function extractEpcInfo() {
 
   log('Product code: ' + code);
   log('Batch: ' + batch);
-  taginfo.productcode = code;
-  taginfo.batchnumber = batch;
-  taginfo.type = type;
-  taginfo.qc = qc;
+  baginfo.productcode = code;
+  baginfo.batchnumber = batch;
+  baginfo.type = type;
+  baginfo.qc = qc;
 }
 
-function extractUserInfo() {
+function extractUserInfo(cb) {
   var mandate = '';
   var expdate = '';
   var quantity = '';
@@ -756,9 +767,10 @@ function extractUserInfo() {
   log('Manufacture date: ' + mandate);
   log('Expiration date: ' + expdate);
   log('Quantity: ' + quantity);
-  taginfo.mandate = mandate;
-  taginfo.expdate = expdate;
-  taginfo.quantity = quantity;
+  baginfo.mandate = mandate;
+  baginfo.expdate = expdate;
+  baginfo.quantity = quantity;
+  cb();
 }
 
 function refreshPort() {
@@ -774,9 +786,9 @@ function refreshPort() {
 
 function restoreData() {
   chrome.storage.sync.get(function(items) {
-    taginfo = items.taginfo;
-    if (!taginfo) {
-      taginfo = {
+    baginfo = items.baginfo;
+    if (!baginfo) {
+      baginfo = {
         type: 'bag', /* 'bag' or 'cabinet' */
         productcode: '00.000.000',
         batchnumber: 'M001/13',
@@ -788,18 +800,18 @@ function restoreData() {
         cabinetname: ''
       };
     }
-    $("#productcode").val(taginfo.productcode);
-    $('input[id=batchnumber]').val(taginfo.batchnumber);
-    $("#mandate").val(taginfo.mandate);
-    $("#expdate").val(taginfo.expdate);
-    $("#quantity").val(taginfo.quantity);
-    console.log('taginfo:', taginfo);
+    $("#productcode").val(baginfo.productcode);
+    $('input[id=batchnumber]').val(baginfo.batchnumber);
+    $("#mandate").val(baginfo.mandate);
+    $("#expdate").val(baginfo.expdate);
+    $("#quantity").val(baginfo.quantity);
+    console.log('baginfo:', baginfo);
   });
 }
 
 function clearData() {
-  taginfo = null;
-  chrome.storage.sync.set({ 'taginfo': taginfo });
+  baginfo = null;
+  chrome.storage.sync.set({ 'baginfo': baginfo });
 }
 
 setInterval(function() {
@@ -839,8 +851,8 @@ function init() {
   sPortPicker = $("#port-picker");
   /*$("#btnRefresh").click(refreshPort());*/
   sBtnSave.click(function() {
-    chrome.storage.sync.set({ 'taginfo': taginfo });
-    console.log('save', taginfo);
+    chrome.storage.sync.set({ 'baginfo': baginfo });
+    console.log('save', baginfo);
   });
   sBtnOpen.click(function() {
     openSelectedPort();
@@ -892,7 +904,7 @@ function init() {
       return false;
   });
   $("#productcode").change(function () {
-    taginfo.productcode = $(this).val();
+    baginfo.productcode = $(this).val();
   });
   $("#batchnumber").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -909,7 +921,7 @@ function init() {
       return false;
   });
   $("#batchnumber").change(function () {
-    taginfo.batchnumber = $(this).val();
+    baginfo.batchnumber = $(this).val();
   });
   $("#mandate").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -920,7 +932,7 @@ function init() {
     return isDateFormat($(this), e);
   });
   $("#mandate").change(function () {
-    taginfo.mandate = $(this).val();
+    baginfo.mandate = $(this).val();
   });
   $("#expdate").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -928,11 +940,11 @@ function init() {
       e.preventDefault();
       return;
     }
-    taginfo.expdate = $(this).val();
+    baginfo.expdate = $(this).val();
     return isDateFormat($(this), e);
   });
   $("#expdate").change(function () {
-    taginfo.expdate = $(this).val();
+    baginfo.expdate = $(this).val();
   });
   $("#quantity").keypress(function (e) {
     var c = (e.which) ? e.which : e.keyCode;
@@ -940,7 +952,7 @@ function init() {
       e.preventDefault();
       return;
     }
-    taginfo.quantity = $(this).val();
+    baginfo.quantity = $(this).val();
     if (isMaxLength($(this), 9))
       return false;
     if (!isNumChar(c)
@@ -950,7 +962,7 @@ function init() {
       return false;
   });
   $("#quantity").change(function () {
-    taginfo.quantity = $(this).val();
+    baginfo.quantity = $(this).val();
   });
   $("#btnSubmit").click(function() {
     progress = 0;

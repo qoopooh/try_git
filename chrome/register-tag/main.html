@@ -14,11 +14,6 @@
     <h1>Testing Mode</h1>
   </div>
   <div data-role="content">
-    <div>
-      <label for="status">Status:</label>
-      <span id="status2" class="ok">Loading</span>
-    </div>
-
     <div data-role="controlgroup" data-type="horizontal" class='center-wrapper'>
     <!--<button id="btnRefresh" data-icon="refresh" data-mini="true">Reload</button>-->
     <button id="btnOpen" data-icon="plus" data-mini='true'>Open</button>
@@ -41,7 +36,7 @@
 
 <div data-role="page" id="main">
   <div data-role="header">
-    <h1>Biomin Bag V0.1</h1>
+    <h1>Biomin RFID Tag V0.1</h1>
   </div>
 
   <div data-role="content">
@@ -77,11 +72,12 @@
       <input type="text" id="quantity" placeholder='9999,999k' value='9999,999u'>
     </div>
     <div class='ui-body ui-body-b'>
-    <button id="btnAvailable" value="Ready" data-inline="true" data-theme="c"
-        data-icon="arrow-r" data-mini="true" disabled></button>
+    <!--<button id="btnAvailable" value="Ready" data-inline="true" data-theme="c"-->
+    <!--data-icon="arrow-r" data-mini="true" disabled></button>-->
       <input type="submit" id="btnSubmit" value="Write Tag" data-inline="true" data-icon="edit">
       <input type="button" id="btnReadTag" value="Read Tag" data-inline="true" data-icon="check">
       <input type="button" id="btnBagCancel" value="Cancel" data-inline="true" data-icon="delete">
+      <input type="button" id="btnExportBag" value="Export" data-inline="true" data-icon="info">
     </div>
     <div>
       <label for="status">Status:</label>
@@ -98,6 +94,22 @@
     <button id='btnSave' data-icon="check">Save</button>
   </div>
   <div data-role="content">
+    <div data-role="fieldcontain">
+      <label for="cabinetcode">Code:</label>
+      <input type="text" id="cabinetcode"  placeholder='00.000.000.0' value='00.000.000'>
+      <label for='cabinetname'>Name:</label>
+      <input type="text" id="cabinetname" placeholder='LBA001/13' value='M001/13'>
+    </div>
+    <div class='ui-body ui-body-b'>
+      <input type="submit" id="btnCabinetSubmit" value="Write Tag" data-inline="true" data-icon="edit">
+      <input type="button" id="btnCabinetReadTag" value="Read Tag" data-inline="true" data-icon="check">
+      <input type="button" id="btnCabinetCancel" value="Cancel" data-inline="true" data-icon="delete">
+    </div>
+    <div>
+      <label for="status2">Status:</label>
+      <span id="status2" class="ok">Loading</span>
+    </div>
+
   </div>
 </div>
 
