@@ -17,6 +17,7 @@
   },
 
   "permissions": [
+    {"fileSystem": ["write"]},
     "serial",
     "storage"
   ]

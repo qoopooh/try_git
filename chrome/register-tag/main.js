@@ -43,6 +43,9 @@ String.prototype.splice = function( idx, rem, s ) {
   return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
 };
 
+function errorHandler(e) {
+  console.log('error', e.toString());
+}
 
 function writeArrayBuffer(buf) {
   if (!conn_id) {
@@ -681,13 +684,12 @@ function readTagInfo() {
       }
       extractUserInfo(function() {
         for (var i = 0, len = arrBag.length; i < len; ++i) {
-          var bag = JSON.parse(arrBag[i]);
+          var bag = arrBag[i];
           if ((bag.productcode === baginfo.productcode)
             && (bag.batchnumber === baginfo.batchnumber))
             return;
         }
-        var bagstr = JSON.stringify(baginfo);
-        arrBag.push(bagstr);
+        arrBag.push(jQuery.extend({}, baginfo)); // copy new object
         console.log('save arr', arrBag);
       });
       closePort(function() {
@@ -814,6 +816,63 @@ function clearData() {
   chrome.storage.sync.set({ 'baginfo': baginfo });
 }
 
+function writeToFile(theFileEntry) {
+  theFileEntry.createWriter(function(fileWriter) {
+    fileWriter.onerror = function(e) {
+      console.log("Write failed: " + e.toString());
+    };
+
+    var res = JSON.stringify(arrBag);
+    var blob = new Blob([res]);
+    fileWriter.truncate(blob.size);
+    fileWriter.onwriteend = function() {
+      fileWriter.onwriteend = function(e) {
+        console.log("Write " + theFileEntry.name + " completed.");
+      };
+
+      fileWriter.write(blob);
+    }
+    console.log('writeToFile', res, theFileEntry);
+  }, errorHandler);
+}
+
+function openFile(theFileEntry) {
+  if (theFileEntry) {
+    theFileEntry.file(function(file) {
+      var fileReader = new FileReader();
+
+      fileReader.onload = function(e) {
+        console.log(theFileEntry.name);
+      };
+
+      fileReader.onerror = function(e) {
+        errorHandler(e);
+      };
+
+      fileReader.onloadend = function(e) {
+        var arr = JSON.parse(fileReader.result);
+        console.log(arr);
+      };
+
+      fileReader.readAsText(file);
+    }, errorHandler);
+  }
+}
+
+function handleExportButton() {
+  chrome.fileSystem.chooseEntry(
+      { type: 'saveFile',
+        accepts: [{ extensions: ['json'] }] 
+      }, writeToFile);
+}
+
+function handleOpenJson() {
+  chrome.fileSystem.chooseEntry(
+      { type: 'openFile',
+        accepts: [{ extensions: ['json'] }] 
+      }, openFile);
+}
+
 setInterval(function() {
   switch (process) {
     case 'register':
@@ -836,9 +895,6 @@ function onLoad() {
     disableButton(false);
   });
 };
-
-function initButton() {
-}
 
 function init() {
   sBtnSave = $("#btnSave");
@@ -979,6 +1035,8 @@ function init() {
     regstate = '';
     readtaginfo_state = '';
   });
+  $("#btnExportBag").click(handleExportButton);
+  $("#btnOpenJson").click(handleOpenJson);
   $("#progress").val(0);
   document.getElementById('progress').setAttribute('max', '' + progressmax);
 
