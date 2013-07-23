@@ -822,7 +822,7 @@ function writeToFile(theFileEntry) {
       console.log("Write failed: " + e.toString());
     };
 
-    var res = JSON.stringify(arrBag);
+    var res = JSON.stringify(arrBag, undefined, 2);
     var blob = new Blob([res]);
     fileWriter.truncate(blob.size);
     fileWriter.onwriteend = function() {
