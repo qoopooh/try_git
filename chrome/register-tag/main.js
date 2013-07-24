@@ -483,7 +483,7 @@ function register() {
       log("f_hb_read " + prev_regstate);
       switch (prev_regstate) {
         case 'waitport':
-          setStatus('Read EPC');
+          setStatus('Reading EPC');
           state = 'single';
           break;
         case 'single':
@@ -492,7 +492,7 @@ function register() {
           if (!epc || epc.length < 1) {
             state = 'single';
           } else {
-            setStatus('Write EPC');
+            setStatus('Writing EPC');
             state = 'writeEpc';
           }
           break;
@@ -504,7 +504,7 @@ function register() {
             userword = 0;
             updateProgress();
             state = 'writeUser';
-            setStatus('Write USER');
+            setStatus('Writing USER');
           } else {
             state = 'single';
           }
@@ -584,7 +584,7 @@ function writeCabinet() {
       log("f_hb_read " + prev_regstate);
       switch (prev_regstate) {
         case 'waitport':
-          setStatus('Read EPC');
+          setStatus('Reading EPC');
           state = 'single';
           break;
         case 'single':
@@ -594,7 +594,7 @@ function writeCabinet() {
             if (!commandtimeout)
               state = 'single';
           } else {
-            setStatus('Write EPC');
+            setStatus('Writing EPC');
             state = 'writeEpc';
           }
           break;
