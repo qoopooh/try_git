@@ -676,8 +676,19 @@ function readTagInfo() {
           state = 'single';
         break;
       }
-      extractEpcInfo();
-      state = 'readUser';
+      extractEpcInfo(function (t) {
+        if (t === 'bag') {
+          state = 'readUser';
+        } else {
+          closePort();
+          collectReadcabinet();
+          setStatus(cabinetinfo.type + ' '
+            + cabinetinfo.cabinetcode + ' '
+            + cabinetinfo.cabinetname + ' '
+            );
+          process = '';
+        }
+      });
       break;
     case 'readUser':
       commandtimeout = 10;
@@ -700,53 +711,6 @@ function readTagInfo() {
           + baginfo.batchnumber + ' '
           + baginfo.quantity + ' qc:'
           + baginfo.qc);
-        process = '';
-      });
-      break;
-    default:
-      closePort();
-      process = '';
-      break;
-  }
-  if (tempstate !== state)
-    prev_regstate = tempstate;
-  readtaginfo_state = state;
-}
-
-function readCabinet() {
-  var state = readtaginfo_state;
-  var tempstate = state;
-
-  switch (state) {
-    case 'openport':
-      setStatus("Open " + sPortPicker.val());
-      openSelectedPort();
-      state = 'waitport';
-      break;
-    case 'waitport':
-      if (conn_id < 1)
-        break;
-      state = 'single';
-      break;
-    case 'single':
-      commandtimeout = 10;
-      inventorySingle(function (buf) {
-        writeArrayBuffer(buf);
-        state = 'waitepc';
-      });
-      break;
-    case 'waitepc':
-      if (!epc || epc.length < 1) {
-        if (!commandtimeout)
-          state = 'single';
-        break;
-      }
-      extractEpcInfo(collectReadcabinet);
-      closePort(function() {
-        setStatus(cabinetinfo.type + ' '
-          + cabinetinfo.cabinetcode + ' '
-          + cabinetinfo.cabinetname + ' '
-          );
         process = '';
       });
       break;
@@ -818,7 +782,7 @@ function extractEpcInfo(cb) {
   }
 
   if (cb)
-    cb();
+    cb(type);
 }
 
 function extractUserInfo(cb) {
@@ -953,6 +917,11 @@ function handleOpenJson() {
       }, openFile);
 }
 
+function handleReadTagButton() {
+  process = 'readTagInfo';
+  readtaginfo_state = 'openport';
+}
+
 function collectReadbag() {
   var tag = {};
 
@@ -985,6 +954,11 @@ function collectReadcabinet() {
   console.log('collectReadcabinet', tagarr);
 }
 
+function cancelProcess() {
+  regstate = '';
+  readtaginfo_state = '';
+}
+
 function saveToStorage() {
   chrome.storage.sync.set({ 'baginfo': baginfo });
   chrome.storage.sync.set({ 'cabinetinfo': cabinetinfo });
@@ -1009,9 +983,6 @@ setInterval(function() {
       break;
     case 'writCabinet':
       writCabinet();
-      break;
-    case 'readCabinet':
-      readCabinet();
       break;
     default:
       break;
@@ -1180,14 +1151,10 @@ function init() {
       regstate = 'genepc';
     }
   });
-  $("#btnReadTag").click(function() {
-    process = 'readTagInfo';
-    readtaginfo_state = 'openport';
-  });
-  $("#btnBagCancel").click(function() {
-    regstate = '';
-    readtaginfo_state = '';
-  });
+  $("#btnReadTag").click(handleReadTagButton);
+  $("#btnCabinetReadTag").click(handleReadTagButton);
+  $("#btnBagCancel").click(cancelProcess);
+  $("#btnCabinetCancel").click(cancelProcess);
   $("#btnExportBag").click(handleExportButton);
   $("#btnOpenJson").click(handleOpenJson);
   $("#progress").val(0);
