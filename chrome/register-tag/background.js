@@ -18,9 +18,5 @@ chrome.app.runtime.onLaunched.addListener(function() {
 
   chrome.runtime.onSuspend.addListener(function() { 
   });
-  /*chrome.app.window.onClosed.addListener(function() {*/
-  /*console.log("onClosed");*/
-  /*});*/
 });
-
 

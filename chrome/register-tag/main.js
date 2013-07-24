@@ -35,7 +35,6 @@ var userwriting = new Uint8Array(2);
 var userword = 0;
 var commandtimeout = 0;
 var process = '';
-/*var sBtnSave = null;*/
 var sBtnOpen = null;
 var sBtnClose = null;
 var sBtnStart = null;
@@ -58,7 +57,6 @@ function writeArrayBuffer(buf) {
     return;
   }
   chrome.serial.write(conn_id, buf, function() {
-      /*document.getElementById('write-info').innerText = ab2hex(buf);*/
   });
 }
 
@@ -136,7 +134,6 @@ function onOpen(openInfo) {
   console.log('Connected', conn_id);
   disableButton(f_openport);
 
-  setPosition(0);
   readIndex = 0;
   readCount = 0;
   chrome.serial.read(conn_id, 1, onRead);
@@ -149,13 +146,10 @@ function openSelectedPort() {
     console.log("openSelectedPort", conn_id);
     return;
   }
-  /*var portPicker = document.getElementById('port-picker');*/
-  /*console.log("portPicker", sPortPicker, sPortPicker.length);*/
   if (!sPortPicker.length) {
     log("there is no port");
     return;
   }
-  /*var selectedPort = portPicker.options[portPicker.selectedIndex].value;*/
   var selectedPort = sPortPicker.val();
   console.log("selectedPort", selectedPort);
 
@@ -257,12 +251,6 @@ function dateToString(d) {
   return year + '-' + month + '-' + day + ' ' + timeToString();
 }
 
-function setPosition(position) {
-  /*var rotation = position * 18.0;*/
-  /*document.getElementById('image').style.webkitTransform =*/
-  /*'rotateZ(' + rotation + 'deg)';*/
-};
-
 function log(msg) {
   $("#messagewindow").prepend(timeToString() + ' ' + msg + '<br/>');
   /*var height = $("#messagewindow")[0].scrollHeight;*/
@@ -272,21 +260,8 @@ function log(msg) {
 function aaelog(msg) {
   var dat = msg.split(':');
 
-  /*if (dat.length > 1) {*/
-  /*$("#read-info").text(dat[1]);*/
-  /*}*/
   ++readCount;
-  setPosition(readCount);
-  /*document.getElementById('read-count').innerText = readCount.toString();*/
   log(msg);
-}
-
-function resizeMessageWindow() {
-  var bodyheight = $(window).height();
-  var bodywidth = $(window).width();
-
-  /*$("#messagewindow").width(bodywidth - 360);*/
-  $("#image").css({ left: bodywidth - 90 });
 }
 
 /**
@@ -338,7 +313,6 @@ function verifyForm() {
   baginfo.batchnumber = val;
   updateProgress();
   val = $("#mandate").val();
-  /*log(val + ' ' + val.length);*/
   patt = /\d{2}\/\d{2}/g;
   res = patt.test(val);
   if (!res) {
@@ -1140,7 +1114,6 @@ function loadCabinetInput(cb) {
 function onLoad() {
   chrome.serial.getPorts(function(ports) {
     buildPortPicker(ports)
-    /*openSelectedPort();*/
     disableButton(false);
   });
 };
@@ -1164,7 +1137,6 @@ setInterval(function() {
 }, 100);
 
 function init() {
-  /*sBtnSave = $("#btnSave");*/
   sBtnOpen = $("#btnOpen");
   sBtnClose = $("#btnClose");
   sBtnStart = $("#btnStart");
@@ -1172,9 +1144,6 @@ function init() {
   sBtnSingle = $("#btnSingle");
   sBtnHB = $("#btnHB");
   sPortPicker = $("#port-picker");
-  /*$("#btnRefresh").click(refreshPort());*/
-  /*sBtnSave.click(saveToStorage);*/
-  /*$("#btnCabinetSave").click(saveToStorage);*/
   sBtnOpen.click(openSelectedPort);
   sBtnClose.click(function() {
     closePort();
@@ -1346,7 +1315,6 @@ function init() {
   document.getElementById('progress').setAttribute('max', '' + progressmax);
 
   $("#messagewindow").html('Start: ' + dateToString() + '<br/>');
-  resizeMessageWindow();
 
   $("#debug").off("pageinit").on("pageinit", function(e) {
     $.mobile.changePage( $("#main"), { transition: "none", reverse: false,
@@ -1357,15 +1325,8 @@ function init() {
   onLoad();
 
   restoreData();
-  /*clearData();*/
+  /*clearData(); // To clear all sync data*/
 }
 
-/*$(document).bind('pageinit', function() {*/
-/*$(document).bind('mobileinit', function() {*/
-/*init();*/
-/*});*/
 $(document).ready(init()); // for only jQuery
-$(window).resize(function() {
-  resizeMessageWindow();
-});
 

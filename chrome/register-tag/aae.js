@@ -66,8 +66,6 @@ function extractPackage(arr, idx, cb) {
     payload.set(arr.subarray(9, 9 + len));
     pkgsize = 11 + len;
   }
-  /*console.log('arr', u82hex(arr.subarray(0, idx)));*/
-  /*console.log('payload', len, u82hex(payload));*/
   if (!isSum(arr, pkgsize))
     return cb();
   execReceivingMessage(cmd, len, payload, function () {
