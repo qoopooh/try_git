@@ -35,7 +35,7 @@ var userwriting = new Uint8Array(2);
 var userword = 0;
 var commandtimeout = 0;
 var process = '';
-var sBtnSave = null;
+/*var sBtnSave = null;*/
 var sBtnOpen = null;
 var sBtnClose = null;
 var sBtnStart = null;
@@ -313,7 +313,7 @@ function disableButton(open) {
   }
 }
 
-function verifyForm(cb) {
+function verifyForm() {
   var res = false;
   var val = $("#productcode").val();
   var len = val.length;
@@ -364,6 +364,34 @@ function verifyForm(cb) {
     return res;
   }
   baginfo.quantity = val;
+  updateProgress();
+  if (res)
+    setStatus("Verified", "ok");
+  return res;
+}
+
+function verifyCabinetFormat() {
+  var res = false;
+  var val = $("#cabinetcode").val();
+  var len = val.length;
+  var patt = /\d{2}\.\d{3}\.\d{3}/g;
+
+  if (len > 10)
+    patt = /\d{2}\.\d{3}\.\d{3}\.\d{1}/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Cabinet code format failed (e.g. 00.000.000.0)", "fail");
+    return res;
+  }
+  baginfo.productcode = val;
+  updateProgress();
+  val = $("#cabinetname").val();
+  patt = /^[A-Z]+\d{4}/g;
+  res = patt.test(val);
+  if (!res) {
+    setStatus("Cabinet name format failed (e.g. ES0041)", "fail");
+    return res;
+  }
   updateProgress();
   if (res)
     setStatus("Verified", "ok");
@@ -528,6 +556,104 @@ function register() {
   regstate = state;
 }
 
+function writeCabinet() {
+  var state = regstate;
+  var tempstate = state;
+
+  switch (state) {
+    case 'genepc':
+      setStatus("Generate EPC");
+      gencabinet(function () {
+        var hex = u82hex(newepc);
+        console.log('gencabinet done', cabinetinfo, hex);
+        $("#epc").text(hex);
+        updateProgress();
+        state = 'openport';
+      });
+      break;
+    case 'openport':
+      setStatus("Open " + sPortPicker.val());
+      openSelectedPort();
+      updateProgress();
+      state = 'waitport';
+      break;
+    case 'waitport':
+      if (conn_id < 1)
+        break;
+      setStatus('Set Heartbeat');
+      setHeartbeat(true, function (buf) {
+        writeArrayBuffer(buf);
+        updateProgress();
+        state = 'waithb';
+      });
+      break;
+    case 'single':
+      commandtimeout = 20;
+      inventorySingle(function (buf) {
+        writeArrayBuffer(buf);
+        f_single = false;
+        state = 'waithb';
+      });
+      break;
+    case 'writeEpc':
+      writeEpc(epc, new Uint8Array([ 0x00, 0x00, 0x00, 0x00 ]),
+          newepc, function (buf) {
+        writeArrayBuffer(buf);
+        console.log(state, buf);
+        state = 'waithb';
+      });
+      break;
+    case 'waithb':
+      if (!f_hb_read)
+        break;
+      f_hb_read = false;
+      log("f_hb_read " + prev_regstate);
+      switch (prev_regstate) {
+        case 'waitport':
+          setStatus('Read EPC');
+          state = 'single';
+          break;
+        case 'single':
+          if (!f_single)
+            break;
+          if (!epc || epc.length < 1) {
+            if (!commandtimeout)
+              state = 'single';
+          } else {
+            setStatus('Write EPC');
+            state = 'writeEpc';
+          }
+          break;
+        case 'writeEpc':
+          if (!f_written)
+            break;
+          if (f_success) {
+            closePort(function () {
+              setStatus('Finished');
+              log('Succeed');
+              process = '';
+            });
+          } else {
+            state = 'single';
+          }
+          break;
+        default:
+          state = 'noop';
+      }
+      break;
+    case 'noop':
+    default:
+      log('No operation');
+      closePort();
+      process = '';
+      console.log(baginfo);
+      break;
+  }
+  if (tempstate !== state)
+    prev_regstate = tempstate;
+  regstate = state;
+}
+
 function genepc(cb) {
   var batch = baginfo.batchnumber;
   var code = baginfo.productcode.split('.');
@@ -553,10 +679,39 @@ function genepc(cb) {
 
   newepc[6] = parseInt(code[0]);
   i = parseInt(code[1]);
-  newepc[7] = (i >> 8) & 0xFF;
+  newepc[7] = (i >> 8) & 0x03;
   newepc[8] = i & 0xFF;
   i = parseInt(code[2]);
   newepc[9] = (i >> 8) & 0xFF;
+  newepc[10] = i & 0xFF;
+  if (code.length < 4)
+    newepc[11] = 0xFF;
+  else
+    newepc[11] = parseInt(code[3]);
+
+  cb();
+}
+
+function gencabinet(cb) {
+  var name = cabinetinfo.cabinetname;
+  var code = cabinetinfo.cabinetcode.split('.');
+  var i = 0;
+  
+  newepc[0] = name.charCodeAt(0);
+  newepc[1] = name.charCodeAt(1);
+  i = parseInt(name.substr(2, 4));
+  newepc[2] = (i >> 8) & 0x3F;
+  newepc[3] = i & 0xFF;
+  newepc[4] = 0;
+  newepc[5] = 0;
+
+  newepc[6] = parseInt(code[0]);
+  i = parseInt(code[1]);
+  newepc[7] = 0x80; // set cabinet bit
+  newepc[7] += (i >> 8) & 0x03;
+  newepc[8] = i & 0xFF;
+  i = parseInt(code[2]);
+  newepc[9] = (i >> 8) & 0x03;
   newepc[10] = i & 0xFF;
   if (code.length < 4)
     newepc[11] = 0xFF;
@@ -682,7 +837,7 @@ function readTagInfo() {
         } else {
           closePort();
           collectReadcabinet();
-          setStatus(cabinetinfo.type + ' '
+          setStatus(cabinetinfo.type + '-> '
             + cabinetinfo.cabinetcode + ' '
             + cabinetinfo.cabinetname + ' '
             );
@@ -706,7 +861,7 @@ function readTagInfo() {
       }
       extractUserInfo(collectReadbag);
       closePort(function() {
-        setStatus(baginfo.type + ' '
+        setStatus(baginfo.type + '-> '
           + baginfo.productcode + ' '
           + baginfo.batchnumber + ' '
           + baginfo.quantity + ' qc:'
@@ -756,7 +911,7 @@ function extractEpcInfo(cb) {
     batch = String.fromCharCode(epc[0]);
     if (epc[1])
       batch += String.fromCharCode(epc[1]);
-    i = ((epc[2] << 8) + epc[3]) & 0x03FF;
+    i = ((epc[2] << 8) + epc[3]) & 0x3FFF;
     batch += zeroPad(i, 4);
   }
 
@@ -965,6 +1120,21 @@ function saveToStorage() {
   console.log('save', baginfo, cabinetinfo);
 }
 
+function loadBagInput(cb) {
+  baginfo.productcode = $("#productcode").val();
+  baginfo.batchnumber = $("#batchnumber").val();
+  baginfo.mandate = $("#mandate").val();
+  baginfo.expdate = $("#expdate").val();
+  baginfo.quantity = $("#quantity").val();
+  cb();
+}
+
+function loadCabinetInput(cb) {
+  cabinetinfo.cabinetcode = $("#cabinetcode").val();
+  cabinetinfo.cabinetname = $("#cabinetname").val();
+  cb();
+}
+
 function onLoad() {
   chrome.serial.getPorts(function(ports) {
     buildPortPicker(ports)
@@ -981,8 +1151,8 @@ setInterval(function() {
     case 'readTagInfo':
       readTagInfo();
       break;
-    case 'writCabinet':
-      writCabinet();
+    case 'writeCabinet':
+      writeCabinet();
       break;
     default:
       break;
@@ -992,7 +1162,7 @@ setInterval(function() {
 }, 100);
 
 function init() {
-  sBtnSave = $("#btnSave");
+  /*sBtnSave = $("#btnSave");*/
   sBtnOpen = $("#btnOpen");
   sBtnClose = $("#btnClose");
   sBtnStart = $("#btnStart");
@@ -1001,8 +1171,8 @@ function init() {
   sBtnHB = $("#btnHB");
   sPortPicker = $("#port-picker");
   /*$("#btnRefresh").click(refreshPort());*/
-  sBtnSave.click(saveToStorage);
-  $("#btnCabinetSave").click(saveToStorage);
+  /*sBtnSave.click(saveToStorage);*/
+  /*$("#btnCabinetSave").click(saveToStorage);*/
   sBtnOpen.click(openSelectedPort);
   sBtnClose.click(function() {
     closePort();
@@ -1146,15 +1316,28 @@ function init() {
 
   $("#btnSubmit").click(function() {
     progress = 0;
-    if (verifyForm()) {
-      process = 'register';
-      regstate = 'genepc';
-    }
+    loadBagInput(function() {
+      if (verifyForm()) {
+        saveToStorage();
+        process = 'register';
+        regstate = 'genepc';
+      }
+    });
   });
   $("#btnReadTag").click(handleReadTagButton);
   $("#btnCabinetReadTag").click(handleReadTagButton);
   $("#btnBagCancel").click(cancelProcess);
   $("#btnCabinetCancel").click(cancelProcess);
+  $("#btnCabinetSubmit").click(function() {
+    progress = 0;
+    loadCabinetInput(function() {
+      if (verifyCabinetFormat()) {
+        saveToStorage();
+        process = 'writeCabinet';
+        regstate = 'genepc';
+      }
+    });
+  });
   $("#btnExportBag").click(handleExportButton);
   $("#btnOpenJson").click(handleOpenJson);
   $("#progress").val(0);
