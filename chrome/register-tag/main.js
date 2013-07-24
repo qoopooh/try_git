@@ -1016,6 +1016,8 @@ function clearData() {
 }
 
 function writeToFile(theFileEntry) {
+  if (!theFileEntry)
+    return;
   theFileEntry.createWriter(function(fileWriter) {
     fileWriter.onerror = function(e) {
       console.log("Write failed: " + e.toString());
