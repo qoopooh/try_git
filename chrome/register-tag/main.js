@@ -897,14 +897,16 @@ function extractEpcInfo(cb) {
   if (epc[11] !== 255)
   code += '.' + epc[11];
 
-  log('Product code: ' + code);
-  log('Batch: ' + batch);
   if (type === 'bag') {
+    log('Product code: ' + code);
+    log('Batch: ' + batch);
     baginfo.productcode = code;
     baginfo.batchnumber = batch;
     baginfo.type = type;
     baginfo.qc = qc;
   } else {
+    log('Cabinet code: ' + code);
+    log('Cabinet name: ' + batch);
     cabinetinfo.cabinetcode = code;
     cabinetinfo.cabinetname = batch;
     cabinetinfo.type = type;
