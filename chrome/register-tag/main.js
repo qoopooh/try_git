@@ -1323,6 +1323,16 @@ function init() {
       changeHash: false });
   });
 
+  $("#btnDownload").click(function () {
+    pr.download();
+  });
+  $("#btnDownloadCancel").click(function () {
+    pr.cancel();
+  });
+  $("#btnPrClear").click(function () {
+    $("#downloadmessage").text("");
+  });
+
 
   onLoad();
 
