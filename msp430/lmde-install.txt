@@ -1,3 +1,12 @@
-sudo apt-get install msp430*
+sudo apt-get install msp430* mspdebug
 http://sourceforge.net/apps/mediawiki/mspgcc/index.php?title=MSPGCC_Wiki
+
+==setup==
+sudo vi /etc/udev/rules.d/46-TI_launchpad.rules
+sudo restart udev
+
+mspdebug rf2500
+prog main.elf
+run
+exit
 

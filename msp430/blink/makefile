@@ -1,6 +1,6 @@
 # makfile configuration
-NAME            = hello
-OBJECTS         = launchpad.o
+NAME            = blink
+OBJECTS         = main.o
 CPU             = msp430g2231
 
 CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
@@ -44,4 +44,4 @@ dist:
 FORCE:
 
 #project dependencies
-launchpad.o: launchpad.c 
+main.o: main.c 

@@ -17,6 +17,8 @@ Dialog::Dialog(QWidget *parent) :
   ui->baudRateBox->addItem("4800", BAUD4800);
   ui->baudRateBox->addItem("9600", BAUD9600);
   ui->baudRateBox->addItem("19200", BAUD19200);
+  ui->baudRateBox->addItem("38400", BAUD38400);
+  ui->baudRateBox->addItem("115200", BAUD115200);
   ui->baudRateBox->setCurrentIndex(3);
 
   ui->led->turnOff();
