@@ -1,0 +1,3 @@
+sudo apt-get install msp430*
+http://sourceforge.net/apps/mediawiki/mspgcc/index.php?title=MSPGCC_Wiki
+
