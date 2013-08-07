@@ -7,30 +7,21 @@
 #define LED         13
 #define R1          12
 #define BUTTON      2
-#define f_r1              flags_00.flg.bit0
-#define f_toggle_ena      flags_00.flg.bit1
 
-//const int k_count_min = 137;
-//const int k_count_max = 145;
-
+const char *k_version = "Pulse Test V1.0";
+const int k_button_delay = 250;
 const int k_count_min = 1400;
-//const int k_count_max = 280;
-
-flags flags_00;
-int count = k_count_min;
 
 void setup()
 {
   pinMode(BUTTON, INPUT);
   pinMode(R1, OUTPUT);
   digitalWrite(R1, LOW);
-  //digitalWrite(R1, HIGH);
-  f_r1 = 0;
 
   Serial.begin(115200);
   while(!Serial);
 
-  Serial.println("Pulse testing 1");
+  Serial.println(k_version);
 }
 
 void loop()
@@ -45,28 +36,10 @@ void loop()
   }
 
   digitalWrite(LED, HIGH);
-  delay(300);
-  count = k_count_min;
-
-  //for (int i=0; i<10; i++) {
-    //digitalWrite(R1, HIGH);
-    //delayMicroseconds(count * 2);
-    //digitalWrite(R1, LOW);
-    //delayMicroseconds(count);
-  //}
-  //do {
-    digitalWrite(R1, HIGH);
-    delayMicroseconds(count);
-    //delayMicroseconds(count * 2);
-    digitalWrite(R1, LOW);
-    delayMicroseconds(count);
-    //} while (++count < k_count_max);
-
-  //if (++count > k_count_max)
-    //return;
-  //digitalWrite(R1, HIGH);
-  //delayMicroseconds(count);
-  //digitalWrite(R1, LOW);
+  delay(k_button_delay);
+  digitalWrite(R1, HIGH);
+  delayMicroseconds(k_count_min);
+  digitalWrite(R1, LOW);
   digitalWrite(LED, LOW);
 }
 
