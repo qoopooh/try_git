@@ -10,9 +10,11 @@
 #define f_r1              flags_00.flg.bit0
 #define f_toggle_ena      flags_00.flg.bit1
 
-const int k_count_min = 137;
-//const int k_count_min = 138;
-const int k_count_max = 145;
+//const int k_count_min = 137;
+//const int k_count_max = 145;
+
+const int k_count_min = 1400;
+//const int k_count_max = 280;
 
 flags flags_00;
 int count = k_count_min;
@@ -52,12 +54,13 @@ void loop()
     //digitalWrite(R1, LOW);
     //delayMicroseconds(count);
   //}
-  do {
+  //do {
     digitalWrite(R1, HIGH);
-    delayMicroseconds(count * 2);
+    delayMicroseconds(count);
+    //delayMicroseconds(count * 2);
     digitalWrite(R1, LOW);
     delayMicroseconds(count);
-  } while (++count < k_count_max);
+    //} while (++count < k_count_max);
 
   //if (++count > k_count_max)
     //return;
