@@ -4,19 +4,25 @@
 
 #include "def.h"
 
-#define R1          13
+#define LED         13
+#define R1          12
 #define BUTTON      2
 #define f_r1              flags_00.flg.bit0
 #define f_toggle_ena      flags_00.flg.bit1
 
+const int k_count_min = 137;
+//const int k_count_min = 138;
+const int k_count_max = 145;
+
 flags flags_00;
-unsigned short count = 0;
+int count = k_count_min;
 
 void setup()
 {
   pinMode(BUTTON, INPUT);
   pinMode(R1, OUTPUT);
   digitalWrite(R1, LOW);
+  //digitalWrite(R1, HIGH);
   f_r1 = 0;
 
   Serial.begin(115200);
@@ -28,7 +34,6 @@ void setup()
 void loop()
 {
   int in = digitalRead(BUTTON);
-  int count = 100;
 
   if (in)
     return;
@@ -36,15 +41,29 @@ void loop()
   while (!in) {
     in = digitalRead(BUTTON);
   }
-  f_toggle_ena ^= 1;
-  delay(500);
 
+  digitalWrite(LED, HIGH);
+  delay(300);
+  count = k_count_min;
+
+  //for (int i=0; i<10; i++) {
+    //digitalWrite(R1, HIGH);
+    //delayMicroseconds(count * 2);
+    //digitalWrite(R1, LOW);
+    //delayMicroseconds(count);
+  //}
   do {
-  digitalWrite(R1, HIGH);
-  //delayMicroseconds(30); // works with 1 board
-  delayMicroseconds(count);
-  digitalWrite(R1, LOW);
-  delayMicroseconds(count);
-  } while (++count < 1000);
+    digitalWrite(R1, HIGH);
+    delayMicroseconds(count * 2);
+    digitalWrite(R1, LOW);
+    delayMicroseconds(count);
+  } while (++count < k_count_max);
+
+  //if (++count > k_count_max)
+    //return;
+  //digitalWrite(R1, HIGH);
+  //delayMicroseconds(count);
+  //digitalWrite(R1, LOW);
+  digitalWrite(LED, LOW);
 }
 
