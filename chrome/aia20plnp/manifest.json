@@ -1,0 +1,19 @@
+{
+  "name": "AIA 20PLNP",
+  "version": "0.1",
+  "manifest_version": 2,
+
+  "description": "Calculate AIA Life Insurance",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "icons": { "16": "aia16.png",
+            "48": "aia48.png",
+            "128": "aia128.png" },
+
+  "permissions": [
+  ]
+}
+
