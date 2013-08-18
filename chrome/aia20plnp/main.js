@@ -1,7 +1,10 @@
 
+function aia_calc() {
+  console.log('calc');
+}
+
 $(document).ready(function() {
-  $(function () {
-    $("#birth").datepicker();
-  });
+  $("#calc").click(aia_calc);
+  $("#birth").datepicker();
 });
 
