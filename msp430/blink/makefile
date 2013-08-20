@@ -3,7 +3,8 @@ NAME            = blink
 OBJECTS         = main.o
 CPU             = msp430g2231
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
+#CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
+CFLAGS          = -mmcu=${CPU} -O2 -Wall
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc

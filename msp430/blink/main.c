@@ -1,6 +1,8 @@
 #include <legacymsp430.h>
 #include "def.h"
 
+char buff[122];
+
 void InitializeLeds(void)
 {
   LED_DIR |= LED1 + LED2;                          
@@ -13,6 +15,7 @@ void delay(unsigned int d)
   int i;
 
   for (i = 0; i<d; i++) {
+    buff[i] = d;
     nop();
   }
 }
