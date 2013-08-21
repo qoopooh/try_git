@@ -12,9 +12,13 @@
 <div id="calculator">
   <h2>Life Insurance Yearly Calculator</h2>
   <form name=calform>
-    <table align=center border=0 cellpadding=1 cellspacing=1 id=tqe_calc>
-      <tr><td align=left>Birth Date:</td><td><input type=text id=birth></td></tr>
-      <tr><td align=left>Fund Amount:</td><td><input type=number id=fund></td></tr>
+    <table align=center id=tqe_calc>
+      <tr><td align=left>Birth Date:</td>
+        <td><input type=text id=birth></td>
+      </tr>
+      <tr><td align=left>Fund Amount:</td>
+        <td><input type=number id=fund></td>
+      </tr>
       <tr><td align=left>Sex:</td><td>
         <div id=sex>
           <input type=radio name=sex value='male' checked>Male
@@ -25,6 +29,7 @@
         <div id=type>
           <input type=radio name=type value='20plp' checked>AIA20PLP
           <input type=radio name=type value='20plnp'>AIA20PLNP
+          <input type=radio name=type value='15p25'>AIA15P25
         </div>
       </td></tr>
       <tr><td align=left>For policy term of</td><td>
@@ -38,7 +43,10 @@
         <input type=button  id='calc' value='Calculate'>
         <input type=reset value='Reset'>
       </td></tr>
-      <tr><td align=left>Annual Payment:</td><td><input type=number id=fund></td></tr>
+      <tr>
+        <td align=left>Annual Payment:</td>
+        <td><input type=number id=payment></td>
+      </tr>
     </table>
   </form>
 </div>
