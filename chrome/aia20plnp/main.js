@@ -1,12 +1,20 @@
 
 function aia_calc() {
   (function () {
-   console.log($("#birth").val());
-   console.log($("#fund").val());
-   console.log($("input[name=year]:radio").val());
-   console.log($("input[name=type]:radio").val());
-   console.log($("input[name=year]:radio").val());
-   console.log($("#payment").val());
+   var birthday = new Date($("#birth").val());
+   var old = Math.floor(((Date.now() - birthday) / (31557600000)));
+   var fund = Number($("#fund").val());
+   var payment = parseInt($("#payment").val());
+   var sex = $("input[name=sex]:checked").val();
+   var type = $("input[name=type]:checked").val();
+   var year = $("input[name=year]:checked").val();
+
+   console.log(old);
+   console.log(fund);
+   console.log(sex);
+   console.log(type);
+   console.log(year);
+   console.log(payment);
   })();
 }
 
