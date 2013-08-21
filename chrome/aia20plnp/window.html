@@ -6,50 +6,46 @@
   <script src="jq/jquery-1.10.2.min.js"></script>
   <script src="jq/jquery-ui.js"></script>
   <script src="aiatable.js"></script>
+  <script src="aiacalc.js"></script>
   <script src="main.js"></script>
 </head>
 <body bgcolor="#eeeee6">
-<div id="calculator">
-  <h2>Life Insurance Yearly Calculator</h2>
-  <form name=calform>
-    <table align=center id=tqe_calc>
-      <tr><td align=left>Birth Date:</td>
-        <td><input type=text id=birth></td>
-      </tr>
-      <tr><td align=left>Fund Amount:</td>
-        <td><input type=number id=fund></td>
-      </tr>
-      <tr><td align=left>Sex:</td><td>
-        <div id=sex>
-          <input type=radio name=sex value='male' checked>Male
-          <input type=radio name=sex value='female'>Female
-        </div>
-      </td></tr>
-      <tr><td align=left>Type:</td><td>
-        <div id=type>
-          <input type=radio name=type value='20plp' checked>AIA20PLP
-          <input type=radio name=type value='20plnp'>AIA20PLNP
-          <input type=radio name=type value='15p25'>AIA15P25
-        </div>
-      </td></tr>
-      <tr><td align=left>For policy term of</td><td>
-        <div id=y>
-          <input type=radio name=year value=15 checked>15-Year
-          <input type=radio name=year value=20>20-Year
-          <input type=radio name=year value=25>25-year
-        </div>
-      </td></tr>
-      <tr><td align=center colspan=2>
-        <input type=button  id='calc' value='Calculate'>
-        <input type=reset value='Reset'>
-      </td></tr>
-      <tr>
-        <td align=left>Annual Payment:</td>
-        <td><input type=number id=payment></td>
-      </tr>
-    </table>
-  </form>
-</div>
+  <div id="calculator">
+    <h2>Life Insurance Yearly Calculator</h2>
+    <form name=calform>
+      <table align=center id=tqe_calc>
+        <tr><td align=left>Birth Date:</td>
+          <td><input type=text id=birth></td>
+        </tr>
+        <tr><td align=left>Fund Amount:</td>
+          <td><input type=number id=fund></td>
+        </tr>
+        <tr><td align=left>Sex:</td><td>
+          <div id=sex>
+            <input type=radio name=sex value='male' checked>Male
+            <input type=radio name=sex value='female'>Female
+          </div>
+        </td></tr>
+        <tr><td align=left>Type:</td><td>
+          <div id=type>
+            <input type=radio name=type value='20plp' checked>AIA20PLP
+            <input type=radio name=type value='20plnp'>AIA20PLNP
+            <input type=radio name=type value='15p25'>AIA15P25
+          </div>
+        </td></tr>
+        <tr><td align=left>Rate:</td><td>
+          <div id=rate>-</div>
+        </td></tr>
+        <tr><td align=center colspan=2>
+          <input type=button  id='calc' value='Calculate'>
+          <input type=reset value='Reset'>
+        </td></tr>
+        <tr><td align=left>Annual Payment:</td>
+          <td><input type=number id=payment></td>
+        </tr>
+      </table>
+    </form>
+  </div>
 </body>
 </html>
 

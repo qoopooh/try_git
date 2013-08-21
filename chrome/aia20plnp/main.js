@@ -7,14 +7,16 @@ function aia_calc() {
    var payment = parseInt($("#payment").val());
    var sex = $("input[name=sex]:checked").val();
    var type = $("input[name=type]:checked").val();
-   var year = $("input[name=year]:checked").val();
+   var aia = new Aia();
 
    console.log(old);
    console.log(fund);
    console.log(sex);
    console.log(type);
-   console.log(year);
    console.log(payment);
+   console.log(aia.calPayment(fund, old, sex, type));
+   $("#rate").text(aia.rate);
+   $("#payment").val(aia.result);
   })();
 }
 
