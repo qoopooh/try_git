@@ -1,30 +1,5 @@
-
-/** Class Foo **/
-var Foo = (function () {
-  // Private variables
-  var private_number = 200
-  /** class Constructor **/
-  var Foo = function () {
-    this.bar = 0;
-  };
-  /** class methods **/
-  Foo.prototype = {
-    add: function () {
-      this.bar += private_number;
-    }
-  };
-  return Foo;
-})();
-
-/*foo = new Foo();*/
-/*alert(foo.bar); // 0*/
-/*foo.add(); */
-/*alert(foo.bar);// 200*/
-/*alert(foo.private_number) //undefined*/
-
 var Aia = (function () {
-  // Private variables
-  var res = 0;
+  /** Private variables **/
   var Sex = {
     'male': 0,
     'female': 1
@@ -38,21 +13,22 @@ var Aia = (function () {
 
   /** class methods **/
   Aia.prototype = {
-    calPayment: function (fund, year, sex, type) {
+    calPayment: function (fund, age, sex, type) {
       var s = Sex[sex];
       var r = 0;
+      var res = 0;
 
       if (fund < 0)
         fund = 0;
-      if (year < 0)
-        year = 0;
+      if (age < 0)
+        age = 0;
       if (!s)
         s = 0;
       switch (type) {
-        /*case '15p25': r = p1525[(year * 2) + s]; break;*/
-        case '20plnp': r = plnp20[(year * 2) + s]; break;
+        /*case '15p25': r = p1525[(age * 2) + s]; break;*/
+        case '20plnp': r = plnp20[(age * 2) + s]; break;
         case '20plp':
-        default: r = plp20[(year * 2) + s]; break;
+        default: r = plp20[(age * 2) + s]; break;
       }
       if (!r)
         r = 1000;
