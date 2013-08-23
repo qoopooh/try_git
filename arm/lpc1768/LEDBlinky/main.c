@@ -5,6 +5,7 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER. USE IT AT YOUR OWN RISK */
 
 #include "LPC17xx.h"
+#include "def.h"
 
 volatile uint32_t temp;
 
@@ -17,9 +18,9 @@ int main (void)
 	LPC_GPIO2->FIOPIN &= ~0xff;         // turn off all leds
 	while(1)
 	{
-		LPC_GPIO2->FIOPIN |= 1 << 7;      // make P2.7 high
+    SET_LED1_ON;
 		_delay( 1 << 22 );
-		LPC_GPIO2->FIOPIN &= ~( 1 << 7 ); // make P2.7 low
+		SET_LED1_OFF;
 		_delay( 1 << 22 );
 	}
 	return 0;
