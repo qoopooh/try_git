@@ -12,21 +12,24 @@ void _delay(uint32_t del);
 
 int main (void) 
 {
-	LPC_SC->PCONP |= ( 1 << 15 ); // power up GPIO
-	LPC_GPIO2->FIODIR |= 1 << 2; // puts P1.29 into output mode.
+	LPC_SC->PCONP |= ( 1 << 15 );       // power up GPIO
+	LPC_GPIO2->FIODIR |= 0xff;          // puts P2.0 - 2.7 into output mode.
+	LPC_GPIO2->FIOPIN &= ~0xff;         // turn off all leds
 	while(1)
 	{
-		LPC_GPIO2->FIOPIN |= 1 << 2; // make P1.29 high
-		_delay( 1 << 24 );
-		LPC_GPIO2->FIOPIN &= ~( 1 << 2 ); // make P1.29 low
-		_delay( 1 << 24 );
+		LPC_GPIO2->FIOPIN |= 1 << 7;      // make P2.7 high
+		_delay( 1 << 22 );
+		LPC_GPIO2->FIOPIN &= ~( 1 << 7 ); // make P2.7 low
+		_delay( 1 << 22 );
 	}
 	return 0;
   
 }
+
 void _delay(uint32_t del)
 {
 	uint32_t i;
 	for(i=0;i<del;i++)
 		temp = i;
 }
+
