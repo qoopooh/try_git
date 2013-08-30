@@ -1,5 +1,5 @@
 var SerialPort = require('serialport').SerialPort;
-var serial = new SerialPort('/dev/ttyS0', { baudrate: 38400 });
+var serial = new SerialPort('/dev/ttyUSB0', { baudrate: 38400 });
 var log = console.log;
 
 serial.on('open', serialEvent);

@@ -1,7 +1,13 @@
 {
   "default_ip":"192.168.1.39",
   "default_port":1470,
-  "serial_port":"/dev/ttyS0",
-  "port":8081
+  "serial_port":"/dev/ttyUSB0",
+  "blutooth_port":"/dev/rfcomm0",
+  "port":8081,
+  "sql_ip":"192.168.1.15",
+  "sql_port":3306,
+  "sql_user":"berm",
+  "sql_pass":"berm",
+  "sql_database":"domotics"
 }
 
