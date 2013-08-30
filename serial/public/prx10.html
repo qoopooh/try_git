@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FTC Bus (RS232)</title>
+  <title>PRx10</title>
   <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1"/> 
-  <!--<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/themes/base/jquery-ui.css" />-->
   <style type="text/css">
 #chatwindow{
   position:relative;
@@ -13,8 +12,8 @@
 }
 #messagewindow, #inputcontainer{
   position:absolute;
-  left:0;
-  right:0;
+  left:1px;
+  right:1px;
   border:1px solid #000;
 }
 #messagewindow{   
@@ -24,8 +23,8 @@
 }
 #inputcontainer{
   display:block;
-  bottom:0;
-  height:1em;
+  bottom:1px;
+  height:5em;
   padding:.5em;
   margin-top:1em;
 }
@@ -35,26 +34,27 @@
   </style>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-  <script type="text/javascript" src="js/client.js"></script>
+  <script type="text/javascript" src="js/pr.js"></script>
 </head>
 <body>
-  <h1>FTC Bus Rev. 2_16</h1>
+  <h1>AAE PRx10 Tester</h1>
   <p id="currenttime">date</p>
   <div id="chatwindow">
     <div id="messagewindow">
     <!-- messages -->
     </div>
   </div>
-  <input id="chkTranslate" type="checkbox">Translate message</input>
-  <input id="chkOneLine" type="checkbox" checked>1 line message</input>
-  <br/>
-  <button id="btnClear" type="button">Clear</button>
-  <button id="btnAddress" type="button">Address</button>
-  <button id="btnVersion" type="button">Version</button>
-  <label id="txtCommandCount" for="selectCommandDevices">-</label>
-  <select id="selectCommandDevices">
-    <option>-</option>
-  </select>
+  <div id="inputcontainer">
+    <input id="chkTranslate" type="checkbox">Translate message</input>
+    <input id="chkOneLine" type="checkbox" checked>1 line message</input>
+    <br/>
+    <button id="btnClear" type="button">Clear</button>
+    <button id="btnVersion" type="button">Version</button>
+    <label id="txtCommandCount">-</label> receive(s)
+    <br/>
+    <input id="command">
+    <button id="btnWrite" type="button">Write</button>
+  <div>
 </body>
 </html>
 

@@ -1,15 +1,18 @@
 var f_translate = true;
-var f_oneline = false;
+var f_oneline = true;
+
 var productCode = {
   '41':'D-8OnOff',
   '43':'W-2OnOff',
   '44':'W-1Shutter',
+  '45':'W-1Dim',
   '4C':'W-InpKeyb',
   '50':'W-Dim010V',
   '54':'W-Themo',
   '55':'D-4Shutter',
   '5B':'W-2VLess',
-  '5C':'Gateway'
+  '5C':'D-Gateway',
+  '5E':'W-DimRGB'
 }
 var commandCode = {
   '41':'CMD_ANALOG',
@@ -23,6 +26,8 @@ var commandCode = {
   '4D':'CMD_MODE',
   '4E':'CMD_NAME',
   '4F':'CMD_DIRECT',
+  '50':'CMD_BABY_RX',
+  '51':'CMD_BABY_DETECT',
   '52':'CMD_RESET',
   '53':'CMD_SET',
   '54':'CMD_TOGGLE',
@@ -60,18 +65,51 @@ var weekDay = {
   '06':'FRI',
   '07':'SAT'
 }
+var SRC = {
+  '00':'s-all',
+  '01':'s-sct',
+  '02':'s-aut',
+  '03':'s-sca',
+  '04':'s-scn',
+  '06':'s-mod',
+  '07':'s-rs2'
+}
+var DST = {
+  '00':'d-all',
+  '01':'d-sct',
+  '02':'d-aut',
+  '03':'d-sca',
+  '04':'d-scn',
+  '06':'d-mod',
+  '07':'d-rs2'
+}
+var MSG_TYPE = {
+  '00':'E',
+  '01':'I',
+  '02':'R',
+  '03':'C'
+}
+var TEMP_DEC = {
+  '00':'0',
+  '20':'1',
+  '40':'3',
+  '60':'4',
+  '80':'5',
+  'A0':'6',
+  'C0':'8',
+  'E0':'9'
+}
 
 function getTimeStamp() {
   var d = new Date();
   return d;
 }
-function timeString(uint8) {
-  var text = uint8.toString()
-  if (text.length === 1)
-    text = '0' + text;
-  return text;
+
+function zeroPad(number) {
+  return (number < 10) ? '0' + number : number;
 }
-function translate(words, callback) {
+
+function translate(words, cb) {
   var cmd = commandCode[words[3]];
   var text = "";
   var product = "";
@@ -85,22 +123,187 @@ function translate(words, callback) {
       if (!product)
         product = words[12];
       sn = words[13] + words[14] + words[15];
-      text = product + ',' + sn + ': ' + words[4] + '.' + words[5] 
-        + ' ' + words[6] + words[7] + '/' + words[8] + '/' + words[9]
-        + ' (' + weekDay[words[10]] + ') Timezone: ' + words[11];
+      var tz = parseInt(words[11], 16);
+      if (tz > 12)
+        tz -= 256;
+      text = product + ',' + sn + ',' + cmd + ',' + SRC[words[0]] + ',' + DST[words[1]]
+        + ',' + MSG_TYPE[words[2]] + ', ' + words[4] + ':' + words[5] 
+        + ' ' + words[6] + words[7] + '-' + words[8] + '-' + words[9]
+        + ' (' + weekDay[words[10]] + ') timezone ' + tz;
+      cb(text);
       break;
     case 'CMD_TOGGLE_MASTER':
-      text = cmd + ': ' + words[4];
+      text = cmd + ',' + SRC[words[0]] + ',' + DST[words[1]]
+        + ',' + MSG_TYPE[words[2]] + ': ' + words[4];
+      cb(text);
+      break;
+    case 'CMD_TEMPERATURE':
+      translateProductCommand(cmd, words, function(text) {
+        if (words[8] === '01') {
+          var temp = parseInt(words[9], 16);
+          cb(text + ', ' + temp + '.' + TEMP_DEC[words[10]] + ' degree(s)');
+        } else {
+          cb(text + ', - degree');
+        }
+      });
+      break;;
+    case 'CMD_ANALOG':
+      translateProductCommand(cmd, words, function(text) {
+        cb(text + ',out' + parseInt(words[8], 16) + ',' + parseInt(words[9], 16) + '%');
+      });
+      break;
+    case 'CMD_TOGGLE':
+    case 'CMD_SET':
+    case 'CMD_RESET':
+      translateProductCommand(cmd, words, function(text) {
+        cb(text + ',out' + parseInt(words[8], 16));
+      });
+      break;
+    case 'CMD_STATUS':
+      translateProductCommand(cmd, words, function(text) {
+        getStatus(words, text, cb);
+      });
+      break;
+    case 'CMD_CLIMA':
+      translateProductCommand(cmd, words, function(text) {
+        var temp = parseInt(words[13], 16) + '.' + TEMP_DEC[words[14]];
+
+        text += ', ' + temp + ' degree(s)';
+        cb(text);
+      });
+      break;
+    case 'CMD_NAME':
+    case 'CMD_SOFT_VERSION':
+      translateProductCommand(cmd, words, function(text) {
+        text += ', ' + hexStringToAscii(words, 8);
+        cb(text);
+      });
       break;
     default:
-      product = productCode[words[4]];
-      if (!product)
-        product = words[4];
-      sn = words[5] + words[6] + words[7];
-      text = product + ',' + sn + ',' + cmd;
+      translateProductCommand(cmd, words, function(text) {
+        cb(text);
+      });
       break;
   }
-  callback(text);
+}
+
+function hexStringToAscii(w, offset, len) {
+  var str = '';
+  
+  if (!offset)
+    offset = 0;
+  if (!len)
+    len = w.length;
+  for (var i = offset; i < len; ++i) {
+    str += String.fromCharCode(parseInt(w[i], 16));
+  }
+
+  return str;
+}
+
+function translateProductCommand(cmd, words, cb) {
+  var text = "";
+  var product = productCode[words[4]];
+  if (!product)
+    product = words[4];
+  var sn = "";
+  if (words.length < 6) {
+    sn = '-';
+  } else {
+    sn = words[5] + words[6] + words[7];
+  }
+
+  text = product + ',' + sn + ',' + cmd + ',' + SRC[words[0]] + ','
+    + DST[words[1]] + ',' + MSG_TYPE[words[2]];
+  cb(text);
+}
+
+function getStatus(words, text, cb) {
+  var product = productCode[words[4]];
+
+  switch (product) {
+    case 'W-2OnOff':
+      if (words.length !== 11)
+        break;
+      var out = parseInt(words[8], 16);
+      var out1 = String.fromCharCode(parseInt(words[9], 16));
+
+      if (out === 0xFF) {
+        var out2 = String.fromCharCode(parseInt(words[10], 16));
+        text += ',' + out1 + out2;
+      } else if (out === 1) {
+        text += ',out1-' + out1;
+      } else if (out === 2) {
+        text += ',out2-' + out1;
+      }
+      break;
+    case 'W-1Shutter':
+      if (words.length !== 11)
+        break;
+      var out = parseInt(words[8], 16);
+
+      text += ',out' + out;
+      if (words[9] === '00') {
+        text += ',stop,';
+      } else if (words[9] === '01') {
+        text += ',up,';
+      } else if (words[9] === '02') {
+        text += ',down,';
+      }
+      text += parseInt(words[10], 16) + '%';
+      break;
+    case 'D-8OnOff':
+      var out = parseInt(words[8], 16);
+
+      if (out === 0xFF) {
+        if (words.length !== 17)
+          break;
+        text += ',';
+        for (var i=9; i<17; i++) {
+          text += String.fromCharCode(parseInt(words[i], 16));
+        }
+      } else {
+        if (words.length !== 10)
+          break;
+        var out_s = String.fromCharCode(parseInt(words[9], 16));
+        text += ',out' + out + '-' + out_s;
+      }
+      break;
+    case 'D-4Shutter':
+      var out = parseInt(words[8], 16);
+
+      if (out === 0xFF) {
+        if (words.length !== 17)
+          break;
+        for (var i=9; i<17; i++) {
+          if (words[i] === '00') {
+            text += ',stop,';
+          } else if (words[i] === '01') {
+            text += ',up,';
+          } else if (words[i] === '02') {
+            text += ',down,';
+          }
+          ++i;
+          text += parseInt(words[i], 16) + '%';
+        }
+      } else {
+        if (words.length !== 11)
+          break;
+        text += ',out' + out;
+        if (words[9] === '00') {
+          text += ',stop,';
+        } else if (words[9] === '01') {
+          text += ',up,';
+        } else if (words[9] === '02') {
+          text += ',down,';
+        }
+        text += parseInt(words[10], 16) + '%';
+      }
+      break;
+    default:
+      break;
+  }
+  cb(text);
 }
 
 function addCommandDevices(words) {
@@ -163,13 +366,16 @@ $(document).ready(function() {
     chat.emit('enquiry', { 'cmd':'address' });
     clearDevice();
   });
+  $("#btnVersion").click(function() {
+    chat.emit('enquiry', { 'cmd':'version' });
+  });
   var chat = io.connect('/ftc');
   chat.on('message', function(msg) {
     var words = msg.split(' ');
     var currentdate = new Date(); 
-    var time = timeString(currentdate.getHours()) + ":"  
-        + timeString(currentdate.getMinutes()) + ":" 
-        + timeString(currentdate.getSeconds());
+    var time = zeroPad(currentdate.getHours()) + ":"  
+        + zeroPad(currentdate.getMinutes()) + ":" 
+        + zeroPad(currentdate.getSeconds());
     if (f_translate) {
       translate(words, function(text) {
         var message = "";

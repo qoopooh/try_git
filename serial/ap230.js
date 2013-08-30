@@ -33,16 +33,30 @@ if ('development' == app.get('env')) {
 // ap230 init
 var f_waitAp230 = false;
 var f_ap230Json = true;
+var f_open = false;
 var resAp230 = null;
 var SerialPort = require('serialport').SerialPort;
-var serial = new SerialPort(config.serial_port, { baudrate: 9600 });
+var serial = new SerialPort(config.serial_port, { baudrate: 9600 }, f_open);
+
 serial.on('open', function() {
   log('open serial port');
   serial.on('data', getSer);
 });
+serial.on('close', closeAp);
 
+function openAp(callback) {
+  serial.open(function() {
+    f_open = true;
+    if (callback)
+      return callback();
+  });
+}
+function closeAp() {
+  log('close port');
+  f_open = false;
+}
 function getSer(data) {
-  log("Serial received: ", data.length);
+  log("Serial received", new Date() + ":", data.length);
   log(data); // Buffer
   if (f_waitAp230) {
     f_waitAp230 = false;
@@ -82,7 +96,13 @@ app.post('/ap230', function(req, res){
   log(new Buffer(command));
   f_waitAp230 = true;
   resAp230 = res;
-  write(command);
+  if (f_open) {
+    write(command);
+  } else {
+    openAp(function() {
+      write(command);
+    });
+  }
 });
 
 
