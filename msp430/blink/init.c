@@ -25,7 +25,7 @@ void InitializeButton(void)
   BUTTON_DIR &= ~BUTTON;
   BUTTON_OUT |= BUTTON;
   BUTTON_REN |= BUTTON;
-  BUTTON_IES |= BUTTON;
+  //BUTTON_IES |= BUTTON;
   BUTTON_IFG &= ~BUTTON;
   BUTTON_IE |= BUTTON;
 }

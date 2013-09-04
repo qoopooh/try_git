@@ -28,7 +28,9 @@ int main(void)
 
   while(1) {
     delay(60000);
-    LED_OUT ^= LED2;
+    LED_OUT |= LED2;
+    delay(3000);
+    LED_OUT &= ~LED2;
   }
 
   return 0;
@@ -47,6 +49,8 @@ interrupt(TIMER0_A1_VECTOR) TIMERA0_ISR(void)
       TACTL &= ~(TAIFG);
       if (f_toggle_led)
         LED_OUT ^= LED1;
+      else
+        LED_OUT &= ~LED1;
       break;
     default:
       TACTL &= ~(TAIFG);
@@ -54,10 +58,8 @@ interrupt(TIMER0_A1_VECTOR) TIMERA0_ISR(void)
   }
 }
 
-interrupt(PORT1_VECTOR) PORT1_ISR(void)
-{
+interrupt(PORT1_VECTOR) PORT1_ISR(void) {
   f_toggle_led ^= 1;
   BUTTON_IFG &= ~BUTTON;
 }
-
 
