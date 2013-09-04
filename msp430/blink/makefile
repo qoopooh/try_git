@@ -10,8 +10,8 @@ HEX             = $(addprefix $(OBJDIR)/, $(NAME).hex)
 ELF             = $(addprefix $(OBJDIR)/, $(NAME).elf)
 LST             = $(addprefix $(OBJDIR)/, $(NAME).lst)
 
-#CPU             = msp430g2231
-CPU             = msp430g2452
+CPU             = msp430g2231
+#CPU             = msp430g2452
 
 #CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
 CFLAGS          = -mmcu=${CPU} -O2 -Wall

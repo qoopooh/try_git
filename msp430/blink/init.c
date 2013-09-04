@@ -2,7 +2,11 @@
 
 void InitializeClock(void)
 {
+#ifdef MSP430G2452
   byte *cal = (byte *) CALDCO_8MHZ_;
+#else
+  byte *cal = (byte *) CALDCO_1MHZ_;
+#endif
 
   BCSCTL1 &= (XTS + DIVA_3);
   BCSCTL1 |= (*cal & 0x0F);
@@ -25,7 +29,7 @@ void InitializeButton(void)
   BUTTON_DIR &= ~BUTTON;
   BUTTON_OUT |= BUTTON;
   BUTTON_REN |= BUTTON;
-  //BUTTON_IES |= BUTTON;
+  BUTTON_IES |= BUTTON;
   BUTTON_IFG &= ~BUTTON;
   BUTTON_IE |= BUTTON;
 }

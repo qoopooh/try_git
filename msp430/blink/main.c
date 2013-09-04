@@ -36,16 +36,18 @@ int main(void)
   return 0;
 }
 
+#ifdef MSP430G2452
 interrupt(TIMER0_A1_VECTOR) TIMERA0_ISR(void)
+#else
+interrupt(TIMERA1_VECTOR) TIMERA0_ISR(void)
+#endif
 {
   switch (TAIV) {
-    case TA0IV_TACCR1:
-      TACCTL2 &= ~(CCIFG);
-      break;
-    case TA0IV_TACCR2:
-      TACCTL1 &= ~(CCIFG);
-      break;
+#ifdef MSP430G2452
     case TA0IV_TAIFG:
+#else
+    case TAIV_TAIFG:
+#endif
       TACTL &= ~(TAIFG);
       if (f_toggle_led)
         LED_OUT ^= LED1;

@@ -41,6 +41,9 @@
 #define     TRUE                  1
 #define     FALSE                 0
 
+/*#define MSP430G2452*/
+#define MSP430G2231
+
 typedef unsigned char byte;
 typedef unsigned short word;
 typedef union {
