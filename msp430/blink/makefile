@@ -1,7 +1,17 @@
 # makfile configuration
 NAME            = blink
-OBJECTS         = main.o
-CPU             = msp430g2231
+OBJDIR          = obj
+OBJS            = $(addprefix $(OBJDIR)/, \
+                  main.o \
+                  init.o \
+    )
+BIN             = $(addprefix $(OBJDIR)/, $(NAME).bin)
+HEX             = $(addprefix $(OBJDIR)/, $(NAME).hex)
+ELF             = $(addprefix $(OBJDIR)/, $(NAME).elf)
+LST             = $(addprefix $(OBJDIR)/, $(NAME).lst)
+
+#CPU             = msp430g2231
+CPU             = msp430g2452
 
 #CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
 CFLAGS          = -mmcu=${CPU} -O2 -Wall
@@ -12,30 +22,42 @@ CC              = msp430-gcc
 .PHONY: all FORCE clean download download-jtag download-bsl dist
 
 #all should be the first target. it's built when make is run without args
-all: ${NAME}.elf ${NAME}.a43 ${NAME}.lst
+all: ${OBJS} ${ELF} ${HEX} ${LST}
 
 #confgigure the next line if you want to use the serial download
 download: download-jtag
 #download: download-bsl
 
-#additional rules for files
-${NAME}.elf: ${OBJECTS}
-	${CC} -mmcu=${CPU} -o $@ ${OBJECTS}
+#project dependencies
+$(OBJS): | $(OBJDIR)
 
-${NAME}.a43: ${NAME}.elf
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+$(OBJDIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+#additional rules for files
+${ELF}: ${OBJS}
+	${CC} -mmcu=${CPU} -o $@ ${OBJS}
+
+${HEX}: ${ELF}
 	msp430-objcopy -O ihex $^ $@
 
-${NAME}.lst: ${NAME}.elf
+${BIN}: ${ELF}
+	msp430-objcopy -O binary $^ $@
+
+${LST}: ${ELF}
 	msp430-objdump -dSt $^ >$@
 
 download-jtag: all
-	msp430-jtag -e ${NAME}.elf
+	msp430-jtag -e ${ELF}
 
 download-bsl: all
-	msp430-bsl -e ${NAME}.elf
+	msp430-bsl -e ${ELF}
 
 clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
+	rm -rf ${NAME}.elf ${NAME}.hex ${NAME}.lst ${OBJDIR}
 
 #backup archive
 dist:
@@ -44,5 +66,4 @@ dist:
 #dummy target as dependecy if something has to be build everytime
 FORCE:
 
-#project dependencies
-main.o: main.c 
+

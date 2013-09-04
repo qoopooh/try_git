@@ -1,0 +1,5 @@
+./main.c
+./init.c
+./def.h
+./flags.h
+./init.h

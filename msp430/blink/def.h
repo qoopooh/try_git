@@ -1,10 +1,10 @@
+#ifndef DEF_H
+#define DEF_H
 
 #define     LED1                  BIT0
 #define     LED2                  BIT6
 #define     LED_DIR               P1DIR
 #define     LED_OUT               P1OUT
-
-
  
 #define     BUTTON                BIT3
 #define     BUTTON_OUT            P1OUT
@@ -37,4 +37,33 @@
 #define     Bitime                13*4//0x0D    
  
 #define     UART_UPDATE_INTERVAL  1000
+
+#define     TRUE                  1
+#define     FALSE                 0
+
+typedef unsigned char byte;
+typedef unsigned short word;
+typedef union {
+  word all;
+  struct {
+    unsigned bit0:1;
+    unsigned bit1:1;
+    unsigned bit2:1;
+    unsigned bit3:1;
+    unsigned bit4:1;
+    unsigned bit5:1;
+    unsigned bit6:1;
+    unsigned bit7:1;
+    unsigned bit8:1;
+    unsigned bit9:1;
+    unsigned bit10:1;
+    unsigned bit11:1;
+    unsigned bit12:1;
+    unsigned bit13:1;
+    unsigned bit14:1;
+    unsigned bit15:1;
+  } flg;
+} flags;
+
+#endif /* DEF_H */
 
