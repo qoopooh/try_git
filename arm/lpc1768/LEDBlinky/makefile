@@ -15,7 +15,7 @@ AS      = $(ARCH)-as
 CP      = $(ARCH)-objcopy
 OD	= $(ARCH)-objdump
 SIZE	= $(ARCH)-size
-RM	= rm
+RM	= rm -rf
 Q	= # @./quiet "$@"
 
 # Flags
@@ -30,49 +30,75 @@ PRFLAGS ?=
 
 # Source files
 LINKER_SCRIPT = LPC17xx.ld
-CSRCS  = startup_LPC17xx.c $(wildcard *.c)
-CSRCS += main.c
+#CSRCS  = startup_LPC17xx.c $(wildcard *.c)
+#CSRCS += main.c
 ASRCS  = 
 
+NAME            = blink
+OBJDIR          = obj
+OBJS            = $(addprefix $(OBJDIR)/, \
+                  main.o \
+                  core_cm3.o \
+                  system_LPC17xx.o \
+                  startup_LPC17xx.o \
+    )
+DBG             = $(addprefix $(OBJDIR)/, $(NAME).d)
+BIN             = $(addprefix $(OBJDIR)/, $(NAME).bin)
+HEX             = $(addprefix $(OBJDIR)/, $(NAME).hex)
+ELF             = $(addprefix $(OBJDIR)/, $(NAME).elf)
+LST             = $(addprefix $(OBJDIR)/, $(NAME).lst)
 
-OBJS   = $(CSRCS:.c=.o) $(ASRCS:.s=.o)
+
+#OBJS   = $(CSRCS:.c=.o) $(ASRCS:.s=.o)
 
 .PHONY: all size clean nuke
 
-all: main.bin main.hex 
+#all: main.bin main.hex 
+all: ${OBJS} ${ELF} ${BIN} ${HEX} ${LST}
+#all: ${BIN} ${HEX}
 
-isp: main.bin
+isp: ${BIN}
 #	@./quiet $< cp $^ $(MBED_VOLUME)/
 
-size: main.elf
+size: ${ELF}
 	@$(SIZE) $<
 
-%.hex: %.elf
-	$Q $(CP) $(CPFLAGS) -O ihex $< $*.hex
+${HEX}: ${ELF}
+	$Q $(CP) $(CPFLAGS) -O ihex $< $@
 
-%.bin: %.elf
-	$Q $(CP) $(CPFLAGS) -O binary $< $*.bin
+${BIN}: ${ELF}
+	$Q $(CP) $(CPFLAGS) -O binary $< $@
 
-main.elf: $(LINKER_SCRIPT) $(OBJS)
+${LST}: ${ELF}
+	${OD} -dSt $^ >$@
+
+
+$(ELF): $(LINKER_SCRIPT) $(OBJS)
 	$Q $(LD) -Map $(@:.elf=.map) $(LDFLAGS) -T $^ -o $@ 
 	$Q $(OD) $(ODFLAGS) $@ > $(@:.elf=.dump)
 	@$(SIZE) $@
 
-%.o: %.c
-	@$(CC) -MM $< -MF $*.d -MP
+$(OBJS): | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+$(OBJDIR)/%.o: %.c
+	@$(CC) -MM $< -MF ${DBG} -MP
 	$Q $(CC) -c $(CFLAGS) $< -o $@
 
-%.o: %.S
+$(OBJDIR)/%.o: %.S
 	$Q $(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	@-rm -f *.elf
+	@-rm -rf *.elf
 	@-\
 for D in "." "**"; do \
-  rm -f $$D/*.o $$D/*.d $$D/*.lst $$D/*.dump $$D/*.map; \
+  $(RM) $$D/*.o $$D/*.d $$D/*.lst $$D/*.dump $$D/*.map ${OBJDIR}; \
 done
 
 nuke: clean
-	-rm -f *.hex *.bin
+	$(RM) *.hex *.bin
 
 -include $(CSRCS:.c=.d)
+
