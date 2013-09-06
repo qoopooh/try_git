@@ -2373,23 +2373,24 @@ We've spent an enormous amount of time creating and checking these footprints an
 </classes>
 <parts>
 <part name="U1" library="SparkFun-DigitalIC" deviceset="FT231X" device="S"/>
-<part name="FRAME1" library="frames" deviceset="A4L-LOC" device=""/>
+<part name="FRAME1" library="frames" deviceset="A4L-LOC" device="" value="USB to UART"/>
 <part name="C1" library="SparkFun-Capacitors" deviceset="0.1UF-25V-5%(0603)" device="" value="0.1uF"/>
 <part name="C2" library="SparkFun-Capacitors" deviceset="0.1UF-25V-5%(0603)" device="" value="0.1uF"/>
 <part name="C3" library="SparkFun-Capacitors" deviceset="0.1UF-25V-5%(0603)" device="" value="0.1uF"/>
-<part name="C4" library="SparkFun-Capacitors" deviceset="CAP_POL" device="1206"/>
-<part name="L1" library="eagle-ltspice" deviceset="L" device=""/>
+<part name="C4" library="SparkFun-Capacitors" deviceset="CAP_POL" device="1206" value="10 uF"/>
+<part name="L1" library="eagle-ltspice" deviceset="L" device="" value="Ferrite bead"/>
 <part name="STANDOFF1" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device=""/>
 <part name="STANDOFF2" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device=""/>
 <part name="STANDOFF3" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device=""/>
 <part name="STANDOFF4" library="SparkFun-Electromechanical" deviceset="STAND-OFF" device=""/>
 <part name="JP1" library="SparkFun-Connectors" deviceset="USB" device="PTH" value="USB-B"/>
-<part name="SL1" library="con-amp-quick" deviceset="M04" device=""/>
+<part name="SL1" library="con-amp-quick" deviceset="M04" device="" value="UART"/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" deviceset="VCC" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
+<part name="GND5" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -2415,6 +2416,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <instance part="GND2" gate="1" x="78.74" y="76.2"/>
 <instance part="GND3" gate="1" x="53.34" y="76.2"/>
 <instance part="GND4" gate="1" x="96.52" y="76.2"/>
+<instance part="GND5" gate="1" x="53.34" y="111.76"/>
 </instances>
 <busses>
 </busses>
@@ -2465,6 +2467,13 @@ We've spent an enormous amount of time creating and checking these footprints an
 <pinref part="SL1" gate="G$1" pin="2"/>
 <wire x1="180.34" y1="106.68" x2="172.72" y2="106.68" width="0.1524" layer="91"/>
 <label x="172.72" y="106.68" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="JP1" gate="G$1" pin="GND"/>
+<wire x1="45.72" y1="104.14" x2="48.26" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="104.14" x2="48.26" y2="114.3" width="0.1524" layer="91"/>
+<pinref part="GND5" gate="1" pin="GND"/>
+<wire x1="48.26" y1="114.3" x2="53.34" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$3" class="0">
