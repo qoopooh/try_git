@@ -69,8 +69,8 @@ void delay(uint32_t count)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
   /* Configure PD0 and PD2 in output pushpull mode */
-  //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+  //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -82,9 +82,13 @@ void delay(uint32_t count)
   This code needs to be compiled with high speed optimization option.  */
   //GPIOB->BSRR = 0x00000180;
   while (1) {
+    GPIO_ResetBits(GPIOB, GPIO_Pin_8);
+    delay(k_deley_count);
     GPIO_SetBits(GPIOB, GPIO_Pin_8);
     delay(k_deley_count);
-    GPIO_ResetBits(GPIOB, GPIO_Pin_8);
+    GPIO_ResetBits(GPIOB, GPIO_Pin_9);
+    delay(k_deley_count);
+    GPIO_SetBits(GPIOB, GPIO_Pin_9);
     delay(k_deley_count);
   }
 }
