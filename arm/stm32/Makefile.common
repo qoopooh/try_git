@@ -1,95 +1,95 @@
-# name of executable
+## name of executable
+ELF=$(addprefix $(OBJDIR)/, $(notdir $(CURDIR)).elf)
+BIN=$(addprefix $(OBJDIR)/, $(notdir $(CURDIR)).bin)
+HEX=$(addprefix $(OBJDIR)/, $(notdir $(CURDIR)).hex)
 
-ELF=$(notdir $(CURDIR)).elf                    
-BIN=$(notdir $(CURDIR)).bin
-HEX=$(notdir $(CURDIR)).hex
+LST=$(addprefix $(OBJDIR)/, $(notdir $(CURDIR)).lst)
 
-# Tool path
+## Tool path
+TOOLROOT=$(HOME)/bin/gcc-arm-none-eabi/bin
 
-#TOOLROOT=/l/arm/codesourcery/bin
-TOOLROOT=/home/pooh/bin/gcc-arm-none-eabi-4_7-2013q2/bin
+## Library path
+LIBROOT=$(HOME)/bin/STM32F10x_StdPeriph_Lib_V3.5.0
 
-# Library path
+## Tools
+ARCH=arm-none-eabi
 
-#LIBROOT=/l/arm/STM32F10x_StdPeriph_Lib_V3.5.0
-LIBROOT=/home/pooh/bin/STM32F10x_StdPeriph_Lib_V3.5.0
+CC=$(TOOLROOT)/$(ARCH)-gcc
+LD=$(TOOLROOT)/$(ARCH)-gcc
+AR=$(TOOLROOT)/$(ARCH)-ar
+AS=$(TOOLROOT)/$(ARCH)-as
+CP=$(TOOLROOT)/$(ARCH)-objcopy
+OD=$(TOOLROOT)/$(ARCH)-objdump
+SIZE=$(TOOLROOT)/$(ARCH)-size
 
-# Tools
-
-CC=$(TOOLROOT)/arm-none-eabi-gcc
-LD=$(TOOLROOT)/arm-none-eabi-gcc
-AR=$(TOOLROOT)/arm-none-eabi-ar
-AS=$(TOOLROOT)/arm-none-eabi-as
-CP=$(TOOLROOT)/arm-none-eabi-objcopy
-
-# Code Paths
-
+## Code Paths
 DEVICE=$(LIBROOT)/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x
 CORE=$(LIBROOT)/Libraries/CMSIS/CM3/CoreSupport
 PERIPH=$(LIBROOT)/Libraries/STM32F10x_StdPeriph_Driver
 
-# Search path for standard files
+OBJDIR=obj
 
+## Search path for standard files
 vpath %.c $(TEMPLATEROOT)
 
-# Search path for perpheral library
-
+## Search path for perpheral library
 vpath %.c $(CORE)
 vpath %.c $(PERIPH)/src
 vpath %.c $(DEVICE)
 
-# Search path for Library
-
+## Search path for Library
 vpath %.c $(TEMPLATEROOT)/Library/ff9/src
 vpath %.c $(TEMPLATEROOT)/Library/ff9/src/option
 vpath %.c $(TEMPLATEROOT)/Library
 
-#  Processor specific
-
-PTYPE = STM32F10X_MD_VL 
+##  Processor specific
+PTYPE = STM32F10X_MD_VL
 LDSCRIPT = $(TEMPLATEROOT)/stm32f100.ld
-STARTUP= startup_stm32f10x.o system_stm32f10x.o 
+STARTUP= startup_stm32f10x.o system_stm32f10x.o
 
-# Compilation Flags
+## Compilation Flags
+FULLASSERT = -DUSE_FULL_ASSERT
 
-FULLASSERT = -DUSE_FULL_ASSERT 
-
-LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m3 
-CFLAGS+= -mcpu=cortex-m3 -mthumb 
+LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m3
+CFLAGS+= -mcpu=cortex-m3 -mthumb
 CFLAGS+= -I$(TEMPLATEROOT) -I$(DEVICE) -I$(CORE) -I$(PERIPH)/inc -I.
 CFLAGS+= -D$(PTYPE) -DUSE_STDPERIPH_DRIVER $(FULLASSERT)
 CFLAGE+= -I$(TEMPLATEROOT)/Library/ff9/src -I$(TEMPLATEROOT)/Library
 
-# Build executable 
-
+## Build executable
 $(ELF) : $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
-
-all: ${OBJS} ${ELF} ${BIN} ${HEX}
-
-# compile and generate dependency info
-
-%.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
-	$(CC) -MM $(CFLAGS) $< > $*.d
-
-%.o: %.s
-	$(CC) -c $(CFLAGS) $< -o $@
-
 ${HEX}: ${ELF}
 	$(CP) $(CPFLAGS) -O ihex $< $@
-
 ${BIN}: ${ELF}
 	$(CP) $(CPFLAGS) -O binary $< $@
+${LST}: ${ELF}
+	${OD} -dSt $^ >$@
+
+## compile and generate dependency info
+$(OBJS): | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+$(OBJDIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -MM $(CFLAGS) $< > $(OBJDIR)/$*.d
+
+$(OBJDIR)/%.o: %.S
+	$(CC) -c $(CFLAGS) $< -o $@
+
+binary: $(BIN)
+hex: $(HEX)
+all: $(BIN) $(HEX) $(LST)
 
 clean:
-	rm -f $(OBJS) $(OBJS:.o=.d) $(ELF) startup_stm32f* $(CLEANOTHER) $(BIN) $(HEX)
+	rm -rf $(CLEANOTHER) $(OBJDIR)
 
 debug: $(ELF)
-	arm-none-eabi-gdb $(ELF)
+	$(ARCH)-gdb $(ELF)
 
-# pull in dependencies
-
+## pull in dependencies
 -include $(OBJS:.o=.d)
 
 

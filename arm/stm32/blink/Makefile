@@ -1,20 +1,17 @@
 TEMPLATEROOT = ..
 
-# compilation flags for gdb
-
+## compilation flags for gdb
 #CFLAGS  = -O1 -g
 ASFLAGS = -g 
 
-# object files
+## object files
+OBJS = $(addprefix $(OBJDIR)/, \
+    $(STARTUP) \
+    main.o \
+    stm32f10x_gpio.o \
+    stm32f10x_rcc.o \
+)
 
-OBJS=  $(STARTUP) main.o stm32f10x_gpio.o stm32f10x_rcc.o
-
-# include common make file
-
+## include common make file
 include $(TEMPLATEROOT)/Makefile.common
-
-binary: $(BIN)
-
-hex: $(HEX)
-
 

@@ -13,7 +13,7 @@ LD      = $(ARCH)-ld
 AR      = $(ARCH)-ar
 AS      = $(ARCH)-as
 CP      = $(ARCH)-objcopy
-OD	= $(ARCH)-objdump
+OD      = $(ARCH)-objdump
 SIZE	= $(ARCH)-size
 RM	= rm -rf
 Q	= # @./quiet "$@"
@@ -32,7 +32,7 @@ PRFLAGS ?=
 LINKER_SCRIPT = LPC17xx.ld
 #CSRCS  = startup_LPC17xx.c $(wildcard *.c)
 #CSRCS += main.c
-ASRCS  = 
+ASRCS  =
 
 NAME            = blink
 OBJDIR          = obj
@@ -53,7 +53,7 @@ LST             = $(addprefix $(OBJDIR)/, $(NAME).lst)
 
 .PHONY: all size clean nuke
 
-#all: main.bin main.hex 
+#all: main.bin main.hex
 all: ${OBJS} ${ELF} ${BIN} ${HEX} ${LST}
 #all: ${BIN} ${HEX}
 
@@ -74,7 +74,7 @@ ${LST}: ${ELF}
 
 
 $(ELF): $(LINKER_SCRIPT) $(OBJS)
-	$Q $(LD) -Map $(@:.elf=.map) $(LDFLAGS) -T $^ -o $@ 
+	$Q $(LD) -Map $(@:.elf=.map) $(LDFLAGS) -T $^ -o $@
 	$Q $(OD) $(ODFLAGS) $@ > $(@:.elf=.dump)
 	@$(SIZE) $@
 
