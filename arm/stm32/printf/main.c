@@ -68,6 +68,9 @@ USART_InitTypeDef USART_InitStructure;
 
   printf("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r");
 
+  while (1) {
+  }
+
   return 0;
 }
 
