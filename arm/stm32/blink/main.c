@@ -24,14 +24,6 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 
-/** @addtogroup STM32F10x_StdPeriph_Examples
-* @{
-*/
-
-/** @addtogroup GPIO_IOToggle
-* @{
-*/
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -41,7 +33,7 @@ GPIO_InitTypeDef GPIO_InitStructure;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-const uint32_t k_deley_count = 500;
+const uint32_t k_deley_count = 1000;
 
 void delay(uint32_t count)
 {
@@ -58,6 +50,8 @@ void delay(uint32_t count)
 * @retval None
 */ int main(void)
 {
+  int toggle;
+
   /*!< At this stage the microcontroller clock setting is already configured, 
   this is done through SystemInit() function which is called from startup
   file (startup_stm32f10x_xx.s) before to branch to application main.
@@ -86,11 +80,16 @@ void delay(uint32_t count)
     delay(k_deley_count);
     GPIO_SetBits(GPIOB, GPIO_Pin_8);
     delay(k_deley_count);
-    GPIO_ResetBits(GPIOB, GPIO_Pin_9);
-    delay(k_deley_count);
-    GPIO_SetBits(GPIOB, GPIO_Pin_9);
-    delay(k_deley_count);
+    if (toggle) {
+      toggle = 0;
+      GPIO_ResetBits(GPIOB, GPIO_Pin_9);
+    } else {
+      toggle = 1;
+      GPIO_SetBits(GPIOB, GPIO_Pin_9);
+    }
   }
+
+  return toggle;
 }
 
 #ifdef  USE_FULL_ASSERT
