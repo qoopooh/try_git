@@ -51,14 +51,17 @@ STARTUP= startup_stm32f10x.o system_stm32f10x.o
 FULLASSERT = -DUSE_FULL_ASSERT
 
 LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m3
-CFLAGS+= -mcpu=cortex-m3 -mthumb
+CFLAGS+= -Wall -mcpu=cortex-m3 -mthumb
 CFLAGS+= -I$(TEMPLATEROOT) -I$(DEVICE) -I$(CORE) -I$(PERIPH)/inc -I.
 CFLAGS+= -D$(PTYPE) -DUSE_STDPERIPH_DRIVER $(FULLASSERT)
+CFLAGS+= -mlong-calls -ffunction-sections -DTRACE_LEVEL=4
+CFLAGS+= -ffunction-sections -fdata-sections
 CFLAGE+= -I$(TEMPLATEROOT)/Library/ff9/src -I$(TEMPLATEROOT)/Library
 
 ## Build executable
 $(ELF) : $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(SIZE) $< $(OBJS)
 ${HEX}: ${ELF}
 	$(CP) $(CPFLAGS) -O ihex $< $@
 ${BIN}: ${ELF}
