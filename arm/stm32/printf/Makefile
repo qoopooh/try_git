@@ -1,9 +1,10 @@
 TEMPLATEROOT = ..
 
 ## compilation flags for gdb
-#CFLAGS  = -O1 -g
-CFLAGS  = -g
+CFLAGS  = -Os -g
+#CFLAGS  = -g
 ASFLAGS = -g 
+LDFLAGS += -Os -nostartfiles -Wl,--gc-sections
 
 ## object files
 OBJS = $(addprefix $(OBJDIR)/, \
