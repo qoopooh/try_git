@@ -20,6 +20,7 @@ void ledInit(void);
 void uartInit(void);
 void delay(uint32_t ms);
 void PrintFError( const char * format, ... );
+void led_toggle(void);
 
 #ifdef __GNUC__
   /* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
@@ -47,7 +48,7 @@ void PrintFError( const char * format, ... );
 
   GPIO_ResetBits(GPIOB, GPIO_Pin_8);
   GPIO_SetBits(GPIOB, GPIO_Pin_9);
-  PrintFError("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r");
+  //PrintFError("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r");
   //snprintf("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r", 24, NULL);
 
   while (1) {
@@ -90,46 +91,44 @@ void ledInit(void)
 
 void uartInit(void)
 {
+  /* USART configuration structure for USART1 */
+  USART_InitTypeDef usart1_init_struct;
   /* Bit configuration structure for GPIOA PIN9 and PIN10 */
   GPIO_InitTypeDef gpioa_init_struct;
 
-  /* USART1 Periph clock enable */
-  //RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+  /* Enalbe clock for USART1, AFIO and GPIOA */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO |
+  RCC_APB2Periph_GPIOA, ENABLE);
 
-  ///* GPIOA PIN9 alternative function Tx */
-  //gpioa_init_struct.GPIO_Pin = GPIO_Pin_9;
-  //gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
-  //gpioa_init_struct.GPIO_Mode = GPIO_Mode_AF_PP;
-  //GPIO_Init(GPIOA, &gpioa_init_struct);
-  ///* GPIOA PIN9 alternative function Rx */
-  //gpioa_init_struct.GPIO_Pin = GPIO_Pin_10;
-  //gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
-  //gpioa_init_struct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-  //GPIO_Init(GPIOA, &gpioa_init_struct);
+  /* GPIOA PIN9 alternative function Tx */
+  gpioa_init_struct.GPIO_Pin = GPIO_Pin_9;
+  gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
+  gpioa_init_struct.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &gpioa_init_struct);
+  /* GPIOA PIN9 alternative function Rx */
+  gpioa_init_struct.GPIO_Pin = GPIO_Pin_10;
+  gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
+  gpioa_init_struct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(GPIOA, &gpioa_init_struct);
 
   /* Enable USART1 */
-  //USART_Cmd(USART1, ENABLE);
-  /* USARTx configured as follow:
-        - BaudRate = 115200 baud
-        - Word Length = 8 Bits
-        - One Stop Bit
-        - No parity
-        - Hardware flow control disabled (RTS and CTS signals)
-        - Receive and transmit enabled
+  USART_Cmd(USART1, ENABLE); 
+  /* Baud rate 9600, 8-bit data, One stop bit
+  * No parity, Do both Rx and Tx, No HW flow control
   */
-  USART_InitStructure.USART_BaudRate = 19200;
-  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-  USART_Init(USART1, &USART_InitStructure);
+  usart1_init_struct.USART_BaudRate = 115200;  
+  usart1_init_struct.USART_BaudRate *= 2; // TODO: something wrong on setting but we need this line
+  usart1_init_struct.USART_WordLength = USART_WordLength_8b; 
+  usart1_init_struct.USART_StopBits = USART_StopBits_1;  
+  usart1_init_struct.USART_Parity = USART_Parity_No ;
+  usart1_init_struct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  usart1_init_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  /* Configure USART1 */
+  USART_Init(USART1, &usart1_init_struct);
+  /* Enable RXNE interrupt */
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+  /* Enable USART1 global interrupt */
   NVIC_EnableIRQ(USART1_IRQn);
-
-  /* Enable USART */
-  USART_Cmd(USART1, ENABLE);
 }
 
 void delay(uint32_t ms)
@@ -142,6 +141,7 @@ void delay(uint32_t ms)
     }
   }
 }
+
 void PrintFError ( const char * format, ... )
 {
   char buffer[256];
@@ -169,12 +169,11 @@ void USART1_IRQHandler(void)
   if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
   {
     char ch = (char)USART_ReceiveData(USART1);
-      /* If received 't', toggle LED and transmit 'T' */
+    /* If received 't', toggle LED and transmit 'T' */
     if(ch == 't')
     {
-      __io_putchar('T');
-      //led_toggle();
-      //USART_SendData(USART1, 'T');
+      led_toggle();
+      USART_SendData(USART1, 'T');
       /* Wait until Tx data register is empty, not really
       * required for this example but put in here anyway.
       */
@@ -187,6 +186,26 @@ void USART1_IRQHandler(void)
 
 /* ------------------------------------------------------------ */
 /* Other USART1 interrupts handler can go here ...             */
+}
+
+/*******************************************
+* Toggle LED
+*******************************************/
+void led_toggle(void)
+{
+  /* Read LED output (GPIOA PIN8) status */
+  uint8_t led_bit = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_8);
+
+  /* If LED output set, clear it */
+  if(led_bit == (uint8_t)Bit_SET)
+  {
+    GPIO_ResetBits(GPIOB, GPIO_Pin_8);
+  }
+  /* If LED output clear, set it */
+  else
+  {
+    GPIO_SetBits(GPIOB, GPIO_Pin_8);
+  }
 }
 
 #ifdef  USE_FULL_ASSERT
