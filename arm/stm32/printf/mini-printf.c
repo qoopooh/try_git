@@ -15,7 +15,7 @@
  */
 
 #include <string.h>
-#include <stdarg.h>
+
 #include "mini-printf.h"
 
 static unsigned int
