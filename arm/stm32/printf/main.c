@@ -3,6 +3,7 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_usart.h"
+#include "mini-printf.h"
 #include <stdio.h> 
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,7 +67,8 @@ USART_InitTypeDef USART_InitStructure;
   /* Enable USART */
   USART_Cmd(USART1, ENABLE);
 
-  printf("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r");
+  //printf("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r");
+  snprintf("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r", 24, NULL);
 
   while (1) {
   }
