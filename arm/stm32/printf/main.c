@@ -15,11 +15,12 @@ const uint32_t k_toggle_delay = 1000;
 GPIO_InitTypeDef GPIO_InitStructure;
 USART_InitTypeDef USART_InitStructure;
 
+int rx_count = 0;
 /* Private function prototypes -----------------------------------------------*/
 void ledInit(void);
 void uartInit(void);
 void delay(uint32_t ms);
-void PrintFError( const char * format, ... );
+void print( const char * format, ... );
 void led_toggle(void);
 
 #ifdef __GNUC__
@@ -36,19 +37,14 @@ void led_toggle(void);
 * @retval None
 */ int main(void)
 {
-  /*!< At this stage the microcontroller clock setting is already configured,
-  this is done through SystemInit() function which is called from startup
-  file (startup_stm32f10x_xx.s) before to branch to application main.
-  To reconfigure the default setting of SystemInit() function, refer to
-  system_stm32f10x.c file
-  */
+  int rx_count_prv = 0;
 
   ledInit();
   uartInit();
 
   GPIO_ResetBits(GPIOB, GPIO_Pin_8);
   GPIO_SetBits(GPIOB, GPIO_Pin_9);
-  //PrintFError("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r");
+  print("\r\nUSART Printf Example: retarget the C library printf function to the USART\r\n");
   //snprintf("\n\rUSART Printf Example: retarget the C library printf function to the USART\n\r", 24, NULL);
 
   while (1) {
@@ -56,6 +52,10 @@ void led_toggle(void);
     GPIO_ResetBits(GPIOB, GPIO_Pin_9);
     delay(k_toggle_delay);
     GPIO_SetBits(GPIOB, GPIO_Pin_9);
+    if (rx_count != rx_count_prv) {
+      print("\r\nRead %d charactor(s)\r\n", rx_count - rx_count_prv);
+      rx_count_prv = rx_count;
+    }
   }
 
   return 0;
@@ -68,11 +68,10 @@ void led_toggle(void);
   */
 PUTCHAR_PROTOTYPE
 {
-  USART_SendData(USART1, (uint8_t) ch);
-
-  //while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
-  while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
+  while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
   {}
+
+  USART_SendData(USART1, (uint8_t) ch);
 
   return ch;
 }
@@ -142,7 +141,7 @@ void delay(uint32_t ms)
   }
 }
 
-void PrintFError ( const char * format, ... )
+void print( const char * format, ... )
 {
   char buffer[256];
   va_list args;
@@ -150,13 +149,12 @@ void PrintFError ( const char * format, ... )
 
   va_start (args, format);
   vsnprintf(buffer, sizeof(buffer), format, args);
-  //perror (buffer);
   va_end (args);
 
   for (i=0; i<sizeof(buffer); i++) {
     if (!buffer[i])
       break;
-    __io_putchar((int) buffer[i]);
+    __io_putchar(buffer[i]);
   }
 }
 /**********************************************************
@@ -169,19 +167,14 @@ void USART1_IRQHandler(void)
   if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
   {
     char ch = (char)USART_ReceiveData(USART1);
-    /* If received 't', toggle LED and transmit 'T' */
-    if(ch == 't')
-    {
-      led_toggle();
-      USART_SendData(USART1, 'T');
-      /* Wait until Tx data register is empty, not really
-      * required for this example but put in here anyway.
-      */
-      /*
-      while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
-      {
-      }*/
+
+    led_toggle();
+    if((ch >= 'a') && (ch <= 'z')) {
+      __io_putchar(ch - 0x20);
+    } else {
+      __io_putchar(ch);
     }
+    ++rx_count;
   }
 
 /* ------------------------------------------------------------ */
