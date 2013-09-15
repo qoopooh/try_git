@@ -1,0 +1,11 @@
+#!/usr/bin/lua
+
+io = require "io"
+
+local read = io.read
+local write = io.write
+
+write ("What is your name? ")
+name = read()
+print ('Hello ' ..  name)
+
