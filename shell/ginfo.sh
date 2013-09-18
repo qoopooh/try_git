@@ -9,11 +9,12 @@ uname -a
 echo "Calendar"
 cal # Do not work on wrt
 
+echo -n 'Your first name please: '
+read name
 
-myname=Vivek
 myos=TroubleOS
 myno=5
-echo "My name is $myname"
+echo "My name is $name"
 echo "My os is $myos"
 echo "My number is $myno, can you see this number"
 
