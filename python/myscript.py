@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-print 'Hello World'
+print('Hello World')
 
 def fib2(n):
   """Return a list containing the Fibonacci up to n."""
@@ -13,5 +13,5 @@ def fib2(n):
 
 f100 = fib2(100)
 
-print 'Result: ', f100
+print('Result: ', f100)
 
