@@ -17,14 +17,6 @@
 #define DPS_1         LATGbits.LATG7
 
 /** INPUT **/
-#define L_ACCESS_MODE   LATBbits.LATB3
-#define L_RELAY_MODE    LATCbits.LATC13
-#define L_AUX_MODE      LATEbits.LATE5
-#define L_Addr_0        LATDbits.LATD1
-#define L_Addr_1        LATDbits.LATD2
-#define L_Addr_2        LATDbits.LATD3
-#define L_Addr_3        LATDbits.LATD4
-
 #define P_AUX_MODE      CNPU4bits.CN63PUE
 
 #define ACCESS_MODE   PORTBbits.RB3
@@ -44,28 +36,11 @@ void InitIO(void)
   TRISF = 0xFFFC;  // RF0-1 are relays
   TRISG = 0xFF3F;
 
-  RDR_D1_GRN = 1;
-  RS422_RXD = 1;
-  STATUS = 1;
-  TAMPER_IN = 1;
-  RDR_D0_GRN = 1;
-  RS422_TX_GRN = 1;
-  RS422_RX_RED = 1;
-  DPS_2 = 1;
-  REX_1 = 1;
-  USB_RED = 1;
-  RLY_0_CTL = 1;
-  RLY_1_CTL = 1;
-  REX_2 = 1;
-  DPS_1 = 1;
-
   P_AUX_MODE = 1;
 }
 
 int main (void)
 {
-  int x;
-
   OSCCON = 0x2200;
   InitIO();
 
