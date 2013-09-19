@@ -1,6 +1,7 @@
 #include "p24FJ256GB106.h"
 
 /** OUTPUT **/
+#define BUZZER        LATBbits.LATB9
 #define RDR_D1_GRN    LATBbits.LATB10
 #define RS422_RXD     LATBbits.LATB15
 #define STATUS        LATCbits.LATC14
@@ -29,7 +30,7 @@
 
 void InitIO(void)
 {
-  TRISB = 0x7BFF;
+  TRISB = 0x79FF;
   TRISC = 0xBFFF;
   TRISD = 0xFD1E;
   TRISE = 0xFF3F;
@@ -59,6 +60,7 @@ int main (void)
     RLY_1_CTL = AUX_MODE;
     REX_2 = AUX_MODE;
     DPS_1 = AUX_MODE;
+    BUZZER = AUX_MODE;
   }
 
 	return 0;
