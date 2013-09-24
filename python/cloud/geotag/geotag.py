@@ -25,9 +25,13 @@ class WorkorderHandler(webapp2.RequestHandler):
     cursor.execute("""
         SELECT ID, TIMESTAMP, LABELNR, PASS, ERRORCODE, VERIFIED FROM TAGSREAD
         WHERE WONR = 
-        """)
+        """ + wonr)
 
     rows = cursor.fetchall()
+    if (rows.length() < 1):
+      self.response.write('This is the WorkorderHandler. '
+          'The work order number is %s' % wonr)
+      return
 
     rowarray_list = []
     for row in rows:
@@ -35,8 +39,6 @@ class WorkorderHandler(webapp2.RequestHandler):
       rowarray_list.append(t)
 
     j = json.dumps(rowarray_list)
-    self.response.write('This is the WorkorderHandler. '
-        'The work order number is %s' % wonr)
 
 routes = [
   (r'/', MainPage),
