@@ -10,7 +10,34 @@ class MainPage(webapp2.RequestHandler):
     else:
       self.redirect(users.create_login_url(self.request.uri))
 
-application = webapp2.WSGIApplication([
-    ('/', MainPage),
-], debug=True)
+class GeotagHandler(webapp2.RequestHandler):
+  def get(self):
+    foo = self.app.config.get('foo')
+    self.response.write('foo value is %s' % foo)
+
+class ProductHandler(webapp2.RequestHandler):
+  def get(self, product_id):
+    self.response.write('This is the ProductHandler. '
+        'The product id is %s' % product_id)
+
+routes = [
+  (r'/', MainPage),
+  (r'/geo', GeotagHandler),
+  (r'/geo/(\d+)', ProductHandler),
+]
+
+config = {}
+config['webapp2_extras.sessions'] = {
+  'secret_key': 'something-very-very-secret-code',
+}
+config['foo'] = 'bar8'
+
+
+application = webapp2.WSGIApplication(routes=routes, debug=True, config=config)
+
+def main():
+  application.run()
+
+if __name__ == '__main__':
+  main()
 
