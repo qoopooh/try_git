@@ -1,5 +1,8 @@
 from google.appengine.api import users
 import webapp2
+import pyodbc
+import json
+import collections
 
 class MainPage(webapp2.RequestHandler):
   def get(self):
@@ -15,15 +18,30 @@ class GeotagHandler(webapp2.RequestHandler):
     foo = self.app.config.get('foo')
     self.response.write('foo value is %s' % foo)
 
-class ProductHandler(webapp2.RequestHandler):
-  def get(self, product_id):
-    self.response.write('This is the ProductHandler. '
-        'The product id is %s' % product_id)
+class WorkorderHandler(webapp2.RequestHandler):
+  def get(self, wonr):
+    cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=ERPTEST\\ERP;DATABASE=GeoRiotinto;UID=sa;PWD=sa')
+    cursor = cnxn.cursor();
+    cursor.execute("""
+        SELECT ID, TIMESTAMP, LABELNR, PASS, ERRORCODE, VERIFIED FROM TAGSREAD
+        WHERE WONR = 
+        """)
+
+    rows = cursor.fetchall()
+
+    rowarray_list = []
+    for row in rows:
+      t = (row.id, row.serial)
+      rowarray_list.append(t)
+
+    j = json.dumps(rowarray_list)
+    self.response.write('This is the WorkorderHandler. '
+        'The work order number is %s' % wonr)
 
 routes = [
   (r'/', MainPage),
   (r'/geo', GeotagHandler),
-  (r'/geo/(\d+)', ProductHandler),
+  (r'/geo/(\d+)', WorkorderHandler),
 ]
 
 config = {}
