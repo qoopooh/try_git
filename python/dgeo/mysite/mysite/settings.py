@@ -1,12 +1,10 @@
-# Django settings for geotag project.
+# Django settings for mysite project.
 
-#DEBUG = True
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
-    ('Berm', 'phuchit@aae.co.th')
 )
 
 MANAGERS = ADMINS
@@ -14,8 +12,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#'ENGINE': 'sqlserver_ado',
-        'NAME': 'GeoRiotinto',                      # Or path to database file if using sqlite3.
+        'NAME': 'db.sqlite3',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -86,7 +83,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'lhru8w)^6x)qzb_yff^eef^3h0b*70ae9%tf@=&sbf8uoi^64%'
+SECRET_KEY = '7&^3qy9r_jvk2b67%8uq%f93xmg@li@-i7h0&t!q77)q191@e_'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -105,10 +102,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'geotag.urls'
+ROOT_URLCONF = 'mysite.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'geotag.wsgi.application'
+WSGI_APPLICATION = 'mysite.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -117,13 +114,13 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'geotag_monitor',
+    'polls',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
