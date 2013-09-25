@@ -21,11 +21,12 @@ def detail(request, question_id):
 
   rowarray_list = []
   for row in rows:
-    t = (row.ID, row.LABELNR, row.VERIFIED)
+    t = (row.ID, row.LABELNR.strip(), row.VERIFIED)
     rowarray_list.append(t)
 
   j = json.dumps(rowarray_list)
   return HttpResponse(j, content_type="application/json")
+#return HttpResponse(j)
 
 def results(request, question_id):
   response = "You're looking at the results of question %s."
