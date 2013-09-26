@@ -36,10 +36,10 @@ class MyHTMLParser(HTMLParser):
 class AiaFund():
   __price = []
   def getinfo(self):
-#req = urllib2.Request(url='https://direct.aia.co.th/btob/FundQueryServlet?actionType=show',
-#data='This data is passed to stdin of the CGI')
-#f = urllib2.urlopen(req)
-    f = open('fund.html', 'r')
+    req = urllib2.Request(url='https://direct.aia.co.th/btob/FundQueryServlet?actionType=show',
+    data='This data is passed to stdin of the CGI')
+    f = urllib2.urlopen(req)
+#f = open('fund.html', 'r')
     parser = MyHTMLParser()
     parser.feed(f.read())
     self.__price = parser.prices
