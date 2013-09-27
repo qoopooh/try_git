@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys
 from PySide import QtGui
 
@@ -8,5 +10,4 @@ win.setWindowTitle('Hi PySide')
 win.show()
 
 sys.exit(app.exec_())
-
 
