@@ -2,7 +2,7 @@
 
 import pymssql
 
-conn = pymssql.connect(host='SERVER=aaebio\\bsserver', user='sa', password='sa', database='domotics')
+conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa', database='domotics')
 cur = conn.cursor()
 cur.execute("""
     SELECT * FROM command
