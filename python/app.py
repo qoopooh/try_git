@@ -22,10 +22,19 @@ class simpleapp(wx.Frame):
     self.label.SetForegroundColour(wx.GREEN)
     sizer.Add(self.label, (1,0), (1,2), wx.EXPAND)
 
+    self.Bind(wx.EVT_TEXT_ENTER, self.OnPressEnter, self.entry)
+    self.Bind(wx.EVT_BUTTON, self.OnButtonClick, button)
+
     sizer.AddGrowableCol(0)
     self.SetSizerAndFit(sizer)
     self.SetSizeHints(self.GetSize().x, self.GetSize().y, -1, self.GetSize().y)
     self.Show(True)
+
+  def OnButtonClick(self, event):
+    print u'เธอกดปุ่ม'
+
+  def OnPressEnter(self, event):
+    print u'เธอเคาะ enter'
 
 if __name__=="__main__":
   app = wx.App()
