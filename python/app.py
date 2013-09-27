@@ -31,7 +31,9 @@ class simpleapp(wx.Frame):
     self.Show(True)
 
   def OnButtonClick(self, event):
-    print u'เธอกดปุ่ม'
+    self.label.SetLabel(self.entry.GetValue() + u' เธอกดปุ่ม')
+    self.entry.SetFocus()
+    self.entry.SetSelection(-1, -1)
 
   def OnPressEnter(self, event):
     print u'เธอเคาะ enter'
