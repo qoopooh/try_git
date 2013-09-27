@@ -22,8 +22,19 @@ class simpleapp(wx.Frame):
     self.label.SetForegroundColour(wx.GREEN)
     sizer.Add(self.label, (1,0), (1,2), wx.EXPAND)
 
+    filemenu = wx.Menu()
+    menuAbout = filemenu.Append(wx.ID_ABOUT, "&About", " Information about this program")
+    filemenu.AppendSeparator()
+    menuExit = filemenu.Append(wx.ID_EXIT, "E&xit", " Terminate the program")
+    menuBar = wx.MenuBar()
+    menuBar.Append(filemenu, "&File")
+    self.SetMenuBar(menuBar)
+    self.CreateStatusBar()
+
     self.Bind(wx.EVT_TEXT_ENTER, self.OnPressEnter, self.entry)
     self.Bind(wx.EVT_BUTTON, self.OnButtonClick, button)
+    self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
+    self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
     sizer.AddGrowableCol(0)
     self.SetSizerAndFit(sizer)
@@ -37,6 +48,14 @@ class simpleapp(wx.Frame):
 
   def OnPressEnter(self, event):
     print u'เธอเคาะ enter'
+
+  def OnAbout(self, e):
+    d = wx.MessageDialog(self, "A small app", "About simple app", wx.OK)
+    d.ShowModal()
+    d.Destroy()
+
+  def OnExit(self, e):
+    self.Close(True)
 
 if __name__=="__main__":
   app = wx.App()
