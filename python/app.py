@@ -10,7 +10,7 @@ class simpleapp(wx.Frame):
     self.initialize()
 
   def initialize(self):
-    self.show(True)
+    self.Show(True)
 
 if __name__=="__main__":
   app = wx.App()
