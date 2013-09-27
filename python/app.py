@@ -58,7 +58,7 @@ class simpleapp(wx.Frame):
     self.Close(True)
 
 if __name__=="__main__":
-  app = wx.App()
+  app = wx.App(redirect=1, filename='app.log')
   frame = simpleapp(None, -1, u'ทดสอบ')
   app.MainLoop()
 
