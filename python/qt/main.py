@@ -7,7 +7,7 @@ try on: 2013-09-29
 """
 
 import sys
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 class Example(QtGui.QMainWindow):
     def __init__(self):
@@ -18,10 +18,11 @@ class Example(QtGui.QMainWindow):
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         self.setToolTip('This is a <b>QWidget</b> widget')
 
-        btn = QtGui.QPushButton('Button', self)
-        btn.setToolTip('This is a <b>QPushButton</b> widget')
-        btn.resize(btn.sizeHint())
-        btn.move(50, 50)
+        btnQuit = QtGui.QPushButton('Quit', self)
+        btnQuit.clicked.connect(QtCore.QCoreApplication.instance().quit)
+        btnQuit.setToolTip('Terminate app')
+        btnQuit.resize(btnQuit.sizeHint())
+        btnQuit.move(50, 50)
 
         self.setGeometry(300, 300, 250, 150)
         self.setWindowTitle('Icon')
