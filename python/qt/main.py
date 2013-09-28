@@ -25,10 +25,17 @@ class Example(QtGui.QMainWindow):
         btnQuit.move(50, 50)
 
         self.setGeometry(300, 300, 250, 150)
+        self.center()
         self.setWindowTitle('Message box')
         self.setWindowIcon(QtGui.QIcon('ksig.png'))
 
         self.show()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtGui.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self,
