@@ -25,10 +25,20 @@ class Example(QtGui.QMainWindow):
         btnQuit.move(50, 50)
 
         self.setGeometry(300, 300, 250, 150)
-        self.setWindowTitle('Icon')
+        self.setWindowTitle('Message box')
         self.setWindowIcon(QtGui.QIcon('ksig.png'))
 
         self.show()
+
+    def closeEvent(self, event):
+        reply = QtGui.QMessageBox.question(self,
+                'Confirmation', u'ต้องการจะปิดจริงหรือ?',
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
 def main():
     app = QtGui.QApplication(sys.argv)
