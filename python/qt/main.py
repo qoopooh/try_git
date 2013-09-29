@@ -9,9 +9,11 @@ try on: 2013-09-29
 import sys
 from PySide import QtGui, QtCore
 
-class Example(QtGui.QMainWindow):
+class MainApp(QtGui.QMainWindow):
+    count = 0
+
     def __init__(self):
-        super(Example, self).__init__()
+        super(MainApp, self).__init__()
         self.initUI()
 
     def initUI(self):
@@ -32,11 +34,17 @@ class Example(QtGui.QMainWindow):
 
         self.statusBar().showMessage("ready")
 
+        btnCount = QtGui.QPushButton('Count', self)
+        btnCount.clicked.connect(self.buttonClicked)
+        btnCount.setToolTip('Count pressing button')
+        btnCount.resize(btnCount.sizeHint())
+        btnCount.move(50, 75)
+    
         btnQuit = QtGui.QPushButton('Quit', self)
         btnQuit.clicked.connect(QtCore.QCoreApplication.instance().quit) # no confirmation
         btnQuit.setToolTip('Terminate app')
         btnQuit.resize(btnQuit.sizeHint())
-        btnQuit.move(50, 75)
+        btnQuit.move(150, 75)
 
         self.setGeometry(300, 300, 250, 150)
         self.center()
@@ -61,9 +69,15 @@ class Example(QtGui.QMainWindow):
         else:
             event.ignore()
 
+    def buttonClicked(self):
+        sender = self.sender()
+        self.count += 1
+        self.statusBar().showMessage(sender.text() + ' was pressed '
+                + str(self.count) + ' time(s)')
+
 def main():
     app = QtGui.QApplication(sys.argv)
-    ex = Example()
+    ex = MainApp()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
