@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-Tutorial from http://zetcode.com/gui/pysidetutorial/menusandtoolbars/
+Tutorial from http://zetcode.com/gui/pysidetutorial/
 try on: 2013-09-29
 """
 
 import sys
 from PySide import QtGui, QtCore
 
-class Example(QtGui.QWidget):
+class Example(QtGui.QMainWindow):
     def __init__(self):
         super(Example, self).__init__()
         self.initUI()
@@ -18,38 +18,25 @@ class Example(QtGui.QWidget):
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         self.setToolTip('This is a <b>QWidget</b> widget')
 
-#exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), 'E&xit', self)
-#exitAction.setShortcut('Ctrl+Q')
-#exitAction.setStatusTip('Exit Application')
-#exitAction.triggered.connect(self.close)
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), 'E&xit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit Application')
+        exitAction.triggered.connect(self.close)
 
-#menuBar = self.menuBar()
-#fileMenu = menuBar.addMenu('&File')
-#fileMenu.addAction(exitAction)
+        menuBar = self.menuBar()
+        fileMenu = menuBar.addMenu('&File')
+        fileMenu.addAction(exitAction)
 
-#self.toolbar = self.addToolBar('Exit')
-#self.toolbar.addAction(exitAction)
+        self.toolbar = self.addToolBar('Exit')
+        self.toolbar.addAction(exitAction)
 
-#self.statusBar().showMessage("ready")
+        self.statusBar().showMessage("ready")
 
         btnQuit = QtGui.QPushButton('Quit', self)
         btnQuit.clicked.connect(QtCore.QCoreApplication.instance().quit) # no confirmation
         btnQuit.setToolTip('Terminate app')
         btnQuit.resize(btnQuit.sizeHint())
         btnQuit.move(50, 75)
-
-        btnOk = QtGui.QPushButton('OK')
-        btnCancel = QtGui.QPushButton('Cancel')
-
-        hbox = QtGui.QHBoxLayout()
-        hbox.addStretch(1)
-        hbox.addWidget(btnOk)
-        hbox.addWidget(btnCancel)
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addStretch(1)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
 
         self.setGeometry(300, 300, 250, 150)
         self.center()
