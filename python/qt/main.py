@@ -18,11 +18,25 @@ class Example(QtGui.QMainWindow):
         QtGui.QToolTip.setFont(QtGui.QFont('SansSerif', 10))
         self.setToolTip('This is a <b>QWidget</b> widget')
 
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), 'E&xit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit Application')
+        exitAction.triggered.connect(self.close)
+
+        menuBar = self.menuBar()
+        fileMenu = menuBar.addMenu('&File')
+        fileMenu.addAction(exitAction)
+
+        self.toolbar = self.addToolBar('Exit')
+        self.toolbar.addAction(exitAction)
+
+        self.statusBar().showMessage("ready")
+
         btnQuit = QtGui.QPushButton('Quit', self)
-        btnQuit.clicked.connect(QtCore.QCoreApplication.instance().quit)
+        btnQuit.clicked.connect(QtCore.QCoreApplication.instance().quit) # no confirmation
         btnQuit.setToolTip('Terminate app')
         btnQuit.resize(btnQuit.sizeHint())
-        btnQuit.move(50, 50)
+        btnQuit.move(50, 75)
 
         self.setGeometry(300, 300, 250, 150)
         self.center()
