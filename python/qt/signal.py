@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Signal & Slot
+Also event handlers
 http://zetcode.com/gui/pysidetutorial/eventsandsignals/
 """
 import sys
@@ -23,12 +24,15 @@ class Lcd(QtGui.QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(lcd)
         vbox.addWidget(sld)
-        
 
         self.setLayout(vbox)
         self.setGeometry(300, 300, 250, 150)
         self.setWindowTitle('Signal & Slot')
         self.show()
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Escape:
+            self.close()
 
 def main():
     app = QtGui.QApplication(sys.argv)
