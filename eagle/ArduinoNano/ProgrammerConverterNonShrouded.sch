@@ -453,38 +453,41 @@ DIN A4, landscape with location and doc. field</description>
 </net>
 <net name="D12/MISO" class="0">
 <segment>
-<pinref part="SV3" gate="1" pin="1"/>
-<wire x1="68.58" y1="114.3" x2="55.88" y2="114.3" width="0.1524" layer="91"/>
-<label x="55.88" y="114.3" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="SV5" gate="G$1" pin="9"/>
-<wire x1="149.86" y1="106.68" x2="134.62" y2="106.68" width="0.1524" layer="91"/>
 <label x="134.62" y="106.68" size="1.778" layer="95"/>
+<wire x1="149.86" y1="106.68" x2="111.76" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="111.76" y1="106.68" x2="111.76" y2="86.36" width="0.1524" layer="91"/>
+<wire x1="111.76" y1="86.36" x2="48.26" y2="86.36" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="86.36" x2="48.26" y2="114.3" width="0.1524" layer="91"/>
+<pinref part="SV3" gate="1" pin="1"/>
+<wire x1="68.58" y1="114.3" x2="48.26" y2="114.3" width="0.1524" layer="91"/>
+<label x="55.88" y="114.3" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="D13/SCK" class="0">
 <segment>
 <pinref part="SV3" gate="1" pin="3"/>
-<wire x1="68.58" y1="111.76" x2="55.88" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="111.76" x2="50.8" y2="111.76" width="0.1524" layer="91"/>
 <label x="55.88" y="111.76" size="1.778" layer="95"/>
-</segment>
-<segment>
+<wire x1="50.8" y1="111.76" x2="50.8" y2="88.9" width="0.1524" layer="91"/>
+<wire x1="50.8" y1="88.9" x2="109.22" y2="88.9" width="0.1524" layer="91"/>
+<wire x1="109.22" y1="88.9" x2="109.22" y2="109.22" width="0.1524" layer="91"/>
 <pinref part="SV5" gate="G$1" pin="7"/>
-<wire x1="149.86" y1="109.22" x2="134.62" y2="109.22" width="0.1524" layer="91"/>
 <label x="134.62" y="109.22" size="1.778" layer="95"/>
+<wire x1="109.22" y1="109.22" x2="149.86" y2="109.22" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="RESET" class="0">
 <segment>
-<pinref part="SV3" gate="1" pin="5"/>
-<wire x1="68.58" y1="109.22" x2="55.88" y2="109.22" width="0.1524" layer="91"/>
-<label x="55.88" y="109.22" size="1.778" layer="95"/>
-</segment>
-<segment>
 <pinref part="SV5" gate="G$1" pin="5"/>
-<wire x1="149.86" y1="111.76" x2="134.62" y2="111.76" width="0.1524" layer="91"/>
 <label x="134.62" y="111.76" size="1.778" layer="95"/>
+<wire x1="149.86" y1="111.76" x2="106.68" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="111.76" x2="106.68" y2="91.44" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="91.44" x2="53.34" y2="91.44" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="91.44" x2="53.34" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="SV3" gate="1" pin="5"/>
+<wire x1="68.58" y1="109.22" x2="53.34" y2="109.22" width="0.1524" layer="91"/>
+<label x="55.88" y="109.22" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="NC" class="0">
