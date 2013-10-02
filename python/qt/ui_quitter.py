@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'quitter.ui'
 #
-# Created: Wed Oct 02 10:37:22 2013
+# Created: Wed Oct 02 10:50:09 2013
 #      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,13 +20,16 @@ class Ui_MainWindow(object):
         spacerItem = QtGui.QSpacerItem(420, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem, 0, 0, 1, 1)
         self.quitButton = QtGui.QPushButton(self.centralwidget)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.quitButton.setIcon(icon)
         self.quitButton.setObjectName("quitButton")
         self.gridLayout.addWidget(self.quitButton, 0, 1, 1, 1)
         spacerItem1 = QtGui.QSpacerItem(20, 165, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.gridLayout.addItem(spacerItem1, 1, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 526, 29))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 526, 25))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
