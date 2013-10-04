@@ -7,7 +7,10 @@ sys.path.append("C:\\Program Files\\Microsoft Visual Studio 9.0\\VC\\redist\\x86
 subprocess.call(['pyside-uic', 'licence.ui', '-o', 'ui_licence.py'])
 
 setup(
-    windows=['licence.py'],
+    windows=[{
+        'script':'licence.py',
+        'icon_resources':[(1,'lic.ico')]
+        }],
     data_files= [
         ('', ['exit.png']),
         ('', ['kpdf.png']),
