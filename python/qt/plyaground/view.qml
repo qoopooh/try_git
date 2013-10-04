@@ -1,15 +1,19 @@
 import QtQuick 1.0
 
 Rectangle {
-  width: 200
-  height: 200
-  color: "white"
+  id: page
+
+  signal textRotationChanged(double root)
+
+  width: 500; height: 200; color: "lightgray"
 
   Text {
     text: "Hello Berm"
     anchors.centerIn: parent
     font.pixelSize: 24
     color: 'black'
+
+    onRotationChanged: textRotationChanged(rotation)
 
     MouseArea {
       anchors.fill: parent

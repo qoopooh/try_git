@@ -11,7 +11,7 @@ class MainWindow(QDeclarativeView):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setWindowTitle("Main Window")
+        self.setWindowTitle("Title on Main Window")
         # Renders 'view.qml'
         self.setSource(QUrl.fromLocalFile('view.qml'))
         # QML resizes to main window
@@ -23,6 +23,12 @@ class MainWindow(QDeclarativeView):
         context = self.rootContext()
         context.setContextProperty('con', con)
         context.setContextProperty('rotatevalue', rotatevalue)
+
+        root = self.rootObject()
+        root.textRotationChanged.connect(self.rotationStatus)
+
+    def rotationStatus(self, r):
+        print 'rotation ' + str(r)
 
 class Console(QObject):
     def __init__(self):
