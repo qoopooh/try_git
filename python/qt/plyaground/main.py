@@ -18,13 +18,29 @@ class MainWindow(QDeclarativeView):
         self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
 
         con = Console()
+        rotatevalue = RotateValue()
+
         context = self.rootContext()
         context.setContextProperty('con', con)
+        context.setContextProperty('rotatevalue', rotatevalue)
 
 class Console(QObject):
+    def __init__(self):
+        super(Console, self).__init__()
+
     @Slot(str)
     def outputStr(self, s):
         print s
+
+class RotateValue(QObject):
+    def __init__(self):
+        super(RotateValue, self).__init__()
+        self.r = 0
+
+    @Slot(result=int)
+    def val(self):
+        self.r = self.r + 10
+        return self.r
 
 
 if __name__ == '__main__':

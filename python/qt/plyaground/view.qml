@@ -20,6 +20,7 @@ Rectangle {
           parent.color = 'blue';
         else
           parent.color = 'black';                
+        parent.rotation = rotatevalue;
       }
     }
   }
