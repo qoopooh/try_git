@@ -28,5 +28,21 @@ Rectangle {
       }
     }
   }
+
+  Rectangle {
+    id: button
+    width: 80; height: 40; color: 'darkgray';
+    anchors.bottom: page.bottom;
+    MouseArea {
+      id: 'btnMouseArea'
+      objectName: 'btnMouseArea'
+      anchors.fill: parent
+    }
+    Text {
+      id: btnText
+      text: 'Press me'
+      anchors.centerIn: parent
+    }
+  }
 }
 

@@ -26,6 +26,8 @@ class MainWindow(QDeclarativeView):
 
         root = self.rootObject()
         root.textRotationChanged.connect(self.rotationStatus)
+        button = root.findChild(QObject, 'btnMouseArea')
+        button.clicked.connect(lambda: con.outputStr('click button'))
 
     def rotationStatus(self, r):
         print 'rotation ' + str(r)
