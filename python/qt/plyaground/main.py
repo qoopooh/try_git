@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PySide.QtCore import QObject, Slot, QUrl
+from PySide.QtCore import QObject, Slot, QUrl, QTimer
 from PySide.QtGui import *
 from PySide.QtDeclarative import QDeclarativeView
 
@@ -28,6 +28,10 @@ class MainWindow(QDeclarativeView):
         root.textRotationChanged.connect(self.rotationStatus)
         button = root.findChild(QObject, 'btnMouseArea')
         button.clicked.connect(lambda: con.outputStr('click button'))
+
+        self.timer = QTimer()
+        self.timer.start(2000)
+        self.timer.timeout.connect(root.updateRotater)
 
     def rotationStatus(self, r):
         print 'rotation ' + str(r)

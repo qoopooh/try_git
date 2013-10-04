@@ -30,9 +30,11 @@ Rectangle {
   }
 
   Rectangle {
-    id: button
-    width: 80; height: 40; color: 'darkgray';
-    anchors.bottom: page.bottom;
+    id: rotater
+    width: 60; height: 40; color: 'darkgray';
+    x: 60; y: 60;
+       //anchors.bottom: page.bottom;
+    property real angle: 0
     MouseArea {
       id: 'btnMouseArea'
       objectName: 'btnMouseArea'
@@ -43,6 +45,21 @@ Rectangle {
       text: 'Press me'
       anchors.centerIn: parent
     }
+
+    transform: Rotation {
+      origin.x: 10; origin.y: 5
+      angle: rotater.angle
+      Behavior on angle {
+        SpringAnimation {
+          spring: 1.4
+          damping: .05
+        }
+      }
+    }
+  }
+
+  function updateRotater() {
+    rotater.angle = rotater.angle + 45
   }
 }
 
