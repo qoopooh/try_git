@@ -13,7 +13,7 @@
 
 import sys
 
-from PySide.QtGui import QApplication, QMainWindow, QTextEdit, QPushButton
+from PySide.QtGui import QApplication, QMainWindow,QTextEdit, QPushButton, QToolTip, QFont
 
 from ui_licence import Ui_MainWindow
 
@@ -22,15 +22,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         '''Mandatory initialisation of a class.'''
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
+        self.setWindowTitle('GPL licence')
+
+        QToolTip.setFont(QFont('SansSerif', 10))
         self.showButton.clicked.connect(self.fileRead)
-        
+        self.showButton.setToolTip('Click to see the licence')
+
+        self.actionE_xit.setShortcut('Ctrl+Q')
+        self.actionE_xit.setStatusTip('Exit Application')
+        self.actionE_xit.triggered.connect(self.close)
+
     def fileRead(self):
         '''Read and display GPL licence.'''
         self.textEdit.setText(open('COPYING.txt').read())
-        
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     frame = MainWindow()
     frame.show()
     app.exec_()
-    
+
