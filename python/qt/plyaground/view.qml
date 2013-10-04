@@ -15,6 +15,7 @@ Rectangle {
       anchors.fill: parent
       onClicked: {
         console.log("Mouse clicked!", parent.color)
+        con.outputStr('Hi')
         if (parent.color == "#000000")
           parent.color = 'blue';
         else

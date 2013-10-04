@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PySide.QtCore import *
+from PySide.QtCore import QObject, Slot, QUrl
 from PySide.QtGui import *
-from PySide.QtDeclarative import *
+from PySide.QtDeclarative import QDeclarativeView
 
 # Our main window
 class MainWindow(QDeclarativeView):
@@ -16,6 +16,15 @@ class MainWindow(QDeclarativeView):
         self.setSource(QUrl.fromLocalFile('view.qml'))
         # QML resizes to main window
         self.setResizeMode(QDeclarativeView.SizeRootObjectToView)
+
+        con = Console()
+        context = self.rootContext()
+        context.setContextProperty('con', con)
+
+class Console(QObject):
+    @Slot(str)
+    def outputStr(self, s):
+        print s
 
 
 if __name__ == '__main__':
