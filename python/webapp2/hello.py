@@ -6,9 +6,23 @@ class HelloWebapp2(w.RequestHandler):
     def get(self):
         self.response.write('Hello, webapp2')
 
-app = w.WSGIApplication([
-    ('/', HelloWebapp2),
-], debug=True)
+class MyHandler(w.RequestHandler):
+    def get(self):
+        foo = self.app.config.get('foo')
+        self.response.write('foo value is %s' % foo)
+
+routes = [
+    (r'/', HelloWebapp2),
+]
+
+config = {}
+config['webapp2_extras.sessions'] = {
+    'secret_key': 'sonething-very-very-secret',
+}
+config['foo'] = 'bar'
+
+app = w.WSGIApplication(routes=routes, config=config, debug=True)
+app.router.add((r'/my', MyHandler))
 
 def main():
     from paste import httpserver
