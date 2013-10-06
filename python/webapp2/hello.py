@@ -28,6 +28,10 @@ def main():
     from paste import httpserver
     httpserver.serve(app, port='8080')
 
+    response = app.get_response('/')
+    assert response.status_int == 200
+    assert response.body == 'Hello, webapp2'
+
 if __name__ == '__main__':
     main()
 
