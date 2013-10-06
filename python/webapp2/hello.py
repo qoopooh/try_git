@@ -25,12 +25,12 @@ app = w.WSGIApplication(routes=routes, config=config, debug=True)
 app.router.add((r'/my', MyHandler))
 
 def main():
-    from paste import httpserver
-    httpserver.serve(app, port='8080')
+#from paste import httpserver
+#httpserver.serve(app, port='8080')
 
     response = app.get_response('/')
     assert response.status_int == 200
-    assert response.body == 'Hello, webapp2'
+    assert response.body == 'Hello, webapp3'
 
 if __name__ == '__main__':
     main()
