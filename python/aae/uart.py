@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import serial
+import serial, os
 
-port = '/dev/ttyACM0'
+if os.name == 'posix':
+    port = '/dev/ttyACM0'
+else:
+    port = 'COM4'
 
 def main():
     ser = serial.Serial(port=port, baudrate=115200)
