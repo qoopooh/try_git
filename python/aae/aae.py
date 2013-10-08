@@ -48,35 +48,40 @@ class Protocol():
         return p
 
     def extract(self, data):
+        '''This method will return:
+           Check sum result: should be True
+           Command: one of CommandBytes
+           Payload: can be None
+           Offset: Extracted position of data
+        '''
         cs, command, payload = False, None, None
         
         p = [ord(x) for x in prefix]
         if (p != data[:3]):
-            return cs, command, payload
+            return cs, command, payload, 1
         for k in CommandBytes:
             if (CommandBytes[k] == (data[4], data[5])):
                 command = k
         payload_len = data[7]
         if (debug):
             print data, payload_len
-        if (payload_len):
-            if (payload_len > len(data) - 10):
-                return cs, command, payload
-
-            payload = data[9:9 + payload_len]
-            if splitter != (data[3], data[6], 3, data[9 + payload_len]):
-                return cs, command, payload
-            if data[payload_len + 10] is self.checksum(data[:payload_len + 10]):
-                cs =True
-
-        else:
+        if payload_len < 1:
             if splitter != (data[3], data[6], 3, data[8]):
-                return cs, command, payload
+                return cs, command, payload, 9
             if data[9] is self.checksum(data[:9]):
                 cs =True
+            return cs, command, payload, 10
 
+        if (payload_len > len(data) - 10):
+            return cs, command, payload, 8
 
-        return cs, command, payload
+        payload = data[9:9 + payload_len]
+        if splitter != (data[3], data[6], 3, data[9 + payload_len]):
+            return cs, command, payload, 10 + payload_len
+        if data[payload_len + 10] is self.checksum(data[:payload_len + 10]):
+            cs =True
+
+        return cs, command, payload, 11 + payload_len
 
     def checksum(self, data):
         if (debug):
@@ -100,9 +105,9 @@ def main():
     assert(print_hex(p.build('InventoryCyclic', 1)) == '41 41 45 01 50 02 02 01 03 01 04 13')
 
     set_hb_off = [0x41, 0x41, 0x45, 0x01, 0x03, 0x02, 0x02, 0x03, 0x03, 0x00, 0x00, 0xFA, 0x04, 0xB9]
-    assert(p.extract(set_hb_off) == (True, 'SetHeartbeat', [0, 0, 250]))
+    assert(p.extract(set_hb_off) == (True, 'SetHeartbeat', [0, 0, 250], 14))
     get_sw = [0x41, 0x41, 0x45, 0x01, 0x01, 0x04, 0x02, 0x00, 0x04, 0x47]
-    assert(p.extract(get_sw) == (True, 'GetSoftwareRev', None))
+    assert(p.extract(get_sw) == (True, 'GetSoftwareRev', None, 10))
 
 if __name__ == '__main__':
     main()
