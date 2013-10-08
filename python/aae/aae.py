@@ -98,8 +98,8 @@ class Protocol():
                 cs =True
             return cs, (command, payload), 10
 
-        if (payload_len > len(data) - 10):
-            return cs, None, 8
+        if (payload_len >= len(data) - 10):
+            return cs, None, 0  # Waiting for the rest
 
         payload = data[9:9 + payload_len]
         if splitter != (data[3], data[6], 3, data[9 + payload_len]):
