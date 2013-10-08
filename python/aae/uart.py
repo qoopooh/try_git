@@ -25,20 +25,23 @@ else:
     
 def main():
     print "ST110"
-    time.sleep(3)
+    time.sleep(1)
     ser = serial.Serial(port=port, baudrate=115200)
-    print "Reading " + ser.portstr
+    print "Reading on " + ser.portstr
     p = Protocol()
     data = residual = []
     while True:
-        if not ser.inWaiting():
+        n = ser.inWaiting()
+        if not n:
             continue
-        data += ser.read()
-        print ":".join("{0:02x}".format(ord(c)) for c in data)
-        if (len(data) > 9):
+        data += ser.read(n)
+        print str(time.clock()) + ":".join("{0:02x}".format(ord(c)) for c in data)
+        while (len(data) > 9):
             res = p.extract([ord(c) for c in data])
             print (res)
             data = data[res[2]:]
+            if not res[2]:
+                break
 
 if __name__ == '__main__':
     main()
