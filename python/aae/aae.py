@@ -36,8 +36,6 @@ class Protocol():
         p.append(splitter[0])
         p += CommandBytes[command]
         p.append(splitter[1])
-        if (debug):
-            print type(data)
         if not data:
             p += [0, splitter[3]]
         elif not isinstance(data, list):
@@ -50,10 +48,35 @@ class Protocol():
         return p
 
     def extract(self, data):
-        cs = False
+        cs, command, payload = False, None, None
+        
+        p = [ord(x) for x in prefix]
+        if (p != data[:3]):
+            return cs, command, payload
+        for k in CommandBytes:
+            if (CommandBytes[k] == (data[4], data[5])):
+                command = k
+        payload_len = data[7]
+        if (debug):
+            print data, payload_len
+        if (payload_len):
+            if (payload_len > len(data) - 10):
+                return cs, command, payload
+
+            payload = data[9:9 + payload_len]
+            if splitter != (data[3], data[6], 3, data[9 + payload_len]):
+                return cs, command, payload
+            if data[payload_len + 10] is self.checksum(data[:payload_len + 10]):
+                cs =True
+
+        else:
+            if splitter != (data[3], data[6], 3, data[8]):
+                return cs, command, payload
+            if data[9] is self.checksum(data[:9]):
+                cs =True
 
 
-        return cs, command, data
+        return cs, command, payload
 
     def checksum(self, data):
         if (debug):
@@ -72,12 +95,14 @@ def print_hex(data, p=False):
 
 def main():
     p = Protocol();
-    d = p.build('GetSerial')
-    print_hex(d, True)
-    d = p.build('InventoryCyclic', [0])
-    print_hex(d, True)
-    d = p.build('InventoryCyclic', 1)
-    print_hex(d, True)
+    assert(print_hex(p.build('GetSerial')) == '41 41 45 01 01 01 02 00 04 42')
+    assert(print_hex(p.build('InventoryCyclic', [0])) == '41 41 45 01 50 02 02 01 03 00 04 12')
+    assert(print_hex(p.build('InventoryCyclic', 1)) == '41 41 45 01 50 02 02 01 03 01 04 13')
+
+    set_hb_off = [0x41, 0x41, 0x45, 0x01, 0x03, 0x02, 0x02, 0x03, 0x03, 0x00, 0x00, 0xFA, 0x04, 0xB9]
+    assert(p.extract(set_hb_off) == (True, 'SetHeartbeat', [0, 0, 250]))
+    get_sw = [0x41, 0x41, 0x45, 0x01, 0x01, 0x04, 0x02, 0x00, 0x04, 0x47]
+    assert(p.extract(get_sw) == (True, 'GetSoftwareRev', None))
 
 if __name__ == '__main__':
     main()
