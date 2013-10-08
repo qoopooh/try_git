@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+#debug = True
 debug = False
 
 prefix = ('A', 'A', 'E')
@@ -10,6 +11,8 @@ CommandBytes = {
     'GetHardwareRev':       (0x01, 0x03),
     'GetSoftwareRev':       (0x01, 0x04),
     'GetBootloaderRev':     (0x01, 0x05),
+    'GetCurrentState':      (0x01, 0x06),
+    'GetStatusRegister':    (0x01, 0x07),
     'GetAttenuation':       (0x02, 0x01),
     'GetFrequency':         (0x02, 0x02),
     'SetHeartbeat':         (0x03, 0x02),
@@ -77,6 +80,8 @@ class Protocol():
         '''
         cs, command, payload = False, None, None
         
+        if (debug):
+            print type(data), data
         p = [ord(x) for x in prefix]
         if (p != data[:3]):
             return cs, None, 1
