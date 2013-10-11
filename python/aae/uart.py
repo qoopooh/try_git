@@ -23,8 +23,9 @@ else:
     #res = p.extract([ord(c) for c in a])
     #print res
 
-def sendCommands():
-    pass
+def sendCommands(packet):
+    if not packet or len(packet) < 10:
+        return
     
 def main():
     print "ST110"

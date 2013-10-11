@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from simplefsm import SimpleFSM
+
 #debug = True
 debug = False
 
@@ -31,19 +33,6 @@ CommandBytes = {
     'InventoryCyclicInt':   (0x90, 0x02),
 }
 
-
-class Packet():
-    """ AAE Packet will has
-        Command: string value
-        Payload: byte list, boolean, integer
-    """
-
-    def __init__(self, command, payload):
-        self.command = command
-        self.payload = payload
-
-    def tup(self):
-        return (self.command, self.payload)
 
 class Protocol():
     """To build or extract AAE protocol"""
@@ -120,6 +109,31 @@ class Protocol():
             cs ^= b
         return cs
 
+
+class Sender():
+
+    def __init__(self, interface):
+        self.i = interface
+        self.busy = False
+        self.sm = SimpleFSM({
+            'initial': 'idle',
+            'transitions': {
+                'idle': {'sending'},
+                'sending': {'wait_response'},
+                'wait_response': {'resending', 'check_response'},
+                'check_response': {'resending', 'wait_response', 'success'},
+                'resending': {'wait_response', 'failure'},
+                'succesful': {'idle'},
+                'failure': {'idle'},
+            }
+        })
+
+
+    def send(packet):
+        if self.busy:
+            return False
+
+        return True
 
 def print_hex(data, p=False):
     s = " ".join("{0:02x}".format(c) for c in data)
