@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import serial, os, time
-from aae import Protocol
+from aae import Protocol, Sender
 
 if os.name == 'posix':
     port = '/dev/ttyACM0'
@@ -33,6 +33,7 @@ def main():
     ser = serial.Serial(port=port, baudrate=115200)
     print "Reading on " + ser.portstr
     p = Protocol()
+    sender = Sender(ser)
     data = residual = []
     while True:
         n = ser.inWaiting()
@@ -43,6 +44,7 @@ def main():
         while (len(data) > 9):
             res = p.extract([ord(c) for c in data])
             print (res)
+            sender.checkResponse(res[1])
             data = data[res[2]:]
             if not res[2]:
                 break

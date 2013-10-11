@@ -121,7 +121,7 @@ class Sender():
                 'idle': {'sending'},
                 'sending': {'wait_response'},
                 'wait_response': {'resending', 'check_response'},
-                'check_response': {'resending', 'wait_response', 'success'},
+                'check_response': {'resending', 'wait_response', 'succesful'},
                 'resending': {'wait_response', 'failure'},
                 'succesful': {'idle'},
                 'failure': {'idle'},
@@ -129,11 +129,17 @@ class Sender():
         })
 
 
-    def send(packet):
+    def send(self, packet):
         if self.busy:
             return False
-
+        self.sm.change_to('sending')
         return True
+
+    def checkResponse(self, data):
+        if not self.busy:
+            return
+        command, payload = data
+
 
 def print_hex(data, p=False):
     s = " ".join("{0:02x}".format(c) for c in data)
