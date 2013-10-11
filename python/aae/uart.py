@@ -22,6 +22,9 @@ else:
     #p = Protocol()
     #res = p.extract([ord(c) for c in a])
     #print res
+
+def sendCommands():
+    pass
     
 def main():
     print "ST110"

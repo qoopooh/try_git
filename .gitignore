@@ -9,6 +9,7 @@ lib-cov
 *.pid
 *.swp
 *.swo
+*.dia~
 benchmarks/graphs
 testing
 node_modules/
