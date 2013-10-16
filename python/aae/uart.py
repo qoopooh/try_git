@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import serial, os, time
+from collections import deque
 from aae import Protocol, Sender
 
 if os.name == 'posix':
@@ -35,17 +36,28 @@ def main():
     p = Protocol()
     sender = Sender(ser)
     data = residual = []
+    sleep_counter = 0
     while True:
         n = ser.inWaiting()
         if not n:
+            sleep_counter += 1
+            if (sleep_counter > 10):
+                sleep_counter = 0
+                time.sleep(0.1)
             continue
+        sleep_counter = 0
         data += ser.read(n)
-        print str(time.clock()) + ":".join("{0:02x}".format(ord(c)) for c in data)
+        out = str(time.clock()) + ":".join("{0:02x}".format(ord(c)) for c in data) 
+        print(out), # continue on the same line
+
         while (len(data) > 9):
             res = p.extract([ord(c) for c in data])
-            print (res)
-            sender.checkResponse(res[1])
+            print (res),
+            if (res[0]):
+                sender.checkResponse(res[1])
             data = data[res[2]:]
+
+            print (',') # new line
             if not res[2]:
                 break
 
