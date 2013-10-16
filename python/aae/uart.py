@@ -11,19 +11,6 @@ if os.name == 'posix':
 else:
     port = 'COM4'
 
-#def main():
-    #print "ST110"
-    #time.sleep(3)
-    #ser = serial.Serial(port=port, baudrate=115200)
-    #print ser.portstr
-##while (!ser.readable());
-    #a = ser.read(12)
-    #ser.close()
-    #print 'Closing'
-    #print ":".join("{0:02x}".format(ord(c)) for c in a)
-    #p = Protocol()
-    #res = p.extract([ord(c) for c in a])
-    #print res
 
 def sendCommands(packet):
     if not packet or len(packet) < 10:
@@ -43,7 +30,8 @@ def main():
         n = ser.inWaiting()
         if not n:
             if queue.qsize():
-                print(str(time.clock()) + ' ' + str(queue.get()))
+                packet = queue.get()
+                print(str(time.clock()), packet)
             sleep_counter += 1
             if (sleep_counter > 10):
                 sleep_counter = 0
