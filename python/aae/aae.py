@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import serial, time
 from simplefsm import SimpleFSM
 
 #debug = True
@@ -7,45 +8,61 @@ debug = False
 
 prefix = ('A', 'A', 'E')
 splitter = (1, 2, 3, 4)
-CommandBytes = {
-    'GetSerial':            (0x01, 0x01),
-    'GetReaderType':        (0x01, 0x02),
-    'GetHardwareRev':       (0x01, 0x03),
-    'GetSoftwareRev':       (0x01, 0x04),
-    'GetBootloaderRev':     (0x01, 0x05),
-    'GetCurrentState':      (0x01, 0x06),
-    'GetStatusRegister':    (0x01, 0x07),
-    'GetAttenuation':       (0x02, 0x01),
-    'GetFrequency':         (0x02, 0x02),
-    'SetHeartbeat':         (0x03, 0x02),
-    'SetAntennaPower':      (0x03, 0x03),
-    'SetAttenuation':       (0x03, 0x04),
-    'SetFrequency':         (0x03, 0x05),
-    'RestoreFactory':       (0x03, 0x20),
-    'SaveSettings':         (0x03, 0x21),
-    'SetParam':             (0x03, 0x30),
-    'GetParam':             (0x03, 0x31),
-    'InventorySingle':      (0x50, 0x01),
-    'InventoryCyclic':      (0x50, 0x02),
-    'ReadFromTag':          (0x50, 0x03),
-    'WriteToTag':           (0x50, 0x04),
-    'HeartbeatInt':         (0x90, 0x01),
-    'InventoryCyclicInt':   (0x90, 0x02),
+
+def response_none(payload):
+    return payload is None
+
+def response_success(payload):
+    return payload[0] is 0
+
+def response_data(payload):
+    return payload
+
+
+AAE_COMMAND = { # code, response
+    'GetSerial':            ((0x01, 0x01), response_data),
+    'GetReaderType':        ((0x01, 0x02), response_data),
+    'GetHardwareRev':       ((0x01, 0x03), response_data),
+    'GetSoftwareRev':       ((0x01, 0x04), response_data),
+    'GetBootloaderRev':     ((0x01, 0x05), response_data),
+    'GetCurrentState':      ((0x01, 0x06), response_data),
+    'GetStatusRegister':    ((0x01, 0x07), response_data),
+    'GetAttenuation':       ((0x02, 0x01), response_data),
+    'GetFrequency':         ((0x02, 0x02), response_data),
+    'SetHeartbeat':         ((0x03, 0x02), response_success),
+    'SetAntennaPower':      ((0x03, 0x03), response_success),
+    'SetAttenuation':       ((0x03, 0x04), response_success),
+    'SetFrequency':         ((0x03, 0x05), response_success),
+    'RestoreFactory':       ((0x03, 0x20), None),
+    'SaveSettings':         ((0x03, 0x21), None),
+    'SetParam':             ((0x03, 0x30), None),
+    'GetParam':             ((0x03, 0x31), response_data),
+    'InventorySingle':      ((0x50, 0x01), response_data),
+    'InventoryCyclic':      ((0x50, 0x02), response_success),
+    'ReadFromTag':          ((0x50, 0x03), response_data),
+    'WriteToTag':           ((0x50, 0x04), response_success),
+    'HeartbeatInt':         ((0x90, 0x01), None),
+    'InventoryCyclicInt':   ((0x90, 0x02), None),
 }
+
 
 
 class Protocol():
     """To build or extract AAE protocol"""
 
     def build(self, command, payload=None):
-        """Please assign command from CommandBytes, and payload as list (if need)
+        """Please assign command from AAE_COMMAND, and payload as list (if need)
             The result will return as byte list
         """
         p = [ord(x) for x in prefix]
         p.append(splitter[0])
-        p += CommandBytes[command]
+        if isinstance(command, tuple):
+            p += AAE_COMMAND[command[0]][0]
+            payload = command[1]
+        else:
+            p += AAE_COMMAND[command][0]
         p.append(splitter[1])
-        if not payload:
+        if payload is None:
             p += [0, splitter[3]]
         elif not isinstance(payload, list):
             p += [1, splitter[2], payload, splitter[3]]
@@ -63,7 +80,7 @@ class Protocol():
             - If you have more than 1 protocol on list, please continue extract from Offset
         The return:
             Check sum result: should be True
-            Command: one of CommandBytes
+            Command: one of AAE_COMMAND
             Payload: can be None
             Offset: Extracted position of data
         '''
@@ -74,8 +91,8 @@ class Protocol():
         p = [ord(x) for x in prefix]
         if (p != data[:3]):
             return cs, None, 1
-        for k in CommandBytes:
-            if (CommandBytes[k] == (data[4], data[5])):
+        for k in AAE_COMMAND:
+            if (AAE_COMMAND[k][0] == (data[4], data[5])):
                 command = k
         payload_len = data[7]
         if (debug):
@@ -119,26 +136,84 @@ class Sender():
             'initial': 'idle',
             'transitions': {
                 'idle': {'sending'},
-                'sending': {'wait_response'},
+                'sending': {'wait_response', 'succes'},
                 'wait_response': {'resending', 'check_response'},
-                'check_response': {'resending', 'wait_response', 'succesful'},
+                'check_response': {'resending', 'wait_response', 'succes'},
                 'resending': {'wait_response', 'failure'},
-                'succesful': {'idle'},
-                'failure': {'idle'},
+                'succes': {'idle', 'sending'},
+                'failure': {'idle', 'sending'},
             }
         })
 
 
-    def send(self, packet):
+    def send(self, command, payload=None):
         if self.busy:
             return False
         self.sm.change_to('sending')
+        p = Protocol()
+        self.ba = bytearray(p.build(command, payload))
+        self.i.write(self.ba)
+        if AAE_COMMAND[command][1] is None:
+            self.sm.change_to('succes')
+            return True
+
+
+        self.tx_cmd = command
+        self.sm.change_to('wait_response')
+        self.start = time.clock()
+        self.resend_cnt = 0
+        self.busy = True # not allow another command
         return True
 
-    def checkResponse(self, data):
+    def get_response(self, data):
         if not self.busy:
             return
         command, payload = data
+
+        self.rx_cmd = command
+        if AAE_COMMAND[command][1] is None:
+            self.resp = None
+        else:
+            self.resp = AAE_COMMAND[command][1](payload)
+            self.sm.change_to('check_response')
+        print('AAE_COMMAND resp', command, self.resp),
+
+
+    def exec_(self):
+        if not self.busy:
+            return
+
+        #First Decision Table
+        if self.sm.current is 'wait_response':
+            t1 = time.clock() - self.start
+            if (t1 > 2):
+                self.sm.change_to('resending')
+        elif self.sm.current is 'check_response':
+            if self.rx_cmd is not self.tx_cmd:
+                self.sm.change_to('wait_response')
+                return
+            if self.resp:
+                self.sm.change_to('succes')
+            else:
+                self.sm.change_to('wait_response')
+        elif self.sm.current is 'succes' or self.sm.current is 'failure':
+            if self.resp is None:
+                print(self.sm.current, self.tx_cmd)
+            else:
+                resp = ''.join('{0:02x}'.format(b) for b in self.resp)
+                print(self.sm.current, self.tx_cmd, resp)
+            self.sm.change_to('idle')
+            self.busy = False
+
+
+        #Second Decision Table (have to do immediately)
+        if self.sm.current is 'resending':
+            if self.resend_cnt > 2:
+                self.sm.change_to('failure')
+            else:
+                self.i.write(self.ba)
+                self.resend_cnt += 1
+                self.sm.change_to('wait_response')
 
 
 def print_hex(data, p=False):
@@ -152,6 +227,7 @@ def main():
     assert(print_hex(p.build('GetSerial')) == '41 41 45 01 01 01 02 00 04 42')
     assert(print_hex(p.build('InventoryCyclic', [0])) == '41 41 45 01 50 02 02 01 03 00 04 12')
     assert(print_hex(p.build('InventoryCyclic', 1)) == '41 41 45 01 50 02 02 01 03 01 04 13')
+    assert(print_hex(p.build(('InventoryCyclic', 0))) == '41 41 45 01 50 02 02 01 03 00 04 12')
 
     set_hb_off = [0x41, 0x41, 0x45, 0x01, 0x03, 0x02, 0x02, 0x03, 0x03, 0x00, 0x00, 0xFA, 0x04, 0xB9]
     assert(p.extract(set_hb_off) == (True, ('SetHeartbeat', [0, 0, 250]), 14))

@@ -3,13 +3,25 @@
 
 import serial, os, time
 #from collections import deque
-import Queue
+from Queue import Queue
 from aae import Protocol, Sender
 
 if os.name == 'posix':
     port = '/dev/ttyACM0'
 else:
     port = 'COM4'
+
+commands = [
+    'GetSerial',
+    'GetReaderType',
+    'GetHardwareRev',
+    'GetSoftwareRev',
+    'GetBootloaderRev',
+    'GetCurrentState',
+    'GetStatusRegister',
+    'GetAttenuation',
+#'GetFrequency',
+]
 
 
 def sendCommands(packet):
@@ -25,13 +37,22 @@ def main():
     sender = Sender(ser)
     data = residual = []
     sleep_counter = 0
-    queue = Queue.Queue()
+    queue = Queue()
+    hb_count = 0
     while True:
         n = ser.inWaiting()
         if not n:
             if queue.qsize():
                 packet = queue.get()
                 print(str(time.clock()), packet)
+                if packet[0] is 'HeartbeatInt':
+                    hb_count += 1
+                    d = hb_count / 3
+                    if d < len(commands) and hb_count % 3 is 0:
+                        sender.send(commands[d])
+                sender.get_response(packet)
+            sender.exec_()
+
             sleep_counter += 1
             if (sleep_counter > 10):
                 sleep_counter = 0
@@ -47,7 +68,6 @@ def main():
             print (res),
             if (res[0]):
                 queue.put(res[1])
-#sender.checkResponse(res[1])
             data = data[res[2]:]
 
             print (',') # new line
