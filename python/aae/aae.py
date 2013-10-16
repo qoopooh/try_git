@@ -136,11 +136,11 @@ class Sender():
             'initial': 'idle',
             'transitions': {
                 'idle': {'sending'},
-                'sending': {'wait_response', 'succes'},
+                'sending': {'wait_response', 'success'},
                 'wait_response': {'resending', 'check_response'},
-                'check_response': {'resending', 'wait_response', 'succes'},
+                'check_response': {'resending', 'wait_response', 'success'},
                 'resending': {'wait_response', 'failure'},
-                'succes': {'idle', 'sending'},
+                'success': {'idle', 'sending'},
                 'failure': {'idle', 'sending'},
             }
         })
@@ -155,7 +155,7 @@ class Sender():
         self.ba = bytearray(p.build(command, payload))
         self.i.write(self.ba)
         if AAE_COMMAND[command][1] is None:
-            self.sm.change_to('succes')
+            self.sm.change_to('success')
             return True
 
 
@@ -194,10 +194,10 @@ class Sender():
                 self.sm.change_to('wait_response')
                 return
             if self.resp:
-                self.sm.change_to('succes')
+                self.sm.change_to('success')
             else:
                 self.sm.change_to('wait_response')
-        elif self.sm.current is 'succes' or self.sm.current is 'failure':
+        elif self.sm.current is 'success' or self.sm.current is 'failure':
             if self.resp is None:
                 print(self.sm.current, self.tx_cmd)
             elif isinstance(self.resp, bool):

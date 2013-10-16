@@ -24,6 +24,8 @@ packets = [
     ('InventorySingle', 1),
     ('InventorySingle', 1),
     ('InventoryCyclic', 0),
+    ('InventoryCyclic', 0),
+    ('InventoryCyclic', 0),
 #'GetFrequency',
 ]
 
@@ -46,21 +48,12 @@ def main():
     while True:
         n = ser.inWaiting()
         if not n:
-            if queue.qsize():
-                packet = queue.get()
-                if packet[0] is 'HeartbeatInt':
-                    hb_count += 1
-                    d = hb_count / 3
-                    if d < len(packets) and hb_count % 3 is 0:
-                        sender.send(packets[d])
-                sender.get_response(packet)
-            sender.exec_()
-
             sleep_counter += 1
             if (sleep_counter > 10):
                 sleep_counter = 0
                 time.sleep(0.07)
             continue
+
         sleep_counter = 0
         data += ser.read(n)
         out = str(time.clock()) + ' ' + ":".join("{0:02x}".format(ord(c)) for c in data) 
@@ -76,6 +69,17 @@ def main():
             print (',') # new line
             if not res[2]:
                 break
+
+        if queue.qsize():
+            packet = queue.get()
+            if packet[0] is 'HeartbeatInt':
+                hb_count += 1
+                d = hb_count / 3
+                if d < len(packets) and hb_count % 3 is 0:
+                    sender.send(packets[d])
+            sender.get_response(packet)
+        sender.exec_()
+
 
 if __name__ == '__main__':
     main()
