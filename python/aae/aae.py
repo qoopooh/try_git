@@ -146,10 +146,11 @@ class Sender():
         })
 
 
-    def send(self, command, payload=None):
+    def send(self, packet):
         if self.busy:
             return False
         self.sm.change_to('sending')
+        command, payload = packet
         p = Protocol()
         self.ba = bytearray(p.build(command, payload))
         self.i.write(self.ba)
@@ -199,6 +200,8 @@ class Sender():
         elif self.sm.current is 'succes' or self.sm.current is 'failure':
             if self.resp is None:
                 print(self.sm.current, self.tx_cmd)
+            elif isinstance(self.resp, bool):
+                print(self.sm.current, self.resp)
             else:
                 resp = ''.join('{0:02x}'.format(b) for b in self.resp)
                 print(self.sm.current, self.tx_cmd, resp)

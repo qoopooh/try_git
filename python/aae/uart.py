@@ -11,20 +11,24 @@ if os.name == 'posix':
 else:
     port = 'COM4'
 
-commands = [
-    'GetSerial',
-    'GetReaderType',
-    'GetHardwareRev',
-    'GetSoftwareRev',
-    'GetBootloaderRev',
-    'GetCurrentState',
-    'GetStatusRegister',
-    'GetAttenuation',
+packets = [
+    ('GetSerial', None),
+    ('GetReaderType', None),
+    ('GetHardwareRev', None),
+    ('GetSoftwareRev', None),
+    #('GetBootloaderRev', None),
+    #('GetCurrentState', None),
+    #('GetStatusRegister', None),
+    #('GetAttenuation', None),
+    ('InventoryCyclic', 1),
+    ('InventorySingle', 1),
+    ('InventorySingle', 1),
+    ('InventoryCyclic', 0),
 #'GetFrequency',
 ]
 
 
-def sendCommands(packet):
+def sendpackets(packet):
     if not packet or len(packet) < 10:
         return
     
@@ -44,12 +48,11 @@ def main():
         if not n:
             if queue.qsize():
                 packet = queue.get()
-                print(str(time.clock()), packet)
                 if packet[0] is 'HeartbeatInt':
                     hb_count += 1
                     d = hb_count / 3
-                    if d < len(commands) and hb_count % 3 is 0:
-                        sender.send(commands[d])
+                    if d < len(packets) and hb_count % 3 is 0:
+                        sender.send(packets[d])
                 sender.get_response(packet)
             sender.exec_()
 
