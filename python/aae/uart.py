@@ -11,6 +11,7 @@ else:
     port = 'COM4'
 
 packets = [
+    ('SetHeartbeat', 1),
     ('GetSerial', None),
     ('GetReaderType', None),
     #('GetBootloaderRev', None),
@@ -18,12 +19,12 @@ packets = [
     #('GetStatusRegister', None),
     #('GetAttenuation', None),
     ('InventoryCyclic', 1),
-    ('InventorySingle', 1),
     ('GetHardwareRev', None),
     ('InventorySingle', 1),
     ('GetSoftwareRev', None),
     ('InventoryCyclic', 0),
-#'GetFrequency',
+    ('SetHeartbeat', 1),
+    ('SetHeartbeat', 0),
 ]
 
 
@@ -38,11 +39,13 @@ def main():
     while True:
         reader.exec_()
         t1 = time.clock()
-        if (t1 - t0 < 2):
+        if (t1 - t0 < 3):
             continue
         t0 = t1
         if i < len(packets) and reader.send(packets[i]):
             i += 1
+        else:
+            break
 
 
 if __name__ == '__main__':
