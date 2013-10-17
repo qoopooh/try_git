@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import serial, os, time
-#from collections import deque
+import os, time
+from serial import Serial
 from Queue import Queue
 from aae import Protocol, Sender
+from aae_reader import Reader
 
 if os.name == 'posix':
     port = '/dev/ttyACM0'
@@ -14,36 +15,31 @@ else:
 packets = [
     ('GetSerial', None),
     ('GetReaderType', None),
-    ('GetHardwareRev', None),
-    ('GetSoftwareRev', None),
     #('GetBootloaderRev', None),
     #('GetCurrentState', None),
     #('GetStatusRegister', None),
     #('GetAttenuation', None),
     ('InventoryCyclic', 1),
     ('InventorySingle', 1),
+    ('GetHardwareRev', None),
     ('InventorySingle', 1),
-    ('InventoryCyclic', 0),
-    ('InventoryCyclic', 0),
+    ('GetSoftwareRev', None),
     ('InventoryCyclic', 0),
 #'GetFrequency',
 ]
 
 
-def sendpackets(packet):
-    if not packet or len(packet) < 10:
-        return
-    
-def main():
+def main1():
     print "ST110"
     time.sleep(1)
-    ser = serial.Serial(port=port, baudrate=115200)
+    ser = Serial(port=port, baudrate=115200)
     print "Reading on " + ser.portstr
     p = Protocol()
     sender = Sender(ser)
     data = residual = []
     sleep_counter = 0
-    queue = Queue()
+    q_packet = Queue()
+    q_rx = Queue()
     hb_count = 0
     while True:
         n = ser.inWaiting()
@@ -63,15 +59,15 @@ def main():
             res = p.extract([ord(c) for c in data])
             print (res),
             if (res[0]):
-                queue.put(res[1])
+                q_packet.put(res[1])
             data = data[res[2]:]
 
             print (',') # new line
             if not res[2]:
                 break
 
-        if queue.qsize():
-            packet = queue.get()
+        if q_packet.qsize():
+            packet = q_packet.get()
             if packet[0] is 'HeartbeatInt':
                 hb_count += 1
                 d = hb_count / 3
@@ -79,6 +75,24 @@ def main():
                     sender.send(packets[d])
             sender.get_response(packet)
         sender.exec_()
+    
+def main():
+    print "ST110"
+    time.sleep(1)
+    s = Serial(port=port, baudrate=115200)
+    reader = Reader(s)
+    reader.start()
+    t0 = time.clock()
+    i = 0
+    while True:
+        reader.exec_()
+        t1 = time.clock()
+        if (t1 - t0 < 2):
+            continue
+        t0 = t1
+        if i < len(packets) and reader.send(packets[i]):
+            i += 1
+
 
 
 if __name__ == '__main__':

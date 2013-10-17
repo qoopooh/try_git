@@ -36,6 +36,7 @@ class Reader():
         self.i = interface
         self.i.close()
         self.rx = Rx(self.i, self)
+        self.rx.daemon = True
         self.tx = Sender(self.i)
         self.rx_buff = []
         self.q_packet = Queue()

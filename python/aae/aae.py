@@ -50,6 +50,9 @@ AAE_COMMAND = { # code, response
 class Protocol():
     """To build or extract AAE protocol"""
 
+    def __init__(self):
+        self._wait_rx_counter = 0
+
     def build(self, command, payload=None):
         """Please assign command from AAE_COMMAND, and payload as list (if need)
             The result will return as byte list
@@ -105,6 +108,10 @@ class Protocol():
             return cs, (command, payload), 10
 
         if (payload_len >= len(data) - 10):
+            if (self._wait_rx_counter > 2):
+                self._wait_rx_counter = 0
+                return cs, None, len(data) # clear buffer
+            self._wait_rx_counter += 1
             return cs, None, 0  # Waiting for the rest
 
         payload = data[9:9 + payload_len]
@@ -112,6 +119,8 @@ class Protocol():
             return cs, None, 10 + payload_len
         if data[payload_len + 10] is self.checksum(data[:payload_len + 10]):
             cs =True
+
+        self._wait_rx_counter = 0
 
         return cs, (command, payload), 11 + payload_len
 
@@ -144,7 +153,7 @@ class Sender():
                 'failure': {'idle', 'sending'},
             }
         })
-
+        self.resp = None
 
     def send(self, packet):
         if self.busy:
@@ -157,7 +166,6 @@ class Sender():
         if AAE_COMMAND[command][1] is None:
             self.sm.change_to('success')
             return True
-
 
         self.tx_cmd = command
         self.sm.change_to('wait_response')
