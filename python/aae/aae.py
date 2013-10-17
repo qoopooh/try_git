@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import serial, time
+from threading import Thread
+from Queue import Queue
+
 from simplefsm import SimpleFSM
 
 #debug = True
@@ -88,7 +91,7 @@ class Protocol():
             Offset: Extracted position of data
         '''
         cs, command, payload = False, None, None
-        
+
         if (debug):
             print type(data), data
         p = [ord(x) for x in prefix]
@@ -136,7 +139,7 @@ class Protocol():
         return cs
 
 
-class Sender():
+class Tx():
 
     def __init__(self, interface):
         self.i = interface
@@ -184,7 +187,11 @@ class Sender():
             self.resp = None
         else:
             self.resp = AAE_COMMAND[command][1](payload)
-            self.sm.change_to('check_response')
+            c1 = self.sm.current
+            try:
+                self.sm.change_to('check_response')
+            except:
+                raise Error, 'check_response', c1
         print('AAE_COMMAND resp', command, self.resp),
 
 
@@ -225,6 +232,31 @@ class Sender():
                 self.i.write(self.ba)
                 self.resend_cnt += 1
                 self.sm.change_to('wait_response')
+
+
+class Rx(Thread):
+    def __init__(self, interface, parent):
+        Thread.__init__(self)
+        self.i = interface
+        self.q = Queue()
+        self.s_count = 0
+        self._parent = parent
+
+    def run(self):
+        while self.i.isOpen() and self._parent:
+            n = self.i.inWaiting()
+            if n < 1:
+                self.s_count += 1
+                if (self.s_count > 5):
+                    self.s_count = 0
+                    time.sleep(0.02)
+                continue
+
+            selfks_count = 0
+            data = self.i.read(n)
+            print('rx_get', len(data), 'last_q', self.q.qsize())
+            for d in data:
+                self.q.put(d)
 
 
 def print_hex(data, p=False):

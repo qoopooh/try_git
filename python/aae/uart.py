@@ -4,7 +4,7 @@
 import os, time
 from serial import Serial
 from Queue import Queue
-from aae import Protocol, Sender
+from aae import Protocol
 from aae_reader import Reader
 
 if os.name == 'posix':
@@ -52,7 +52,7 @@ def main1():
 
         sleep_counter = 0
         data += ser.read(n)
-        out = str(time.clock()) + ' ' + ":".join("{0:02x}".format(ord(c)) for c in data) 
+        out = str(time.clock()) + ' ' + ":".join("{0:02x}".format(ord(c)) for c in data)
         print(out), # continue on the same line
 
         while (len(data) > 9):
@@ -75,7 +75,7 @@ def main1():
                     sender.send(packets[d])
             sender.get_response(packet)
         sender.exec_()
-    
+
 def main():
     print "ST110"
     time.sleep(1)
@@ -92,7 +92,6 @@ def main():
         t0 = t1
         if i < len(packets) and reader.send(packets[i]):
             i += 1
-
 
 
 if __name__ == '__main__':
