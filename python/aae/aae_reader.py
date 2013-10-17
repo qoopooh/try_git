@@ -29,14 +29,14 @@ class Reader():
             self.rx_buff.append(ord(self.rx.q.get()))
         while (len(self.rx_buff) > 9):
             res = self.p.extract(self.rx_buff)
-            print ('res', res[0], res[1][0], len(res[1][1]), res[2]),
             if res[0]:
                 self.q_packet.put(res[1])
+                print ('exec', res[1][0], self.q_packet.qsize()),
             self.rx_buff = self.rx_buff[res[2]:]
 
             print (';') # new line
-            if not res[2]:
-                break
+#if not res[2]:
+#break
 
         if self.q_packet.qsize():
             packet = self.q_packet.get()

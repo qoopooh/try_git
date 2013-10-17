@@ -192,16 +192,14 @@ class Tx():
             self.resp = AAE_COMMAND[command][1](payload)
             c1 = self.sm.current
 #self.sm.change_to('check_response')
-            if self.sm.current is not 'check_response':
-                try:
-                    self.sm.change_to('check_response')
-                except:
-                    print('current', c1)
-                    raise Error
+#if self.sm.current is not 'check_response':
+            try:
+                self.sm.change_to('check_response')
+            except:
+                print('current', c1)
+                raise Error
                 
-                #self.sm.force_change_to('check_response')
-            #finally:
-            print('AAE_COMMAND resp', command, self.resp, self.sm.current),
+            print('_resp', command),
 
 
     def exec_(self):
@@ -211,7 +209,7 @@ class Tx():
         #First Decision Table
         if self.sm.current is 'wait_response':
             t1 = time.clock() - self.start
-            if (t1 > 2):
+            if (t1 > 10):
                 self.sm.change_to('resending')
         elif self.sm.current is 'check_response':
             if self.rx_cmd is not self.tx_cmd:
@@ -235,7 +233,7 @@ class Tx():
 
         #Second Decision Table (have to do immediately)
         if self.sm.current is 'resending':
-            if self.resend_cnt > 3:
+            if self.resend_cnt > 0:
                 self.sm.change_to('failure')
             else:
                 self.i.write(self.ba)
