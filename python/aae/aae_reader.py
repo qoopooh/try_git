@@ -26,11 +26,11 @@ class Reader():
 
     def exec_(self):
         while self.rx.q.qsize():
-            self.rx_buff.append(self.rx.q.get())
+            self.rx_buff.append(ord(self.rx.q.get()))
         while (len(self.rx_buff) > 9):
-            res = self.p.extract([ord(c) for c in self.rx_buff])
-            print (res),
-            if (res[0]):
+            res = self.p.extract(self.rx_buff)
+            print ('res', res[0], res[1][0], len(res[1][1]), res[2]),
+            if res[0]:
                 self.q_packet.put(res[1])
             self.rx_buff = self.rx_buff[res[2]:]
 
@@ -39,13 +39,13 @@ class Reader():
                 break
 
         if self.q_packet.qsize():
-            ''' check received packet '''
             packet = self.q_packet.get()
             if packet[0] is 'HeartbeatInt':
                 self.hb_count += 1
                 if self.hb_count % 5 is 0:
                     print('hb', self.hb_count),
-            self.tx.get_response(packet)
+            else:
+                self.tx.get_response(packet)
         self.tx.exec_()
 
     def send(self, packet):

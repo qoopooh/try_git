@@ -21,6 +21,9 @@ def response_success(payload):
 def response_data(payload):
     return payload
 
+def response_epc_cyclic(payload):
+    return len(payload)
+
 
 AAE_COMMAND = { # code, response
     'GetSerial':            ((0x01, 0x01), response_data),
@@ -45,7 +48,7 @@ AAE_COMMAND = { # code, response
     'ReadFromTag':          ((0x50, 0x03), response_data),
     'WriteToTag':           ((0x50, 0x04), response_success),
     'HeartbeatInt':         ((0x90, 0x01), None),
-    'InventoryCyclicInt':   ((0x90, 0x02), None),
+    'InventoryCyclicInt':   ((0x90, 0x02), response_epc_cyclic),
 }
 
 
@@ -152,8 +155,8 @@ class Tx():
                 'wait_response': {'resending', 'check_response'},
                 'check_response': {'resending', 'wait_response', 'success'},
                 'resending': {'wait_response', 'failure'},
-                'success': {'idle', 'sending'},
-                'failure': {'idle', 'sending'},
+                'success': {'idle', 'sending', 'check_response'},
+                'failure': {'idle', 'sending', 'check_response'},
             }
         })
         self.resp = None
@@ -188,11 +191,17 @@ class Tx():
         else:
             self.resp = AAE_COMMAND[command][1](payload)
             c1 = self.sm.current
-            try:
-                self.sm.change_to('check_response')
-            except:
-                raise Error, 'check_response', c1
-        print('AAE_COMMAND resp', command, self.resp),
+#self.sm.change_to('check_response')
+            if self.sm.current is not 'check_response':
+                try:
+                    self.sm.change_to('check_response')
+                except:
+                    print('current', c1)
+                    raise Error
+                
+                #self.sm.force_change_to('check_response')
+            #finally:
+            print('AAE_COMMAND resp', command, self.resp, self.sm.current),
 
 
     def exec_(self):
@@ -215,7 +224,7 @@ class Tx():
         elif self.sm.current is 'success' or self.sm.current is 'failure':
             if self.resp is None:
                 print(self.sm.current, self.tx_cmd)
-            elif isinstance(self.resp, bool):
+            elif isinstance(self.resp, bool) or isinstance(self.resp, int):
                 print(self.sm.current, self.resp)
             else:
                 resp = ''.join('{0:02x}'.format(b) for b in self.resp)
@@ -226,7 +235,7 @@ class Tx():
 
         #Second Decision Table (have to do immediately)
         if self.sm.current is 'resending':
-            if self.resend_cnt > 2:
+            if self.resend_cnt > 3:
                 self.sm.change_to('failure')
             else:
                 self.i.write(self.ba)
@@ -254,7 +263,7 @@ class Rx(Thread):
 
             selfks_count = 0
             data = self.i.read(n)
-            print('rx_get', len(data), 'last_q', self.q.qsize())
+            #print('rx_get', len(data), 'last_q', self.q.qsize())
             for d in data:
                 self.q.put(d)
 
