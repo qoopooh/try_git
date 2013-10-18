@@ -47,7 +47,7 @@ def main():
         else:
             break
     finish = True
-    reader.run = ~finish
+    reader.run = not finish
 
 if __name__ == '__main__':
     main()

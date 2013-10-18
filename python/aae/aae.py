@@ -148,9 +148,9 @@ class Protocol():
 class Tx():
 
     def __init__(self, interface):
-        self.i = interface
+        self._i = interface
         self.busy = False
-        self.sm = SimpleFSM({
+        self._sm = SimpleFSM({
             'initial': 'idle',
             'transitions': {
                 'idle': {'sending'},
@@ -167,17 +167,17 @@ class Tx():
     def send(self, packet):
         if self.busy:
             return False
-        self.sm.change_to('sending')
+        self._sm.change_to('sending')
         command, payload = packet
         p = Protocol()
         self.ba = bytearray(p.build(command, payload))
-        self.i.write(self.ba)
+        self._i.write(self.ba)
         if AAE_COMMAND[command][1] is None:
-            self.sm.change_to('success')
+            self._sm.change_to('success')
             return True
 
         self.tx_cmd = command
-        self.sm.change_to('wait_response')
+        self._sm.change_to('wait_response')
         self.start = time.clock()
         self.resend_cnt = 0
         self.busy = True # not allow another command
@@ -186,7 +186,7 @@ class Tx():
     def get_response(self, command, payload):
         if not self.busy:
             return
-        if self.sm.current is not 'wait_response':
+        if self._sm.current is not 'wait_response':
             return
         self.rx_cmd = command
         if AAE_COMMAND[command][1] is None:
@@ -194,58 +194,61 @@ class Tx():
         else:
             self.resp = AAE_COMMAND[command][1](payload)
         print('_resp', command, self.resp)
-        self.sm.change_to('check_response')
+        self._sm.change_to('check_response')
 
     def exec_(self):
         if not self.busy:
             return
 
         #First Decision Table
-        if self.sm.current is 'wait_response':
+        if self._sm.current is 'wait_response':
             t1 = time.clock() - self.start
             if (t1 > 10):
-                self.sm.change_to('resending')
-        elif self.sm.current is 'check_response':
+                self._sm.change_to('resending')
+        elif self._sm.current is 'check_response':
             if self.rx_cmd is not self.tx_cmd:
-                self.sm.change_to('wait_response')
+                self._sm.change_to('wait_response')
                 return
             if self.resp:
-                self.sm.change_to('success')
+                self._sm.change_to('success')
             else:
-                self.sm.change_to('wait_response')
-        elif self.sm.current is 'success' or self.sm.current is 'failure':
+                self._sm.change_to('wait_response')
+        elif self._sm.current is 'success' or self._sm.current is 'failure':
             if self.resp is None:
-                print(self.sm.current, self.tx_cmd)
+                print(self._sm.current, self.tx_cmd)
             elif isinstance(self.resp, bool) or isinstance(self.resp, int):
-                print(self.sm.current, self.resp)
+                print(self._sm.current, self.resp)
             else:
                 resp = ''.join('{0:02x}'.format(b) for b in self.resp)
-                print(self.sm.current, self.tx_cmd, resp)
-            self.sm.change_to('idle')
+                print(self._sm.current, self.tx_cmd, resp)
+            self.last_result = self._sm.current
+            self._sm.change_to('idle')
             self.busy = False
 
 
         #Second Decision Table (have to do immediately)
-        if self.sm.current is 'resending':
+        if self._sm.current is 'resending':
             if self.resend_cnt > 0:
-                self.sm.change_to('failure')
+                self._sm.change_to('failure')
             else:
-                self.i.write(self.ba)
+                self._i.write(self.ba)
                 self.resend_cnt += 1
-                self.sm.change_to('wait_response')
+                self._sm.change_to('wait_response')
+
+    last_result = 'success'
 
 
 class Rx(Thread):
     def __init__(self, interface, parent):
         Thread.__init__(self)
-        self.i = interface
+        self._i = interface
         self.q = Queue()
         self.s_count = 0
         self._parent = parent
 
     def run(self):
-        while self.i.isOpen() and self._parent:
-            n = self.i.inWaiting()
+        while self._i.isOpen() and self._parent:
+            n = self._i.inWaiting()
             if n < 1:
                 self.s_count += 1
                 if (self.s_count > 5):
@@ -254,7 +257,7 @@ class Rx(Thread):
                 continue
 
             selfks_count = 0
-            data = self.i.read(n)
+            data = self._i.read(n)
             #print('rx_get', len(data), 'last_q', self.q.qsize())
             for d in data:
                 self.q.put(d)

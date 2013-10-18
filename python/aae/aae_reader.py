@@ -68,7 +68,8 @@ class Reader(object):
         command, payload = packet
         self._tx.get_response(command, payload)
     def send(self, packet):
-        return self._tx.send(packet)
+        while not self._tx.send(packet): pass
+        return self._tx.last_result == 'success'
 
     def read_from_tag(epc, bank=2, length=0):
         pass
@@ -77,7 +78,8 @@ class Reader(object):
         pass
 
     def set_heartbeat(on):
-        pass
+        send('SetHeartbeat', on)
+        
 
     _q_packet = Queue()
     _p = Protocol()
