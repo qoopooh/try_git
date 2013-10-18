@@ -33,17 +33,17 @@ Rectangle {
       }
       
       width: parent.width*downloader.progress
+    }
 
-      Text {
-        anchors {
-          fill: parent
-          rightMargin: 5
-        }
-        color: "black"
-        text: formatProgress(downloader.size, downloader.progress)
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignRight
+    Text {
+      anchors {
+        fill: parent
+        rightMargin: 5
       }
+      color: "black"
+      text: formatProgress(downloader.size, downloader.progress)
+      verticalAlignment: Text.AlignVCenter
+      horizontalAlignment: Text.AlignHCenter
     }
   }
 
