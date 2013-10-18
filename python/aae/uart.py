@@ -33,10 +33,10 @@ def main():
     finish = False
     s = Serial(port=port, baudrate=115200)
     reader = Reader(s)
-    reader.start()
+    reader.run = True
     t0 = time.clock()
     i = 0
-    while True:
+    while reader.run:
         reader.exec_()
         t1 = time.clock()
         if (t1 - t0 < 3):
@@ -47,7 +47,7 @@ def main():
         else:
             break
     finish = True
-    reader.stop()
+    reader.run = ~finish
 
 if __name__ == '__main__':
     main()

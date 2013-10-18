@@ -5,13 +5,29 @@ from Queue import Queue
 
 from aae import Protocol, Tx, Rx, AAE_COMMAND
 
-class Reader():
+class Reader(object):
+
     def __init__(self, interface):
         self.i = interface
         self.i.close()
         self.rx = Rx(self.i, self)
         self.rx.daemon = True
         self._tx = Tx(self.i)
+
+    @property
+    def run(self):
+        return self._run
+
+    @run.setter
+    def run(self, value):
+        if value is not False:
+            value = True
+        if value:
+            self.i.open()
+            self.rx.start()
+        else:
+            self.i.close()
+        self._run = value
 
     def start(self):
         self.i.open()
@@ -68,6 +84,7 @@ class Reader():
     _rx_buff = []
     _hb_count = 0
     _sleep = 1.
+    _run = False
 
 
 class CommandHandler():
