@@ -4,6 +4,7 @@
 import os, time
 from serial import Serial
 from aae_reader import Reader
+from threading import Timer
 
 if os.name == 'posix':
     port = '/dev/ttyACM0'
@@ -13,13 +14,13 @@ else:
 packets = [
     ('SetHeartbeat', 1),
     ('GetSerial', None),
-    ('GetReaderType', None),
+    ('GetHardwareRev', None),
+    #('GetReaderType', None),
     #('GetBootloaderRev', None),
     #('GetCurrentState', None),
     #('GetStatusRegister', None),
     #('GetAttenuation', None),
     ('InventoryCyclic', 1),
-    ('GetHardwareRev', None),
     ('InventorySingle', 1),
     ('GetSoftwareRev', None),
     ('InventoryCyclic', 0),
@@ -27,10 +28,9 @@ packets = [
     ('SetHeartbeat', 0),
 ]
 
-
 def main():
     print "ST110"
-    time.sleep(1)
+    finish = False
     s = Serial(port=port, baudrate=115200)
     reader = Reader(s)
     reader.start()
@@ -46,7 +46,8 @@ def main():
             i += 1
         else:
             break
-
+    finish = True
+    reader.stop()
 
 if __name__ == '__main__':
     main()

@@ -11,11 +11,7 @@ class Reader():
         self.i.close()
         self.rx = Rx(self.i, self)
         self.rx.daemon = True
-        self.tx = Tx(self.i)
-        self.rx_buff = []
-        self.q_packet = Queue()
-        self.p = Protocol()
-        self.hb_count = 0
+        self._tx = Tx(self.i)
 
     def start(self):
         self.i.open()
@@ -26,32 +22,54 @@ class Reader():
 
     def exec_(self):
         while self.rx.q.qsize():
-            self.rx_buff.append(ord(self.rx.q.get()))
-        while (len(self.rx_buff) > 9):
-            res = self.p.extract(self.rx_buff)
+            self._rx_buff.append(ord(self.rx.q.get()))
+        while (len(self._rx_buff) > 9):
+            res = self._p.extract(self._rx_buff)
             if res[0]:
-                self.q_packet.put(res[1])
-                print ('exec', res[1][0], self.q_packet.qsize()),
-            self.rx_buff = self.rx_buff[res[2]:]
+                self._q_packet.put(res[1])
+                print ('exec', res[1][0], self._q_packet.qsize()),
+            self._rx_buff = self._rx_buff[res[2]:]
 
             print (';') # new line
-#if not res[2]:
-#break
 
-        if self.q_packet.qsize():
-            packet = self.q_packet.get()
+        if self._q_packet.qsize():
+            packet = self._q_packet.get()
             if packet[0] is 'HeartbeatInt':
-                self.hb_count += 1
-                if self.hb_count % 5 is 0:
-                    print('hb', self.hb_count),
+                self._hb_count += 1
+                if self._hb_count % 5 is 0:
+                    print('hb', self._hb_count),
             else:
                 self.get_response(packet)
-        self.tx.exec_()
+            self._sleep = 1.0
+        else:
+            if (self._sleep < 50):
+                self._sleep += 1
+            time.sleep(self._sleep / 100)
+
+        self._tx.exec_()
 
     def get_response(self, packet):
         command, payload = packet
-        self.tx.get_response(command, payload)
+        self._tx.get_response(command, payload)
     def send(self, packet):
-        return self.tx.send(packet)
+        return self._tx.send(packet)
 
+    def read_from_tag(epc, bank=2, length=0):
+        pass
+
+    def write_to_tag(epc, data, bank=3):
+        pass
+
+    def set_heartbeat(on):
+        pass
+
+    _q_packet = Queue()
+    _p = Protocol()
+    _rx_buff = []
+    _hb_count = 0
+    _sleep = 1.
+
+
+class CommandHandler():
+    pass
 

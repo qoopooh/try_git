@@ -24,6 +24,9 @@ def response_data(payload):
 def response_epc_cyclic(payload):
     return len(payload)
 
+def response_epc_single(payload):
+    return len(payload)
+
 
 AAE_COMMAND = { # code, response
     'GetSerial':            ((0x01, 0x01), response_data),
