@@ -3,7 +3,7 @@
 import time
 from Queue import Queue
 
-from aae import Protocol, Tx, Rx
+from aae import Protocol, Tx, Rx, AAE_COMMAND
 
 class Reader():
     def __init__(self, interface):
@@ -45,9 +45,12 @@ class Reader():
                 if self.hb_count % 5 is 0:
                     print('hb', self.hb_count),
             else:
-                self.tx.get_response(packet)
+                self.get_response(packet)
         self.tx.exec_()
 
+    def get_response(self, packet):
+        command, payload = packet
+        self.tx.get_response(command, payload)
     def send(self, packet):
         return self.tx.send(packet)
 

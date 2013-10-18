@@ -155,8 +155,8 @@ class Tx():
                 'wait_response': {'resending', 'check_response'},
                 'check_response': {'resending', 'wait_response', 'success'},
                 'resending': {'wait_response', 'failure'},
-                'success': {'idle', 'sending', 'check_response'},
-                'failure': {'idle', 'sending', 'check_response'},
+                'success': {'idle', 'sending'},
+                'failure': {'idle', 'sending'},
             }
         })
         self.resp = None
@@ -180,27 +180,18 @@ class Tx():
         self.busy = True # not allow another command
         return True
 
-    def get_response(self, data):
+    def get_response(self, command, payload):
         if not self.busy:
             return
-        command, payload = data
-
+        if self.sm.current is not 'wait_response':
+            return
         self.rx_cmd = command
         if AAE_COMMAND[command][1] is None:
             self.resp = None
         else:
             self.resp = AAE_COMMAND[command][1](payload)
-            c1 = self.sm.current
-#self.sm.change_to('check_response')
-#if self.sm.current is not 'check_response':
-            try:
-                self.sm.change_to('check_response')
-            except:
-                print('current', c1)
-                raise Error
-                
-            print('_resp', command),
-
+        print('_resp', command, self.resp)
+        self.sm.change_to('check_response')
 
     def exec_(self):
         if not self.busy:
