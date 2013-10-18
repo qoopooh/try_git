@@ -3,7 +3,6 @@
 import os, sys, urllib
 from threading import Thread
 
-#from PySide import QtCore, QtGui, QtDeclarative
 from PySide.QtCore import QObject, Slot, Signal, Property
 from PySide.QtGui import QApplication
 from PySide.QtDeclarative import QDeclarativeView
@@ -21,9 +20,9 @@ class Downloader(QObject):
 
     def _download(self):
         def reporthook(pos, block, total):
-            if self.size != total: #######
+            if self.size != total: # one time setting
                 self._size = total
-                self.on_size.emit()
+                self.on_size.emit() # notify the qml
             self.progress = float(pos*block)/float(total)
 
         urllib.urlretrieve(self._url, self._filename, reporthook)
@@ -64,7 +63,7 @@ class Downloader(QObject):
     progress = Property(float, _get_progress, _set_progress, notify=on_progress)
     running = Property(bool, _get_running, _set_running, notify=on_running)
     filename = Property(str, _get_filename, notify=on_filename)
-    size = Property(int, _get_size, notify=on_size)
+    size = Property(int, _get_size, notify=on_size) # notify for QML
 
 if __name__ == '__main__':
     d = Downloader("http://www.advancedidasia.com/pdf/Reader_PR-510.pdf")
