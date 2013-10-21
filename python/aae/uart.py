@@ -15,16 +15,17 @@ packets = [
     ('SetHeartbeat', 1),
     ('GetSerial', None),
     ('GetHardwareRev', None),
-    #('GetReaderType', None),
-    #('GetBootloaderRev', None),
-    #('GetCurrentState', None),
-    #('GetStatusRegister', None),
-    #('GetAttenuation', None),
-    ('InventoryCyclic', 1),
+    ('GetReaderType', None),
+    ('GetBootloaderRev', None),
+    ('GetCurrentState', None),
+    ('GetStatusRegister', None),
+    ('GetAttenuation', None),
+#('InventoryCyclic', 1),
+    ('InventorySingle', 1),
     ('InventorySingle', 1),
     ('GetSoftwareRev', None),
-    ('InventoryCyclic', 0),
-    ('SetHeartbeat', 1),
+#('InventoryCyclic', 0),
+#('SetHeartbeat', 1),
     ('SetHeartbeat', 0),
 ]
 
@@ -39,7 +40,7 @@ def main():
     while reader.run:
         reader.exec_()
         t1 = time.clock()
-        if (t1 - t0 < 3):
+        if (t1 - t0 < 2):
             continue
         t0 = t1
         if i < len(packets) and reader.send(packets[i]):

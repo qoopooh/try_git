@@ -19,13 +19,29 @@ def response_success(payload):
     return payload[0] is 0
 
 def response_data(payload):
-    return payload
+    return tuple(payload)
 
 def response_epc_cyclic(payload):
     return len(payload)
 
 def response_epc_single(payload):
-    return len(payload)
+    data_length = len(payload)
+    status, id_count, packet_id_count = payload[:3]
+    if status != 0:
+        return status
+    
+    out = []
+    if id_count < 1:
+        return tuple(out)
+
+    i = 3
+    while(len(out) < id_count):
+        len_offset, id_len = payload[i], payload[i+2]
+        i += 3 # Skip StartByte-TagID and ID Length
+        out.append(tuple(payload[i:(i + id_len)]))
+        i += id_len
+
+    return tuple(out)
 
 
 AAE_COMMAND = { # code, response
@@ -46,7 +62,7 @@ AAE_COMMAND = { # code, response
     'SaveSettings':         ((0x03, 0x21), None),
     'SetParam':             ((0x03, 0x30), None),
     'GetParam':             ((0x03, 0x31), response_data),
-    'InventorySingle':      ((0x50, 0x01), response_data),
+    'InventorySingle':      ((0x50, 0x01), response_epc_single),
     'InventoryCyclic':      ((0x50, 0x02), response_success),
     'ReadFromTag':          ((0x50, 0x03), response_data),
     'WriteToTag':           ((0x50, 0x04), response_success),
@@ -218,8 +234,16 @@ class Tx():
                 print(self._sm.current, self.tx_cmd)
             elif isinstance(self.resp, bool) or isinstance(self.resp, int):
                 print(self._sm.current, self.resp)
-            else:
-                resp = ''.join('{0:02x}'.format(b) for b in self.resp)
+            else: # Should be list or tuple
+                if isinstance(self.resp[0], int):
+                    resp = ''.join('{0:02x}'.format(b) for b in self.resp)
+                else: # Should be list or tuple in sub-item
+                    resp = ''
+                    for lst in self.resp:
+                        resp += ''.join('{0:02x}'.format(b) for b in lst)
+                        resp += '\n'
+
+
                 print(self._sm.current, self.tx_cmd, resp)
             self.last_result = self._sm.current
             self._sm.change_to('idle')
