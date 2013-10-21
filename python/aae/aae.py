@@ -22,7 +22,16 @@ def response_data(payload):
     return tuple(payload)
 
 def response_epc_cyclic(payload):
-    return len(payload)
+    id_count = payload[0]
+    out = []
+    i = 1
+    while len(out) < id_count:
+        id_len = payload[i]
+        i += 1
+        out.append(tuple(payload[i:(i+id_len)]))
+        i += id_len
+
+    return tuple(out)
 
 def response_epc_single(payload):
     data_length = len(payload)
@@ -70,7 +79,12 @@ AAE_COMMAND = { # code, response
     'InventoryCyclicInt':   ((0x90, 0x02), response_epc_cyclic),
 }
 
-
+def get_payload_out(command, payload):
+    if AAE_COMMAND[command][1] is None:
+        resp = None
+    else:
+        resp = AAE_COMMAND[command][1](payload)
+    return resp
 
 class Protocol():
     """To build or extract AAE protocol"""
@@ -205,11 +219,8 @@ class Tx():
         if self._sm.current is not 'wait_response':
             return
         self.rx_cmd = command
-        if AAE_COMMAND[command][1] is None:
-            self.resp = None
-        else:
-            self.resp = AAE_COMMAND[command][1](payload)
-        print('_resp', command, self.resp)
+        self.resp = get_payload_out(command, payload)
+        print('Tx.get_response', command, self.resp)
         self._sm.change_to('check_response')
 
     def exec_(self):
@@ -241,10 +252,9 @@ class Tx():
                     resp = ''
                     for lst in self.resp:
                         resp += ''.join('{0:02x}'.format(b) for b in lst)
-                        resp += '\n'
-
-
+                        resp += '|'
                 print(self._sm.current, self.tx_cmd, resp)
+
             self.last_result = self._sm.current
             self._sm.change_to('idle')
             self.busy = False
@@ -263,6 +273,7 @@ class Tx():
 
 
 class Rx(Thread):
+
     def __init__(self, interface, parent):
         Thread.__init__(self)
         self._i = interface
@@ -272,7 +283,10 @@ class Rx(Thread):
 
     def run(self):
         while self._i.isOpen() and self._parent:
-            n = self._i.inWaiting()
+            try:
+                n = self._i.inWaiting()
+            except:
+                continue
             if n < 1:
                 self.s_count += 1
                 if (self.s_count > 5):

@@ -12,21 +12,21 @@ else:
     port = 'COM4'
 
 packets = [
-    ('SetHeartbeat', 1),
-    ('GetSerial', None),
-    ('GetHardwareRev', None),
-    ('GetReaderType', None),
-    ('GetBootloaderRev', None),
-    ('GetCurrentState', None),
-    ('GetStatusRegister', None),
-    ('GetAttenuation', None),
+    #('SetHeartbeat', 1),
+    #('GetSerial', None),
+    #('GetHardwareRev', None),
+    #('GetReaderType', None),
+    #('GetBootloaderRev', None),
+    #('GetCurrentState', None),
+    #('GetStatusRegister', None),
+    #('GetAttenuation', None),
 #('InventoryCyclic', 1),
     ('InventorySingle', 1),
     ('InventorySingle', 1),
-    ('GetSoftwareRev', None),
+    #('GetSoftwareRev', None),
 #('InventoryCyclic', 0),
-#('SetHeartbeat', 1),
-    ('SetHeartbeat', 0),
+    #('SetHeartbeat', 1),
+    #('SetHeartbeat', 0),
 ]
 
 def main():
