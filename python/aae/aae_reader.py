@@ -49,7 +49,6 @@ class Reader(object):
             pass #print (';') # new line
 
         self._check_q_packet()
-
         self._tx.exec_()
 
     def _check_q_packet(self):
@@ -78,15 +77,15 @@ class Reader(object):
         while not self._tx.send(packet): pass
         return self._tx.last_result == 'success'
 
-    def read_from_tag(epc, bank=2, length=0):
+    def read_from_tag(bank=2, length=0, epc=None):
         pass
 
-    def write_to_tag(epc, data, bank=3):
+    def write_to_tag(data, bank=3, epc=None):
         pass
 
     def set_heartbeat(on):
         send('SetHeartbeat', on)
-        
+
 
     _q_packet = Queue()
     _p = Protocol()
