@@ -3,7 +3,7 @@
 
 import os, time
 from serial import Serial
-from aae_reader import Reader
+from aaereader import Reader
 from threading import Timer
 
 if os.name == 'posix':
