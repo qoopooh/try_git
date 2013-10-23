@@ -6,6 +6,7 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
+from kivy.clock import Clock
 
 
 if os.name == 'nt': #sys.platform == 'win32':
@@ -27,6 +28,7 @@ Builder.load_string("""
     padding: [5, 3, 3, 3]
 
     txt_inpt: txt_inpt
+    f_btn_inventory: _btn_inventory
     f_btn_setting: _btn_setting
     f_btn_quit: _btn_quit
 
@@ -36,8 +38,8 @@ Builder.load_string("""
         spacing: 3
 
         BigBtn:
-            id: f_but
-            text: root.set_btn_text()
+            id: _btn_inventory
+            text: 'Message'
         BigBtn:
             id: _btn_setting
             text: 'Setting'
@@ -47,8 +49,8 @@ Builder.load_string("""
 
     TextInput:
         id: txt_inpt
-        text: f_but.state
-        on_text: root.check_status(f_but)
+        text: _btn_inventory.state
+        on_text: root.check_status(_btn_inventory)
 
 """)
 
@@ -61,12 +63,16 @@ class Test(BoxLayout):
         self.app = app
         self.f_btn_setting.bind(on_release=self.app.open_settings)
         self.f_btn_quit.bind(on_release=self.quit)
+        Clock.schedule_interval(self.cb, 1)
 
     def check_status(self, btn):
         print('button state is: {state}'.format(state=btn.state))
 
-    def set_btn_text(self):
-        return 'text'
+    def cb(self, clk):
+        if self.f_btn_inventory.text != 'Message':
+            self.f_btn_inventory.text = 'Message'
+        else:
+            self.f_btn_inventory.text = 'Toggle'
         
     def quit(self, btn):
         print('Bye', btn)
