@@ -23,28 +23,33 @@ Builder.load_string("""
     markup: True
 
 <Test>:
+    spacing: 5
+    padding: [5, 3, 3, 3]
+
     txt_inpt: txt_inpt
     f_btn_setting: _btn_setting
     f_btn_quit: _btn_quit
 
-    BigBtn:
-        id: f_but
-        text: root.set_btn_text()
-
-    TextInput:
-        id: txt_inpt
-        text: f_but.state
-        on_text: root.check_status(f_but)
-
     BoxLayout:
+        size_hint: (.4, 1)
         orientation: 'vertical'
+        spacing: 3
 
+        BigBtn:
+            id: f_but
+            text: root.set_btn_text()
         BigBtn:
             id: _btn_setting
             text: 'Setting'
         BigBtn:
             id: _btn_quit
             text: 'Quit'
+
+    TextInput:
+        id: txt_inpt
+        text: f_but.state
+        on_text: root.check_status(f_but)
+
 """)
 
 class Test(BoxLayout):
@@ -70,6 +75,7 @@ class Test(BoxLayout):
 class InventoryApp(App):
 
     #use_kivy_settings = False
+    icon = 'Logo_only.ico'
 
     def build_config(self, config):
         config.setdefaults('section1', {
