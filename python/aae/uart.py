@@ -13,19 +13,26 @@ else:
 
 packets = [
     ('SetHeartbeat', 1),
-    ('GetSerial', None),
-    ('GetHardwareRev', None),
-    ('GetReaderType', None),
-    ('InventoryCyclic', 1),
-    ('GetBootloaderRev', None),
-    ('GetCurrentState', None),
-    ('GetStatusRegister', None),
-    ('GetAttenuation', None),
+    #('GetSerial', None),
+    #('GetHardwareRev', None),
+    #('GetReaderType', None),
+    #('InventoryCyclic', 1),
+    #('GetBootloaderRev', None),
+    #('GetCurrentState', None),
+    #('GetStatusRegister', None),
+    #('GetAttenuation', None),
     #('InventorySingle', 1),
     #('InventorySingle', 1),
-    ('GetSoftwareRev', None),
-    ('InventoryCyclic', 0),
+    #('GetSoftwareRev', None),
+    #('InventoryCyclic', 0),
     ('SetHeartbeat', 1),
+    ('SetHeartbeat', 0),
+    ('SetHeartbeat', 0),
+    ('GetSoftwareRev', None),
+    ('GetSoftwareRev', None),
+    ('GetSoftwareRev', None),
+    ('SetHeartbeat', 0),
+    ('SetHeartbeat', 0),
     ('SetHeartbeat', 0),
 ]
 
@@ -40,7 +47,7 @@ def main():
     while reader.run:
         reader.exec_()
         t1 = time.clock()
-        if (t1 - t0 < 3):
+        if (t1 - t0 < 2):
             continue
         t0 = t1
         if i < len(packets):
@@ -48,12 +55,13 @@ def main():
                 i += 1
             else:
                 print('resend', packets[i][0])
+                if reader.resend():
+                    i += 1
         else:
             print('end of packets')
             break
     finish = True
     reader.run = not finish
-    print('fin')
 
 if __name__ == '__main__':
     main()

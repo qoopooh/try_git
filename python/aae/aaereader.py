@@ -8,11 +8,11 @@ from aae import Protocol, Tx, Rx, get_payload_out
 class Reader(object):
 
     def __init__(self, interface):
-        self.i = interface
-        self.i.close()
-        self._rx = Rx(self.i, self)
+        self._i = interface
+        self._i.close()
+        self._rx = Rx(self._i, self)
         self._rx.daemon = True
-        self._tx = Tx(self.i)
+        self._tx = Tx(self._i)
 
     @property
     def run(self):
@@ -23,36 +23,36 @@ class Reader(object):
         if value is not False:
             value = True
         if value:
-            self.i.open()
+            self._i.open()
             self._rx.start()
         else:
-            self.i.close()
+            self._i.close()
+            self._rx.join()
         self._run = value
-
-    def start(self):
-        self.i.open()
-        self._rx.start()
-
-    def stop(self):
-        self.i.close()
 
     def exec_(self):
         try:
-            self._rx_buff.append(ord(self._rx.q.get(block = True, timeout = 0.1)))
+            b = self._rx.q.get(block = True, timeout = 0.005)
+            self._rx_buff.append(ord(b))
+            n = self._rx.q.qsize()
         except:
+            #print('TO rx.q.get()')
             return
 
-        while self._rx.q.qsize():
+        while n:
+            n -= 1
             self._rx_buff.append(ord(self._rx.q.get()))
 
         while (len(self._rx_buff) > 9):
             res = self._p.extract(self._rx_buff)
             if res[0]:
-                self.get_response(res[1])
+                self._get_response(res[1])
                 self._tx.exec_()
+            else:
+                print('failed msg extraction')
             self._rx_buff = self._rx_buff[res[2]:]
 
-    def get_response(self, packet):
+    def _get_response(self, packet):
         command, payload = packet
         self._tx.get_response(command, payload)
         resp = get_payload_out(command, payload)
@@ -60,7 +60,12 @@ class Reader(object):
             print('ici', resp)
 
     def send(self, packet):
+        self._sending_packet = packet
         return self._tx.send(packet)
+        
+    def resend(self):
+        self._tx.clear()
+        return self._tx.send(self._sending_packet)
 
     def read_from_tag(bank=2, length=0, epc=None):
         pass

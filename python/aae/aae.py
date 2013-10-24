@@ -86,6 +86,15 @@ def get_payload_out(command, payload):
         resp = AAE_COMMAND[command][1](payload)
     return resp
 
+
+class InvalidStateError(Exception):
+    '''A change to an invalid state was attempted'''
+    def __init__(self, message, errors=None):
+        super(InvalidStateError, self).__init__(message)
+        self.message = message
+        self.errors = errors
+
+
 class Protocol():
     """To build or extract AAE protocol"""
 
@@ -179,7 +188,6 @@ class Tx():
 
     def __init__(self, interface):
         self._i = interface
-        self.busy = False
         self._sm = SimpleFSM({
             'initial': 'idle',
             'transitions': {
@@ -192,7 +200,15 @@ class Tx():
                 'failure': {'idle', 'sending'},
             }
         })
+        self.clear()
+
+    def clear(self):
+        self.busy = False
         self.resp = None
+        try:
+            self._sm.change_to('idle')
+        except:
+            self._sm.force_change_to('idle')
 
     def send(self, packet):
         if self.busy:
@@ -214,8 +230,6 @@ class Tx():
         return True
 
     def get_response(self, command, payload):
-        if not self.busy:
-            return
         if self._sm.current is not 'wait_response':
             return
         self.rx_cmd = command
@@ -232,6 +246,7 @@ class Tx():
             t1 = time.clock() - self.start
             if (t1 > 10):
                 self._sm.change_to('resending')
+                print('sm', self._sm.current),
         elif self._sm.current is 'check_response':
             if self.rx_cmd is not self.tx_cmd:
                 self._sm.change_to('wait_response')
@@ -242,9 +257,9 @@ class Tx():
                 self._sm.change_to('wait_response')
         elif self._sm.current is 'success' or self._sm.current is 'failure':
             if self.resp is None:
-                print(self._sm.current, self.tx_cmd)
+                print('judge', self._sm.current, self.tx_cmd),
             elif isinstance(self.resp, bool) or isinstance(self.resp, int):
-                print(self._sm.current, self.resp)
+                print('judge', self._sm.current, self.resp),
             else: # Should be list or tuple
                 if len(self.resp) < 1:
                     resp = ''
@@ -255,7 +270,7 @@ class Tx():
                     for lst in self.resp:
                         resp += ''.join('{0:02x}'.format(b) for b in lst)
                         resp += '|'
-                print(self._sm.current, self.tx_cmd, resp)
+                print('judge', self._sm.current, self.tx_cmd, resp),
 
             self.last_result = self._sm.current
             self._sm.change_to('idle')
@@ -264,6 +279,7 @@ class Tx():
 
         #Second Decision Table (have to do immediately)
         if self._sm.current is 'resending':
+            print('Resending')
             if self.resend_cnt > 0:
                 self._sm.change_to('failure')
             else:
