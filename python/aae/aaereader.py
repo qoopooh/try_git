@@ -37,34 +37,20 @@ class Reader(object):
         self.i.close()
 
     def exec_(self):
+        try:
+            self._rx_buff.append(ord(self._rx.q.get(block = True, timeout = 0.1)))
+        except:
+            return
+
         while self._rx.q.qsize():
             self._rx_buff.append(ord(self._rx.q.get()))
+
         while (len(self._rx_buff) > 9):
             res = self._p.extract(self._rx_buff)
             if res[0]:
-                self._q_packet.put(res[1])
-                pass #print ('put', res[1][0], self._q_packet.qsize()),
+                self.get_response(res[1])
+                self._tx.exec_()
             self._rx_buff = self._rx_buff[res[2]:]
-
-            pass #print (';') # new line
-
-        self._check_q_packet()
-        self._tx.exec_()
-
-    def _check_q_packet(self):
-        if self._q_packet.qsize():
-            packet = self._q_packet.get()
-            if packet[0] is 'HeartbeatInt':
-                self._hb_count += 1
-                if self._hb_count % 5 is 0:
-                    pass #print('hb', self._hb_count),
-            else:
-                self.get_response(packet)
-            self._sleep = 1.0
-        else:
-            if (self._sleep < 50):
-                self._sleep += 1
-            time.sleep(self._sleep / 100)
 
     def get_response(self, packet):
         command, payload = packet
@@ -74,8 +60,7 @@ class Reader(object):
             print('ici', resp)
 
     def send(self, packet):
-        while not self._tx.send(packet): pass
-        return self._tx.last_result == 'success'
+        return self._tx.send(packet)
 
     def read_from_tag(bank=2, length=0, epc=None):
         pass

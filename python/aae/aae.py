@@ -246,7 +246,9 @@ class Tx():
             elif isinstance(self.resp, bool) or isinstance(self.resp, int):
                 print(self._sm.current, self.resp)
             else: # Should be list or tuple
-                if isinstance(self.resp[0], int):
+                if len(self.resp) < 1:
+                    resp = ''
+                elif isinstance(self.resp[0], int):
                     resp = ''.join('{0:02x}'.format(b) for b in self.resp)
                 else: # Should be list or tuple in sub-item
                     resp = ''
@@ -283,20 +285,13 @@ class Rx(Thread):
 
     def run(self):
         while self._i.isOpen() and self._parent:
+            data = [self._i.read()]
             try:
                 n = self._i.inWaiting()
             except:
                 continue
-            if n < 1:
-                self.s_count += 1
-                if (self.s_count > 5):
-                    self.s_count = 0
-                    time.sleep(0.02)
-                continue
-
-            selfks_count = 0
-            data = self._i.read(n)
-            #print('rx_get', len(data), 'last_q', self.q.qsize())
+            if n > 0:
+                data.extend(self._i.read(n))
             for d in data:
                 self.q.put(d)
 
