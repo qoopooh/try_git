@@ -53,10 +53,10 @@ def main():
         if i < len(packets):
             if reader.send(packets[i]):
                 i += 1
-            else:
-                print('resend', packets[i][0])
-                if reader.resend():
-                    i += 1
+            #else:
+                #print('resend', packets[i][0])
+                #if reader.resend():
+                    #i += 1
         else:
             print('end of packets')
             break

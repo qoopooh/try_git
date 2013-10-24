@@ -205,6 +205,7 @@ class Tx():
     def clear(self):
         self.busy = False
         self.resp = None
+        self._ba = []
         try:
             self._sm.change_to('idle')
         except:
@@ -216,8 +217,8 @@ class Tx():
         self._sm.change_to('sending')
         command, payload = packet
         p = Protocol()
-        self.ba = bytearray(p.build(command, payload))
-        self._serial.write(self.ba)
+        self._ba = bytearray(p.build(command, payload))
+        self._serial.write(self._ba)
         if AAE_COMMAND[command][1] is None:
             self._sm.change_to('success')
             return True
@@ -244,7 +245,7 @@ class Tx():
         #First Decision Table
         if self._sm.current is 'wait_response':
             t1 = time.clock() - self.start
-            if (t1 > 10):
+            if (t1 > 2):
                 self._sm.change_to('resending')
                 print('sm', self._sm.current),
         elif self._sm.current is 'check_response':
@@ -283,7 +284,7 @@ class Tx():
             if self.resend_cnt > 0:
                 self._sm.change_to('failure')
             else:
-                self._serial.write(self.ba)
+                self._serial.write(self._ba)
                 self.resend_cnt += 1
                 self._sm.change_to('wait_response')
 
@@ -292,23 +293,28 @@ class Tx():
 
 class Rx(Thread):
 
-    def __init__(self, serial_instance):
+    def __init__(self, serial_instance, callback):
         super(Rx, self).__init__()
         self._serial = serial_instance
         self.q = Queue()
         self.s_count = 0
 
     def run(self):
+        p = Protocol()
+        data = []
         while self._serial.isOpen():
-            data = [self._serial.read()]
+            data.extend(self._serial.read())
             try:
                 n = self._serial.inWaiting()
             except:
                 continue
             if n > 0:
                 data.extend(self._serial.read(n))
-            for d in data:
-                self.q.put(d)
+            while len(data) > 9:
+                res = p.extract(data)
+                if res[0]:
+                    self.q.put(res[1])
+                data = data[res[2]:]
 
 
 def print_hex(data, p=False):
@@ -318,7 +324,7 @@ def print_hex(data, p=False):
     return s
 
 def main():
-    p = Protocol();
+    p = Protocol()
     assert(print_hex(p.build('GetSerial')) == '41 41 45 01 01 01 02 00 04 42')
     assert(print_hex(p.build('InventoryCyclic', [0])) == '41 41 45 01 50 02 02 01 03 00 04 12')
     assert(print_hex(p.build('InventoryCyclic', 1)) == '41 41 45 01 50 02 02 01 03 01 04 13')

@@ -10,7 +10,7 @@ class Reader(object):
     def __init__(self, interface):
         self._i = interface
         self._i.close()
-        self._rx = Rx(self._i, self)
+        self._rx = Rx(self._i)
         self._rx.daemon = True
         self._tx = Tx(self._i)
 
@@ -32,25 +32,12 @@ class Reader(object):
 
     def exec_(self):
         try:
-            b = self._rx.q.get(block = True, timeout = 0.005)
-            self._rx_buff.append(ord(b))
-            n = self._rx.q.qsize()
+            packet = self._rx.q.get(block = True, timeout = 0.005)
         except:
             #print('TO rx.q.get()')
-            return
-
-        while n:
-            n -= 1
-            self._rx_buff.append(ord(self._rx.q.get()))
-
-        while (len(self._rx_buff) > 9):
-            res = self._p.extract(self._rx_buff)
-            if res[0]:
-                self._get_response(res[1])
-                self._tx.exec_()
-            else:
-                print('failed msg extraction')
-            self._rx_buff = self._rx_buff[res[2]:]
+            pass
+        self._get_response(packet)
+        self._tx.exec_()
 
     def _get_response(self, packet):
         command, payload = packet
@@ -76,12 +63,6 @@ class Reader(object):
     def set_heartbeat(on):
         send('SetHeartbeat', on)
 
-
-    _q_packet = Queue()
-    _p = Protocol()
-    _rx_buff = []
-    _hb_count = 0
-    _sleep = 1.
     _run = False
 
 
