@@ -186,8 +186,8 @@ class Protocol():
 
 class Tx():
 
-    def __init__(self, interface):
-        self._i = interface
+    def __init__(self, serial_instance):
+        self._serial = serial_instance
         self._sm = SimpleFSM({
             'initial': 'idle',
             'transitions': {
@@ -217,7 +217,7 @@ class Tx():
         command, payload = packet
         p = Protocol()
         self.ba = bytearray(p.build(command, payload))
-        self._i.write(self.ba)
+        self._serial.write(self.ba)
         if AAE_COMMAND[command][1] is None:
             self._sm.change_to('success')
             return True
@@ -283,7 +283,7 @@ class Tx():
             if self.resend_cnt > 0:
                 self._sm.change_to('failure')
             else:
-                self._i.write(self.ba)
+                self._serial.write(self.ba)
                 self.resend_cnt += 1
                 self._sm.change_to('wait_response')
 
@@ -292,22 +292,21 @@ class Tx():
 
 class Rx(Thread):
 
-    def __init__(self, interface, parent):
-        Thread.__init__(self)
-        self._i = interface
+    def __init__(self, serial_instance):
+        super(Rx, self).__init__()
+        self._serial = serial_instance
         self.q = Queue()
         self.s_count = 0
-        self._parent = parent
 
     def run(self):
-        while self._i.isOpen() and self._parent:
-            data = [self._i.read()]
+        while self._serial.isOpen():
+            data = [self._serial.read()]
             try:
-                n = self._i.inWaiting()
+                n = self._serial.inWaiting()
             except:
                 continue
             if n > 0:
-                data.extend(self._i.read(n))
+                data.extend(self._serial.read(n))
             for d in data:
                 self.q.put(d)
 
