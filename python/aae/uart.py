@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, time
+import os, time, sys
 from serial import Serial
 from aaereader import Reader
 from threading import Timer
@@ -21,8 +21,11 @@ packets = [
     ('GetCurrentState', None),
     ('GetStatusRegister', None),
     ('GetAttenuation', None),
-    #('InventorySingle', 1),
-    #('InventorySingle', 1),
+    ('InventorySingle', 1),
+    ('InventorySingle', 1),
+    ('InventorySingle', 1),
+    ('InventorySingle', 1),
+    ('InventorySingle', 1),
     ('GetSoftwareRev', None),
     ('InventoryCyclic', 0),
     ('SetHeartbeat', 1),
@@ -45,21 +48,24 @@ def main():
     t0 = time.clock()
     i = 0
     while reader.run:
-        reader.exec_()
+        out = reader.exec_()
+        if out is not None:
+            print(out)
+
         t1 = time.clock()
         if (t1 - t0 < 2):
             continue
+
         t0 = t1
         if i < len(packets):
             if reader.send(packets[i]):
                 i += 1
-            #else:
-                #print('resend', packets[i][0])
-                #if reader.resend():
-                    #i += 1
+            else:
+                sys.stderr.write('resend {pkt}\n'.format(pkt=packets[i][0]))
         else:
             print('end of packets')
             break
+
     finish = True
     reader.run = not finish
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import serial, time
+import serial, time, sys
 from threading import Thread
 from Queue import Queue
 
@@ -236,7 +236,8 @@ class Tx():
             return
         self.rx_cmd = command
         self.resp = get_payload_out(command, payload)
-        print('Tx.get_response', command, self.resp),
+        if (debug):
+            print('Tx.get_response', command, self.resp),
         self._sm.change_to('check_response')
 
     def exec_(self):
@@ -253,15 +254,17 @@ class Tx():
             if self.rx_cmd is not self.tx_cmd:
                 self._sm.change_to('wait_response')
                 return
-            if self.resp:
+            if self.resp is not None:
                 self._sm.change_to('success')
             else:
                 self._sm.change_to('wait_response')
         elif self._sm.current is 'success' or self._sm.current is 'failure':
             if self.resp is None:
-                print('judge', self._sm.current, self.tx_cmd)
+                pass
+                #print('judge', self._sm.current, self.tx_cmd)
             elif isinstance(self.resp, bool) or isinstance(self.resp, int):
-                print('judge', self._sm.current, self.resp)
+                pass
+                #print('judge', self._sm.current, self.resp)
             else: # Should be list or tuple
                 if len(self.resp) < 1:
                     resp = ''
@@ -272,16 +275,16 @@ class Tx():
                     for lst in self.resp:
                         resp += ''.join('{0:02x}'.format(b) for b in lst)
                         resp += '|'
-                print('judge', self._sm.current, self.tx_cmd, resp)
+                        #print('judge', self._sm.current, self.tx_cmd, resp)
+
 
             self.last_result = self._sm.current
             self._sm.change_to('idle')
             self.busy = False
 
 
-        #Second Decision Table (have to do immediately)
+        # Second Decision Table (have to do immediately)
         if self._sm.current is 'resending':
-            print('Resending')
             if self.resend_cnt > 0:
                 self._sm.change_to('failure')
             else:
@@ -306,8 +309,8 @@ class Rx(Thread):
         data = []
         f_rcv = False
         while self._serial.isOpen():
-            data.extend(ord(b) for b in self._serial.read())
             try:
+                data.extend(ord(b) for b in self._serial.read())
                 n = self._serial.inWaiting()
                 if n > 0:
                     data.extend(ord(b) for b in self._serial.read(n))
@@ -321,7 +324,7 @@ class Rx(Thread):
                     t = tuple(res[1])
                     self.q.put(t)
                 else:
-                    print('res failed', res, len(data), data),
+                    sys.stderr.write('res failed: {res}\n'.format(res=res))
                 data = data[res[2]:]
 
             if f_rcv and self._cb is not None:

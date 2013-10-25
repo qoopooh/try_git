@@ -32,20 +32,26 @@ class Reader(object):
         self._run = value
 
     def exec_(self):
+        out = None
+
         try:
             self._rcv_packet = self._rx.q.get(block = True, timeout = 0.005)
         except Empty:
-            pass
-        if len(self._rcv_packet) == 2:
-            self._get_response(self._rcv_packet)
+            self._rcv_packet = None
+
+        if self._rcv_packet is not None:
+            out = self._get_response(self._rcv_packet)
         self._tx.exec_()
+
+        return out
 
     def _get_response(self, packet):
         command, payload = packet
         self._tx.get_response(command, payload)
         resp = get_payload_out(command, payload)
         if command is 'InventoryCyclicInt':
-            print('ici', resp)
+            print(command, resp)
+        return command, resp
 
     def send(self, packet):
         self._sending_packet = packet
