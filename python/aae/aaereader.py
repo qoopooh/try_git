@@ -3,7 +3,7 @@
 import time
 from Queue import Queue, Empty
 
-from aae import Protocol, Tx, Rx, get_payload_out
+from aae import Protocol, Tx, Rx, get_command_data
 
 class Reader(object):
 
@@ -33,25 +33,22 @@ class Reader(object):
 
     def exec_(self):
         out = None
-
         try:
             self._rcv_packet = self._rx.q.get(block = True, timeout = 0.005)
         except Empty:
             self._rcv_packet = None
-
         if self._rcv_packet is not None:
             out = self._get_response(self._rcv_packet)
         self._tx.exec_()
-
         return out
 
     def _get_response(self, packet):
         command, payload = packet
-        self._tx.get_response(command, payload)
-        resp = get_payload_out(command, payload)
+        command_data = get_command_data(command, payload)
+        self._tx.get_response(command, command_data)
         if command is 'InventoryCyclicInt':
-            print(command, resp)
-        return command, resp
+            print(command, command_data)
+        return command, command_data
 
     def send(self, packet):
         self._sending_packet = packet

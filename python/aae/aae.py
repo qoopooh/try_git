@@ -79,12 +79,12 @@ AAE_COMMAND = { # code, response
     'InventoryCyclicInt':   ((0x90, 0x02), response_epc_cyclic),
 }
 
-def get_payload_out(command, payload):
+def get_command_data(command, payload):
     if AAE_COMMAND[command][1] is None:
-        resp = None
+        data = None
     else:
-        resp = AAE_COMMAND[command][1](payload)
-    return resp
+        data = AAE_COMMAND[command][1](payload)
+    return data
 
 
 class InvalidStateError(Exception):
@@ -231,11 +231,10 @@ class Tx():
         self.busy = True # not allow another command
         return True
 
-    def get_response(self, command, payload):
+    def get_response(self, command, resp):
         if self._sm.current is not 'wait_response':
             return
-        self.rx_cmd = command
-        self.resp = get_payload_out(command, payload)
+        self.rx_cmd, self.resp = command, resp
         if (debug):
             print('Tx.get_response', command, self.resp),
         self._sm.change_to('check_response')
@@ -276,7 +275,6 @@ class Tx():
                         resp += ''.join('{0:02x}'.format(b) for b in lst)
                         resp += '|'
                         #print('judge', self._sm.current, self.tx_cmd, resp)
-
 
             self.last_result = self._sm.current
             self._sm.change_to('idle')
