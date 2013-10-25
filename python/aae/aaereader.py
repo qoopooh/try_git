@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import time
-from Queue import Queue
+from Queue import Queue, Empty
 
 from aae import Protocol, Tx, Rx, get_payload_out
 
@@ -13,6 +13,7 @@ class Reader(object):
         self._rx = Rx(self._i)
         self._rx.daemon = True
         self._tx = Tx(self._i)
+        self._rcv_packet = ()
 
     @property
     def run(self):
@@ -32,11 +33,11 @@ class Reader(object):
 
     def exec_(self):
         try:
-            packet = self._rx.q.get(block = True, timeout = 0.005)
-        except:
-            #print('TO rx.q.get()')
+            self._rcv_packet = self._rx.q.get(block = True, timeout = 0.005)
+        except Empty:
             pass
-        self._get_response(packet)
+        if len(self._rcv_packet) == 2:
+            self._get_response(self._rcv_packet)
         self._tx.exec_()
 
     def _get_response(self, packet):

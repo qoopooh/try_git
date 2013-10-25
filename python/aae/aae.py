@@ -4,7 +4,7 @@ import serial, time
 from threading import Thread
 from Queue import Queue
 
-from simplefsm import SimpleFSM
+from simplefsm import SimpleFSM, exceptions
 
 #debug = True
 debug = False
@@ -207,8 +207,9 @@ class Tx():
         self.resp = None
         self._ba = []
         try:
-            self._sm.change_to('idle')
-        except:
+            if self._sm.current is not 'idle':
+                self._sm.change_to('idle')
+        except exceptions.InvalidStateError:
             self._sm.force_change_to('idle')
 
     def send(self, packet):
@@ -235,7 +236,7 @@ class Tx():
             return
         self.rx_cmd = command
         self.resp = get_payload_out(command, payload)
-        print('Tx.get_response', command, self.resp)
+        print('Tx.get_response', command, self.resp),
         self._sm.change_to('check_response')
 
     def exec_(self):
@@ -258,9 +259,9 @@ class Tx():
                 self._sm.change_to('wait_response')
         elif self._sm.current is 'success' or self._sm.current is 'failure':
             if self.resp is None:
-                print('judge', self._sm.current, self.tx_cmd),
+                print('judge', self._sm.current, self.tx_cmd)
             elif isinstance(self.resp, bool) or isinstance(self.resp, int):
-                print('judge', self._sm.current, self.resp),
+                print('judge', self._sm.current, self.resp)
             else: # Should be list or tuple
                 if len(self.resp) < 1:
                     resp = ''
@@ -271,7 +272,7 @@ class Tx():
                     for lst in self.resp:
                         resp += ''.join('{0:02x}'.format(b) for b in lst)
                         resp += '|'
-                print('judge', self._sm.current, self.tx_cmd, resp),
+                print('judge', self._sm.current, self.tx_cmd, resp)
 
             self.last_result = self._sm.current
             self._sm.change_to('idle')
@@ -293,28 +294,38 @@ class Tx():
 
 class Rx(Thread):
 
-    def __init__(self, serial_instance, callback):
+    def __init__(self, serial_instance, callback=None):
         super(Rx, self).__init__()
         self._serial = serial_instance
         self.q = Queue()
         self.s_count = 0
+        self._cb = callback
 
     def run(self):
         p = Protocol()
         data = []
+        f_rcv = False
         while self._serial.isOpen():
-            data.extend(self._serial.read())
+            data.extend(ord(b) for b in self._serial.read())
             try:
                 n = self._serial.inWaiting()
-            except:
+                if n > 0:
+                    data.extend(ord(b) for b in self._serial.read(n))
+            except serial.SerialException:
                 continue
-            if n > 0:
-                data.extend(self._serial.read(n))
+            f_rcv = False
             while len(data) > 9:
                 res = p.extract(data)
                 if res[0]:
-                    self.q.put(res[1])
+                    f_rcv = True
+                    t = tuple(res[1])
+                    self.q.put(t)
+                else:
+                    print('res failed', res, len(data), data),
                 data = data[res[2]:]
+
+            if f_rcv and self._cb is not None:
+                self._cb()
 
 
 def print_hex(data, p=False):
