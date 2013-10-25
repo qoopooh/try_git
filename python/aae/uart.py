@@ -39,7 +39,7 @@ packets = [
     ('SetHeartbeat', 0),
 ]
 
-def main():
+def main0():
     print "ST110"
     finish = False
     s = Serial(port=port, baudrate=115200)
@@ -68,6 +68,16 @@ def main():
 
     finish = True
     reader.run = not finish
+
+def main():
+    print "ST110"
+    finish = False
+    s = Serial(port=port, baudrate=115200)
+    reader = Reader(s)
+    reader.set_heartbeat(True)
+    time.sleep(3)
+    reader.set_heartbeat(False)
+
 
 if __name__ == '__main__':
     main()

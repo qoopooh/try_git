@@ -11,7 +11,7 @@ class Reader(object):
         self._i = interface
         self._i.close()
         self._rx = Rx(self._i)
-        self._rx.daemon = True
+#self._rx.daemon = True
         self._tx = Tx(self._i)
         self._rcv_packet = ()
 
@@ -25,10 +25,12 @@ class Reader(object):
             value = True
         if value:
             self._i.open()
-            self._rx.start()
+            if self._rx.ident is not None:
+                self._rx.run()
+            else:
+                self._rx.start()
         else:
             self._i.close()
-            self._rx.join()
         self._run = value
 
     def exec_(self):
@@ -58,14 +60,18 @@ class Reader(object):
         self._tx.clear()
         return self._tx.send(self._sending_packet)
 
-    def read_from_tag(bank=2, length=0, epc=None):
+    def read_from_tag(self, bank=2, length=0, epc=None):
         pass
 
-    def write_to_tag(data, bank=3, epc=None):
+    def write_to_tag(self, data, bank=3, epc=None):
         pass
 
-    def set_heartbeat(on):
-        send('SetHeartbeat', on)
+    def set_heartbeat(self, on):
+        if not self.run:
+            self.run = True
+        self.send(('SetHeartbeat', on))
+        while self._tx.busy: self.exec_()
+        self.run = False
 
     _run = False
 
