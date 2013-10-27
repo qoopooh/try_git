@@ -20,6 +20,6 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND NewTransDetail_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
     AND Tyre_Model_ID=Model_ID
-    AND NewTransDetail_NewTrans_ID LIKE 'NTO13100016%'
+    AND NewTransDetail_NewTrans_ID = '{id}'
     """
 
