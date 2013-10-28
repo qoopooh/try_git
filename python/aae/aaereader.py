@@ -32,7 +32,6 @@ class Reader(object):
         else:
             self._i.close()
             self._rx.join()
-            print('joined')
 
     def exec_(self):
         out = None
@@ -73,7 +72,7 @@ class Reader(object):
         self.send(('SetHeartbeat', on))
         while self._tx.busy: self.exec_()
 
-    def inventory(self):
+    def inventory(self, cb=None):
         tags = ()
         cmd = 'InventorySingle'
         if not self.run:
@@ -92,8 +91,12 @@ class Reader(object):
                 self.send(packet)
             else:
                 break
-                
-        return tags
+
+        self.run = False
+        if cb is not None:
+            cb(tags)
+        else:
+            return tags
 
     _run = False
 
