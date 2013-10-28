@@ -9,13 +9,12 @@ S_PRO_DETN = """ SELECT * FROM tblProductionTransactionDetail
 WIT_NT = """
 SELECT TOP 100 NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,
        Comp_ID,COUNT(Comp_ID) AS cnt
-FROM tblNewTyreTransactionDetail,tblDocument,tblCompany,tblNewTyreTransaction
+FROM tblNewTyreTransactionDetail,tblDocument,tblCompany
 WHERE NewTransDetail_NewTrans_ID=Doc_Transaction_ID
     AND Doc_Comp_ID=Comp_ID
-    AND NewTransDetail_NewTrans_ID=NewTrans_ID
 GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,Comp_ID,
-      NewTrans_Create_Date
-ORDER BY NewTrans_Create_Date DESC
+      Doc_Date
+ORDER BY Doc_Date DESC
     """
 WIT_NT_ID = """
 SELECT Tyre_SerialNo,Size_Name,Model_Name
