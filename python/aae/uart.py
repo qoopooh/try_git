@@ -76,12 +76,13 @@ def main():
     b = False
     delay = 3
     reader = Reader(s)
-    for i in range(5):
-        b ^= 1
-        reader.set_heartbeat(b)
-        time.sleep(delay)
+    #for i in range(5):
+        #b ^= 1
+        #reader.set_heartbeat(b)
+        #time.sleep(delay)
         #reader.run = False
-
+    epc = reader.inventory()
+    print epc
 
 if __name__ == '__main__':
     main()

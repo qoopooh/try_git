@@ -73,6 +73,28 @@ class Reader(object):
         self.send(('SetHeartbeat', on))
         while self._tx.busy: self.exec_()
 
+    def inventory(self):
+        tags = ()
+        cmd = 'InventorySingle'
+        if not self.run:
+            self.run = True
+        packet = (cmd, True)
+        self.send(packet)
+        repeat = 0
+        while True:
+            while self._tx.busy:
+                o = self.exec_()
+                if o is not None and o[0] is cmd:
+                    tags = o[1]
+            if len(tags) < 1 and repeat < 10:
+                repeat += 1
+                time.sleep(.4)
+                self.send(packet)
+            else:
+                break
+                
+        return tags
+
     _run = False
 
 
