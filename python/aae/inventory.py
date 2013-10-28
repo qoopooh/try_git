@@ -1,13 +1,16 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 
 from kivy.app import App
+from kivy.config import ConfigParser
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.clock import Clock
 
+from hb import Heartbeat
 
 if os.name == 'nt': #sys.platform == 'win32':
     from serial.tools.list_ports_windows import *
@@ -23,7 +26,17 @@ Builder.load_string("""
     valign: 'middle'
     markup: True
 
-<Test>:
+[ThaiBtn@Button]:
+    text: ctx.text if hasattr(ctx, 'text') else ''
+    text_size: self.size
+    font_name: 'Thaitillium.ttf'
+    font_size: '35sp'
+    halign: 'center'
+    valign: 'middle'
+    markup: True
+
+
+<Inventory>:
     spacing: 5
     padding: [5, 3, 3, 3]
 
@@ -40,9 +53,13 @@ Builder.load_string("""
         BigBtn:
             id: _btn_inventory
             text: 'Message'
-        BigBtn:
+        ThaiBtn:
             id: _btn_setting
-            text: 'Setting'
+            text: 'ตั้งค่า'
+        Image:
+            source: "atlas://images/hb/hb_on"
+        Heartbeat:
+            id: _hb
         BigBtn:
             id: _btn_quit
             text: 'Quit'
@@ -54,12 +71,12 @@ Builder.load_string("""
 
 """)
 
-class Test(BoxLayout):
+class Inventory(BoxLayout):
 
     txt_inpt = ObjectProperty(None)
 
     def __init__(self, app, **kwargs):
-        super(Test, self).__init__(**kwargs)
+        super(Inventory, self).__init__(**kwargs)
         self.app = app
         self.f_btn_setting.bind(on_release=self.app.open_settings)
         self.f_btn_quit.bind(on_release=self.quit)
@@ -86,7 +103,7 @@ class InventoryApp(App):
     def build_config(self, config):
         config.setdefaults('section1', {
             'reader': 'COM1',
-            'timeout': '42',
+            'attenuation': 0,
             'output_path': 'output.json'
         })
 
@@ -104,10 +121,10 @@ class InventoryApp(App):
                 "key": "reader",
                 "options": """ + portlist + """},
             { "type": "numeric",
-                "title": "Reader timeout (ms)",
-                "desc": "Timeout of reader's response",
+                "title": "Power attenuation",
+                "desc": "Set power attenuation 0 - 10 dBm",
                 "section": "section1",
-                "key": "timeout" },
+                "key": "attenuation" },
             { "type": "string",
                 "title": "Output file path",
                 "desc": "Reader output",
@@ -121,14 +138,27 @@ class InventoryApp(App):
     def on_config_change(self, config, section, key, value):
         if config is self.config:
             token = (section, key)
-            if token == ('section1', 'key1'):
-                print('Our key1 have been change to', value)
-            elif token == ('section1', 'key2'):
-                print('Our key2 have been change to', value)
+            if token == ('section1', 'reader'):
+                print('Reader port has been change to', value)
+            elif token == ('section1', 'attenuation'):
+                print('Power attenuation has been change to', value)
+                if 0 <= value <= 10:
+                    pass
+                else:
+                    new_value = 10
+                    if float(value) < 0:
+                        new_value = 0
+                    self.config.set('section1', 'attenuation', new_value) 
+                    self.config.write()
+                    self.build_config(self.load_config())
+                    print('over range', value, type(value), new_value)
+                print(type(self.config))
+            elif token == ('section1', 'output_path'):
+                print('Output path has been change to', value)
 
 
     def build(self):
-        return Test(self)
+        return Inventory(self)
 
 def main():
     InventoryApp().run()
