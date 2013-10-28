@@ -73,10 +73,14 @@ def main():
     print "ST110"
     finish = False
     s = Serial(port=port, baudrate=115200)
+    b = False
+    delay = 3
     reader = Reader(s)
-    reader.set_heartbeat(True)
-    time.sleep(3)
-    reader.set_heartbeat(False)
+    for i in range(5):
+        b ^= 1
+        reader.set_heartbeat(b)
+        time.sleep(delay)
+        #reader.run = False
 
 
 if __name__ == '__main__':

@@ -10,8 +10,6 @@ class Reader(object):
     def __init__(self, interface):
         self._i = interface
         self._i.close()
-        self._rx = Rx(self._i)
-#self._rx.daemon = True
         self._tx = Tx(self._i)
         self._rcv_packet = ()
 
@@ -23,15 +21,18 @@ class Reader(object):
     def run(self, value):
         if value is not False:
             value = True
+        if value == self._run:
+            return
+        self._run = value
         if value:
             self._i.open()
-            if self._rx.ident is not None:
-                self._rx.run()
-            else:
-                self._rx.start()
+            self._rx = Rx(self._i)
+            self._rx.daemon = True
+            self._rx.start()
         else:
             self._i.close()
-        self._run = value
+            self._rx.join()
+            print('joined')
 
     def exec_(self):
         out = None
@@ -71,7 +72,6 @@ class Reader(object):
             self.run = True
         self.send(('SetHeartbeat', on))
         while self._tx.busy: self.exec_()
-        self.run = False
 
     _run = False
 
