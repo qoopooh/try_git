@@ -10,10 +10,11 @@ import eurosoft
 cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=192.168.1.152;DATABASE=EUROSOFT;UID=sa;PWD=sa')
 cursor = cnxn.cursor();
 
-query = eurosoft.WIT_NT
-query = eurosoft.WIT_NT_ID.format(tid='NTO13100011', cid='132')
-#query = eurosoft.WIT_CUS
-#query = eurosoft.WIT_CUS_ID.format(tid='PRI13100011', cid='124')
+#query = eurosoft.WIT_NT
+#query = eurosoft.WIT_NT_ID.format(tid='NTO13100011', cid='132')
+query = eurosoft.WIT_CUS
+query = eurosoft.WIT_CUS_ID.format(tid='PRI13100011', cid='124')
+#query = eurosoft.WIT_STO
 #print query
 cursor.execute(query)
 
