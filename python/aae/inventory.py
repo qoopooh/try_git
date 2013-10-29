@@ -50,6 +50,7 @@ Builder.load_string("""
     btn_setting: _btn_setting
     btn_clear: _btn_clear
     btn_quit: _btn_quit
+    lb_status: _lb_status
 
     BoxLayout:
         size_hint: (.4, 1)
@@ -67,8 +68,9 @@ Builder.load_string("""
             text: 'ตั้งค่า'
         Image:
             source: "atlas://images/hb/hb_on"
-        Heartbeat:
-            id: _hb
+        Label:
+            id: _lb_status
+            text: 'STANDBY'
         ThaiBtn:
             id: _btn_clear
             text: 'ล้างหน้าจอ'
@@ -97,15 +99,17 @@ class ReaderTask():
 class Inventory(BoxLayout):
 
     txt_inpt = ObjectProperty(None)
+    f_invt = False
 
     def __init__(self, app, **kwargs):
         super(Inventory, self).__init__(**kwargs)
-        self.app = app
+        self._app = app
         self.btn_inventory.bind(on_release=self.on_inventory)
-        self.btn_setting.bind(on_release=self.app.open_settings)
+        self.btn_setting.bind(on_release=self._app.open_settings)
         self.btn_clear.bind(on_release=lambda instance: \
                 setattr(self.txt_inpt, 'text', ""))
         self.btn_quit.bind(on_release=self.quit)
+        self.set_status(self.selected_port())
         Clock.schedule_interval(self.cb, 1)
 
     def check_status(self, btn):
@@ -117,11 +121,30 @@ class Inventory(BoxLayout):
         else:
             self.btn_toggle.text = 'Toggle'
 
+    def selected_port(self):
+        return self._app.config.get('section1', 'reader')
+
+    def set_status(self, status):
+        self.lb_status.text = status
+
+    def _inventory(self, *args, **kwargs):
+        try:
+            print 'args', args
+            print 'kwargs', kwargs
+            s = Serial(port=args[0], baudrate=115200)
+            r = Reader(s)
+            r.inventory(self.on_tex)
+        finally:
+            self.f_invt = False
+
     def on_inventory(self, btn):
-        port =  self.app.config.get('section1', 'reader')
-        s = Serial(port=port, baudrate=115200)
-        r = Reader(s)
-        r.inventory(self.on_tex)
+        if self.f_invt:
+            return
+        port = self.selected_port()
+        self.set_status('Reading on ' + port)
+        thread = Thread(target=self._inventory, args=(port,))
+        thread.start()
+        self.f_invt = True
 
     def on_tex(self, tags):
         print tags
@@ -131,10 +154,10 @@ class Inventory(BoxLayout):
             epc = print_hex(tag)
             text += datetime.now().strftime('%H:%M:%S') + ' -> ' + epc + '\n'
         self.txt_inpt.text = text
+        self.set_status('Closed ' + self.selected_port())
 
     def quit(self, btn):
-        print('Bye', btn)
-        self.app.stop()
+        self._app.stop()
 
 class InventoryApp(App):
 
