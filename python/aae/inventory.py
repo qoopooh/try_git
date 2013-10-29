@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, types
+import os, types, json
 from serial import Serial
 from threading import Thread
 from datetime import datetime
@@ -89,21 +89,11 @@ Builder.load_string("""
 
 """)
 
-class ReaderTask():
-
-    busy = False
-
-    def __init__(self, port):
-        s = Serial(port=port, baudrate=115200)
-        r = Reader(s)
-        r.inventory(self.on_txt)
-
-
-
 class Inventory(BoxLayout):
 
     txt_inpt = ObjectProperty(None)
     f_running = False
+    _out = {}
 
     def __init__(self, app, **kwargs):
         super(Inventory, self).__init__(**kwargs)
@@ -182,14 +172,30 @@ class Inventory(BoxLayout):
         if isinstance(t[0], types.IntType):
             data = print_hex(t)
             text += datetime.now().strftime('%H:%M:%S') + ' -> ' + data + '\n'
+            self.out(data)
         else:
             for tag in t:
                 epc = print_hex(tag)
                 text += datetime.now().strftime('%H:%M:%S') + ' -> ' + epc + '\n'
+                self.out(epc)
         if len(text) > 1:
             self.txt_inpt.text = text + self.txt_inpt.text
 
+    def out(self, text):
+        if text in self._out:
+            self._out[text]['count'] += 1
+        else:
+            self._out[text] = { 'count': 1,
+                'start': datetime.now().strftime('%y-%m-%d %H:%M:%S'),
+            }
+        print '_out', self._out
+
     def quit(self, btn):
+        path = self._app.config.get('section1', 'output_path')
+        f = open(path, 'w')
+        j = json.dumps(self._out, indent=2)
+        f.write(j)
+        f.close()
         self._app.stop()
 
 class InventoryApp(App):
@@ -272,9 +278,9 @@ class InventoryApp(App):
             elif token == ('section1', 'output_path'):
                 print('Output path has been change to', value)
 
-
     def build(self):
         return Inventory(self)
+
 
 def main():
     InventoryApp().run()
