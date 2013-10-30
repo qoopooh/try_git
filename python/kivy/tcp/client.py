@@ -25,6 +25,20 @@ class Client(object):
         return self._connect
 
     @property
+    def host(self):
+        return self._host
+    @host.setter
+    def host(self, val):
+        self._host = val
+
+    @property
+    def port(self):
+        return self._port
+    @host.setter
+    def port(self, val):
+        self._port = val
+
+    @property
     def rx_hex(self):
         return self._rx_hex
     @rx_hex.setter
@@ -62,6 +76,7 @@ class Client(object):
         self._connect = True
 
     def close(self):
+        self.send('')
         self._s.close()
         self._connect = False
 
@@ -84,12 +99,14 @@ class Client(object):
                 sz = self._s.send(data)
         return sz
 
-def print_data(data):
+def print_rcv(data):
     print datetime.now(), len(data), data
 
 if __name__ == '__main__':
-    c = Client(print_data)
+    c = Client(print_rcv)
     c.connect()
+    c.rx_hex = False
+    c.tx_hex = False
     raw ='48-69-20'
     sz = c.send(hex_trim(raw))
     count = 0

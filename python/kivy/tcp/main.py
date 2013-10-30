@@ -47,7 +47,7 @@ class MainApp(App):
                 "title": "New Line",
                 "desc": "New line splitter for ASCII format",
                 "section": "section1",
-                "options": ["CR", "LF", "CRLF"],
+                "options": ["None", "CR", "LF", "CRLF"],
                 "key": "newline" }
             ]"""
 
@@ -59,10 +59,14 @@ class MainApp(App):
             token = (section, key)
             if token == ('section1', 'ip'):
                 self._console.reconnect(ip=value)
+            elif token == ('section1', 'port'):
+                self._console.reconnect(port=value)
             elif token == ('section1', 'format_rx'):
                 self._console.set_format(rx=value)
             elif token == ('section1', 'format_tx'):
                 self._console.set_format(tx=value)
+            elif token == ('section1', 'newline'):
+                self._console.set_newline(value)
 
     def build(self):
         self._console = Console(self)
