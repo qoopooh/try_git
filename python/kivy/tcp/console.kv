@@ -1,0 +1,42 @@
+#:kivy 1.0
+
+[BigBtn@Button]:
+    text: ctx.text if hasattr(ctx, 'text') else ''
+    text_size: self.size
+    font_size: '25sp'
+    halign: 'center'
+    valign: 'middle'
+    markup: True
+
+<Console>:
+    spacing: 5
+    padding: [5, 3, 3, 3]
+    orientation: 'vertical'
+
+    txt_monitor: txt_monitor
+    txt_tx: txt_tx
+    btn_send: _btn_send
+    btn_clear: _btn_clear
+
+    TextInput:
+        id: txt_monitor
+
+    BoxLayout:
+        size_hint: (1, .2)
+        spacing: 3
+
+        TextInput:
+            id: txt_tx
+        BoxLayout:
+            size_hint: (.5, 1)
+            spacing: 5
+            Button:
+                id: _btn_send
+                text: 'Send'
+                on_press: self.text = 'Pressed'
+                on_release: self.text = 'Send'
+            Button:
+                id: _btn_clear
+                text: 'Clear'
+
+
