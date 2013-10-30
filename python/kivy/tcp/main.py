@@ -4,7 +4,7 @@
 from kivy.app import App
 from console import Console
 
-class ControllerApp(App):
+class MainApp(App):
 
     use_kivy_settings = False
     #icon = 'Logo_only.ico'
@@ -13,7 +13,8 @@ class ControllerApp(App):
         config.setdefaults('section1', {
             'ip': '192.168.1.31',
             'port': 1470,
-            'format': 'HEX',
+            'format_rx': 'HEX',
+            'format_tx': 'HEX',
             'newline': 'CRLF',
         })
 
@@ -31,11 +32,17 @@ class ControllerApp(App):
                 "section": "section1",
                 "key": "port" },
             { "type": "options",
-                "title": "Format",
+                "title": "Receiver Format",
                 "desc": "Data communication format",
                 "section": "section1",
                 "options": ["HEX", "ASCII"],
-                "key": "format" },
+                "key": "format_rx" },
+            { "type": "options",
+                "title": "Sender Format",
+                "desc": "Data communication format",
+                "section": "section1",
+                "options": ["HEX", "ASCII"],
+                "key": "format_tx" },
             { "type": "options",
                 "title": "New Line",
                 "desc": "New line splitter for ASCII format",
@@ -51,12 +58,17 @@ class ControllerApp(App):
         if config is self.config:
             token = (section, key)
             if token == ('section1', 'ip'):
-                print('Server IP has been change to', value)
+                self._console.reconnect(ip=value)
+            elif token == ('section1', 'format_rx'):
+                self._console.set_format(rx=value)
+            elif token == ('section1', 'format_tx'):
+                self._console.set_format(tx=value)
 
     def build(self):
-        return Console(self)
+        self._console = Console(self)
+        return self._console
 
 if __name__ == '__main__':
-    ControllerApp().run()
+    MainApp().run()
 
 
