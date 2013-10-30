@@ -13,7 +13,7 @@ class Client(object):
 
     def __init__(self, recv_cb=None):
         self._recv_cb = recv_cb
-        self._s = socket(AF_INET, SOCK_STREAM)
+        self._s = None
         self._host = '192.168.1.92'
         self._port = 1470
         self._connect = False
@@ -69,6 +69,7 @@ class Client(object):
             self._host = ip
         if port is not None:
             self._port = port
+        self._s = socket(AF_INET, SOCK_STREAM)
         self._s.connect((self._host, self._port))
         self._rx = Thread(target=self.receiving)
         self._rx.daemon = True
@@ -77,7 +78,8 @@ class Client(object):
 
     def close(self):
         self.send('')
-        self._s.close()
+        if self._s is not None:
+            self._s.close()
         self._connect = False
 
     def receiving(self):

@@ -60,7 +60,7 @@ class MainApp(App):
             if token == ('section1', 'ip'):
                 self._console.reconnect(ip=value)
             elif token == ('section1', 'port'):
-                self._console.reconnect(port=value)
+                self._console.reconnect(port=int(value))
             elif token == ('section1', 'format_rx'):
                 self._console.set_format(rx=value)
             elif token == ('section1', 'format_tx'):

@@ -14,6 +14,8 @@ class Console(BoxLayout):
     def __init__(self, app, **kwargs):
         super(Console, self).__init__(**kwargs)
         self._app = app
+        self.btn_send.bind(on_release=self.on_send)
+        self.btn_clear.bind(on_release=self.on_clear)
         self._s = Client(self.print_rcv)
         self.connect()
 
@@ -21,6 +23,11 @@ class Console(BoxLayout):
         ip = self._app.config.get('section1', 'ip')
         port = self._app.config.getint('section1', 'port')
         self._s.connect(ip, port)
+        format_rx = self._app.config.get('section1', 'format_rx')
+        format_tx = self._app.config.get('section1', 'format_tx')
+        nl = self._app.config.get('section1', 'newline')
+        self.set_format(rx=format_rx, tx=format_tx)
+        self.set_newline(nl)
 
     def reconnect(self, ip=None, port=None):
         self._s.reconnect(ip, port)
@@ -49,4 +56,9 @@ class Console(BoxLayout):
             text = datetime.now().strftime('%H:%M:%S') + ' closed'
         self.txt_monitor.text = text + self.txt_monitor.text
 
+    def on_send(self, btn):
+        self._s.send(self.txt_tx.text)
+
+    def on_clear(self, btn):
+        self.txt_monitor.text = ''
 
