@@ -1,4 +1,5 @@
-__all__ = ['str_to_hex', 'hexstr_to_hex', 'hex_to_hexstr', 'hex_to_str']
+__all__ = ['str_to_hex', 'hexstr_to_hex', 'hex_to_hexstr', 'hex_to_str',
+        'hex_trim']
 
 class HexToStringError(Exception):
     pass
@@ -20,5 +21,11 @@ def hex_to_str(l):
             s += chr(i)
         else:
             raise HexToStringError()
+    return s
+
+def hex_trim(s):
+    for c in (' ','\t','\n','\r','-'):
+        s = s.replace(c, '')
+           
     return s
 

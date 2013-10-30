@@ -90,7 +90,8 @@ def print_data(data):
 if __name__ == '__main__':
     c = Client(print_data)
     c.connect()
-    sz = c.send('486920')
+    raw ='48-69-20'
+    sz = c.send(hex_trim(raw))
     count = 0
     while sz > 0:
         time.sleep(1)
