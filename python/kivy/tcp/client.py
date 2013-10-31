@@ -62,7 +62,7 @@ class Client(object):
 
     def reconnect(self, ip=None, port=None):
         self.close()
-        self.connect(ip, port)
+        return self.connect(ip, port)
 
     def connect(self, ip=None, port=None):
         if ip is not None:
@@ -74,11 +74,12 @@ class Client(object):
             self._s.connect((self._host, self._port))
         except:
             sys.stderr.write('Connecting failed\n')
-            return
+            return False
         self._rx = Thread(target=self.receiving)
         self._rx.daemon = True
         self._rx.start()
         self._connect = True
+        return True
 
     def close(self):
         try:
