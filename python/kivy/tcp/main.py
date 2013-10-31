@@ -68,6 +68,10 @@ class MainApp(App):
             elif token == ('section1', 'newline'):
                 self._console.set_newline(value)
 
+    #def get_application_config(self):
+        #return super(MainApp, self).get_application_config(
+                #'/sdcard/.<appname>.ini')
+
     def build(self):
         self._console = Console(self)
         return self._console
