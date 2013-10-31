@@ -16,13 +16,13 @@ class Console(BoxLayout):
         self._app = app
         self.btn_send.bind(on_release=self.on_send)
         self.btn_clear.bind(on_release=self.on_clear)
-        self._s = Client(self.print_rcv)
+        self._c = Client(self.print_rcv)
         self.connect()
 
     def connect(self):
         ip = self._app.config.get('section1', 'ip')
         port = self._app.config.getint('section1', 'port')
-        self._s.connect(ip, port)
+        self._c.connect(ip, port)
         format_rx = self._app.config.get('section1', 'format_rx')
         format_tx = self._app.config.get('section1', 'format_tx')
         nl = self._app.config.get('section1', 'newline')
@@ -30,24 +30,24 @@ class Console(BoxLayout):
         self.set_newline(nl)
 
     def reconnect(self, ip=None, port=None):
-        self._s.reconnect(ip, port)
+        self._c.reconnect(ip, port)
 
     def set_format(self, rx=None, tx=None):
         if rx is not None:
-            self._s.rx_hex = True if rx == 'HEX' else False
+            self._c.rx_hex = True if rx == 'HEX' else False
 
         if tx is not None:
-            self._s.tx_hex = True if tx == 'HEX' else False
+            self._c.tx_hex = True if tx == 'HEX' else False
 
     def set_newline(self, n):
         if n is 'LF':
-            self._s.newline = '\n'
+            self._c.newline = '\n'
         elif n is 'CR':
-            self._s.newline = '\r'
+            self._c.newline = '\r'
         elif n is 'CRLF':
-            self._s.newline = '\r\n'
+            self._c.newline = '\r\n'
         else:
-            self._s.newline = None
+            self._c.newline = None
 
     def print_rcv(self, data):
         if len(data) > 0:
@@ -57,7 +57,7 @@ class Console(BoxLayout):
         self.txt_monitor.text = text + self.txt_monitor.text
 
     def on_send(self, btn):
-        self._s.send(self.txt_tx.text)
+        self._c.send(self.txt_tx.text)
 
     def on_clear(self, btn):
         self.txt_monitor.text = ''

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import time
+import time, sys
 
 from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
@@ -69,17 +69,22 @@ class Client(object):
             self._host = ip
         if port is not None:
             self._port = port
-        self._s = socket(AF_INET, SOCK_STREAM)
-        self._s.connect((self._host, self._port))
+        try:
+            self._s = socket(AF_INET, SOCK_STREAM)
+            self._s.connect((self._host, self._port))
+        except:
+            sys.stderr.write('Connecting failed\n')
+            return
         self._rx = Thread(target=self.receiving)
         self._rx.daemon = True
         self._rx.start()
         self._connect = True
 
     def close(self):
-        self.send('')
-        if self._s is not None:
+        try:
             self._s.close()
+        except:
+            sys.stderr.write('Closing failed\n')
         self._connect = False
 
     def receiving(self):
@@ -89,11 +94,16 @@ class Client(object):
                 if self._rx_hex:
                     chunk = hex_to_hexstr(chunk)
                 self._recv_cb(chunk)
-            chunk = self._s.recv(1024)
+            try:
+                chunk = self._s.recv(1024)
+            except:
+                break
         self.close()
 
     def send(self, data):
         sz = 0
+        if not self._connect:
+            self.connect()
         if self._connect:
             if self._tx_hex:
                 sz = self._s.send(bytearray(hexstr_to_hex(data)))
