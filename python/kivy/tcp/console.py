@@ -111,5 +111,5 @@ class Console(BoxLayout):
 
     def show_popup(self, title, content):
         self.print_rcv((title, content))
-            
+
 
