@@ -1,9 +1,13 @@
 import os
 from types import *
 from datetime import datetime
+
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
+from kivy.uix.listview import ListItemButton
 from kivy.lang import Builder
+from kivy.adapters.adapter import Adapter
+from kivy.adapters.dictadapter import DictAdapter
 
 from client import Client
 
@@ -18,10 +22,23 @@ err_cannot_connect = 'Cannot create connection, please try again'
 class Console(BoxLayout):
 
     def __init__(self, app, **kwargs):
-        super(Console, self).__init__(**kwargs)
         self._app = app
+        super(Console, self).__init__(**kwargs)
         self.btn_send.bind(on_release=self.on_send)
         self.btn_clear.bind(on_release=self.on_clear)
+        list_item_args_converter = \
+                lambda row_index: {'text': rec['name'],
+                'size_hint_y': None,
+                'height': 25}
+
+        self.adapter = DictAdapter(
+                data={},
+                #data={'1':'water', '2':'melon'},
+                #args_converter=list_item_args_converter,
+                selection_mode='multiple',
+                allow_emptery_selection=True,
+                cls=Label)
+        self.txt_monitor.adapter = self.adapter
         self._c = Client(self.print_rcv)
         self.connect()
 
@@ -62,12 +79,22 @@ class Console(BoxLayout):
             self._c.newline = None
 
     def print_rcv(self, msg):
+        t = datetime.now().strftime('%H:%M:%S')
+        data = self.adapter.data
+        k = self.adapter.sorted_keys
         if isinstance(msg, StringType):
-            text = datetime.now().strftime('%H:%M:%S') + ' -> ' + msg + '\n'
+            text = t + ' -> ' + msg + '\n'
+            data[t] = msg
         else:
-            text = datetime.now().strftime('%H:%M:%S') + ' -> ' + msg[0] \
+            text = t + ' -> ' + msg[0] \
                   + ': ' + msg[1] + '\n'
-        self.txt_monitor.text = text + self.txt_monitor.text
+            data[t] = msg[0] + ':' + msg[1]
+
+#k.append(t)
+        k.insert(0, t)
+        self.adapter.sorted_keys.data = data
+        self.adapter.sorted_keys.sorted_keys = k
+        self.txt_monitor.populate()
 
     def on_send(self, btn):
         if self._c.connecting:
@@ -78,7 +105,9 @@ class Console(BoxLayout):
             self.show_popup('Sendig failed', err_cannot_send)
 
     def on_clear(self, btn):
-        self.txt_monitor.text = ''
+        self.adapter.data = {}
+        self.adapter.sorted_keys = []
+        self.txt_monitor.populate()
 
     def show_popup(self, title, content):
         self.print_rcv((title, content))

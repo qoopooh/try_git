@@ -17,15 +17,13 @@
     btn_send: _btn_send
     btn_clear: _btn_clear
 
-    TextInput:
-        id: txt_monitor
-
     BoxLayout:
-        size_hint: (1, .2)
+        size_hint: (1, .15)
         spacing: 3
 
         TextInput:
             id: txt_tx
+            multiline: False
         BoxLayout:
             size_hint: (.5, 1)
             spacing: 5
@@ -38,4 +36,9 @@
                 id: _btn_clear
                 text: 'Clear'
 
+    #TextInput:
+        #id: txt_monitor
+
+    ListView:
+        id: txt_monitor
 
