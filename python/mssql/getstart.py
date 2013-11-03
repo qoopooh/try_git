@@ -12,14 +12,14 @@ cursor = cnxn.cursor();
 
 #query = WIT_NT
 #query = WIT_NT_ID.format(tid='NTO13100011', cid='132')
-query = WIT_NT_ID.format(tid='NTO13070031', cid='254')
+#query = WIT_NT_ID.format(tid='NTO13070031', cid='254')
 #query = WIT_CUS
 #query = WIT_CUS_ID.format(tid='PRI13100011', cid='124')
 #query = WIT_CUS_ID.format(tid='PRO13100022', cid='95')
-#query = WIT_STO
+query = WIT_STO
 #query = WIT_STO_ID.format(tid='PRI13100011', cid='8')
-query = WIT_REJ
-query = WIT_REJ_ID.format(tid='RJI13100003', cid='116')
+#query = WIT_REJ
+#query = WIT_REJ_ID.format(tid='RJI13100003', cid='116')
 #query = INV_NT
 #query = INV_NT_ID.format(sz='295/80R22.5')
 #query = INV_CUS
