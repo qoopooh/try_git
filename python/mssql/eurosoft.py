@@ -91,23 +91,23 @@ ORDER BY RejectTrans_Create_Date DESC
 """
 
 WIT_REJ_ID = """
-SELECT Tyre_SerialNo,Size_Name,Model_Name
-FROM tblRejectTransactionDetail,tblCasing,tblTyre,tblSize,tblModel
+SELECT Tyre_SerialNo,Size_Name
+FROM tblRejectTransactionDetail,tblCasing,tblTyre,tblSize
 WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
     AND Casing_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
-    AND Tyre_Model_ID=Model_ID
     AND RejectTransDetail_RejectTrans_ID='{tid}'
+    AND Casing_Owner_ID='{cid}'
 """
 
 INV_NT = """
-SELECT Size_Name, COUNT(Size_ID)
+SELECT Size_Name,COUNT(Size_ID)
 FROM tblNewTyreStock,tblTyre,tblSize
 WHERE NewStock_Tyre_Serial=Tyre_SerialNo
     AND NewStock_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
-GROUP BY Size_ID
+GROUP BY Size_Name
 """
 
 INV_NT_ID = """
@@ -128,7 +128,7 @@ WHERE ProdStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Code=Tyre_Code
     AND Casing_OwnerBranch_ID>0
     AND Tyre_Size_ID=Size_ID
-GROUP BY Size_ID
+GROUP BY Size_Name
 """
 
 INV_CUS_ID = """
@@ -151,7 +151,7 @@ WHERE ProdStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Code=Tyre_Code
     AND Casing_OwnerBranch_ID=-1
     AND Tyre_Size_ID=Size_ID
-GROUP BY Size_ID
+GROUP BY Size_Name
 """
 
 INV_STO_ID = """
@@ -173,7 +173,7 @@ WHERE RejectStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
     AND Casing_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
-GROUP BY Size_ID
+GROUP BY Size_Name
 """
 
 INV_REJ_ID = """
@@ -188,9 +188,8 @@ WHERE RejectStock_Casing_ID=Casing_ID
 """
 
 IDENTIFY = """
-SELECT Tyre_SerialNo, Tyre_Code, Size_Name, B
-, Model_Name
-FROM tblTyre, tblSize, tblBrand, tblModel
+SELECT Tyre_SerialNo,Tyre_Code,Size_Name,Brand_Name,Model_Name
+FROM tblTyre,tblSize,tblBrand,tblModel
 WHERE Tyre_Size_ID=Size_ID
     AND Tyre_Brand_ID=Brand_ID
     AND Tyre_Model_ID=Model_ID
