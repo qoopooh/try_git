@@ -1,4 +1,16 @@
 
+__all__ = (
+        'WIT_NT', 'WIT_NT_ID',
+        'WIT_CUS', 'WIT_CUS_ID',
+        'WIT_STO', 'WIT_STO_ID',
+        'WIT_REJ', 'WIT_REJ_ID',
+        'INV_NT', 'INV_NT_ID',
+        'INV_CUS', 'INV_CUS_ID',
+        'INV_STO', 'INV_STO_ID',
+        'INV_REJ', 'INV_REJ_ID',
+        'IDENTIFY'
+        )
+
 S_REJ_DET = """ SELECT * FROM tblRejectTransactionDetail
                 WHERE RejectTransDetail_IsConfirm = 1 """
 S_PRO_DET = """ SELECT * FROM tblProductionTransactionDetail
@@ -67,10 +79,15 @@ ORDER BY ProdTrans_Create_Date DESC
 WIT_STO_ID = WIT_CUS_ID
 
 WIT_REJ = """
-SELECT RejectTransDetail_RejectTrans_ID,Comp_Name
-FROM tblRejectTransactionDetail, tblCasing,tblCompany
+SELECT TOP 100 RejectTransDetail_RejectTrans_ID,Comp_Name,
+       RejectTransDetail_IsConfirm,Comp_ID,COUNT(Comp_ID) as cnt
+FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction
 WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
+    AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
+GROUP BY RejectTransDetail_RejectTrans_ID,Comp_Name,RejectTransDetail_IsConfirm,
+      Comp_ID,RejectTrans_Create_Date
+ORDER BY RejectTrans_Create_Date DESC
 """
 
 WIT_REJ_ID = """

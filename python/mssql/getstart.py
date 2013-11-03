@@ -4,18 +4,20 @@
 import pyodbc
 import json
 import collections
-import eurosoft
+from eurosoft import *
 
 #cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=COMTHAI;DATABASE=EUROSOFT;UID=sa;PWD=sa')
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=192.168.1.152;DATABASE=EUROSOFT;UID=sa;PWD=sa')
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=192.168.1.153;DATABASE=EUROSOFT;UID=sa;PWD=sa')
 cursor = cnxn.cursor();
 
-#query = eurosoft.WIT_NT
-#query = eurosoft.WIT_NT_ID.format(tid='NTO13100011', cid='132')
-query = eurosoft.WIT_CUS
-query = eurosoft.WIT_CUS_ID.format(tid='PRI13100011', cid='124')
-#query = eurosoft.WIT_STO
-#print query
+#query = WIT_NT
+#query = WIT_NT_ID.format(tid='NTO13100011', cid='132')
+#query = WIT_CUS
+query = WIT_CUS_ID.format(tid='PRI13100011', cid='124')
+query = WIT_STO
+query = WIT_STO_ID.format(tid='PRI13100011', cid='8')
+query = WIT_REJ
+#query = WIT_REJ_ID.format(tid='PRI13100011', cid='8')
 cursor.execute(query)
 
 rows = cursor.fetchall()
@@ -30,8 +32,8 @@ for r in rows:
     count += 1
 
 j = json.dumps(rowarray_list, ensure_ascii=False, indent=2).encode("utf8")
-#print j
-print 'นับ', count
+print j
+print 'count', count
 rowarray_file = 'output.js'
 f = open(rowarray_file, 'w')
 print >> f, j
