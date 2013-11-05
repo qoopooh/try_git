@@ -149,7 +149,7 @@ it waits for the next connect.
         action = "store",
         type = 'int',
         help = "set baud rate, default: %default",
-        default = 9600
+        default = 2400
     )
 
     group.add_option("", "--parity",
@@ -200,7 +200,7 @@ it waits for the next connect.
         action = "store",
         type = 'int',
         help = "local TCP port",
-        default = 7777
+        default = 1470
     )
 
     group = optparse.OptionGroup(parser,
