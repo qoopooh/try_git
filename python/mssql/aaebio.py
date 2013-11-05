@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import sys, pymssql
-from eurosoft import *
 
-#conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa', database='domotics')
-conn = pymssql.connect(host='192.168.1.153', user='sa', password='sa',
-        database='EUROSOFT', charset='utf8')
+TIME_TODAY = """
+SELECT nDateTime,nUserIdn
+FROM TB_TA_RESULT
+WHERE nDateTime > 1383523200
+"""
+
+conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa', database='BioStar')
 cur = conn.cursor()
-#query = WIT_STO
-query = IDENTIFY.format(sn='CVO46179H')
+query = TIME_TODAY
 cur.execute(query)
 #row=cur.fetchone()
 rows=cur.fetchall()
@@ -22,9 +24,7 @@ for row in rows:
     count += 1
 
 console_thai = 'นับ'
-#sys.stdout.write(console_thai)
 print console_thai, count
-#print(console_thai, count)
 
 conn.close()
 
