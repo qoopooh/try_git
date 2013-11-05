@@ -1,30 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, pymssql
+import sys
+import pymssql
+from time import strftime, localtime
 
 TIME_TODAY = """
-SELECT nDateTime,nUserIdn
-FROM TB_TA_RESULT
-WHERE nDateTime > 1383523200
+SELECT nStartTime,sUserName,sDepartment
+FROM TB_TA_RESULT,TB_USER,TB_USER_DEPT
+WHERE nDateTime={date}
+    AND nStartTime<>0
+    AND TB_TA_RESULT.nUserIdn=TB_USER.nUserIdn
+    AND TB_USER.nDepartmentIdn=TB_USER_DEPT.nDepartmentIdn
+ORDER BY sDepartment
 """
 
-conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa', database='BioStar')
+conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa',
+        database='BioStar', as_dict=True)
 cur = conn.cursor()
-query = TIME_TODAY
+today=1383523200
+query = TIME_TODAY.format(date=today)
 cur.execute(query)
-#row=cur.fetchone()
 rows=cur.fetchall()
-print query, rows
+#print query, rows
 count = 0
-#while row:
 for row in rows:
-    print row[0], row[1]
-    row = cur.fetchone()
+    t = strftime("%Y:%m:%d ", localtime(today)) \
+        + strftime("%H:%M:%S", localtime(row['nStartTime']))
+    print row['sDepartment'], t, row['sUserName']
     count += 1
 
-console_thai = 'นับ'
-print console_thai, count
+print 'count', count
 
 conn.close()
 
