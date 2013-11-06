@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+__version__ = '1.0.0'
 __all__ = (
         'WIT_NT', 'WIT_NT_ID',
         'WIT_CUS', 'WIT_CUS_ID',
@@ -10,7 +14,14 @@ __all__ = (
         'IDENTIFY'
         )
 
-import web
+host='192.168.1.153'
+user='sa'
+password='sa'
+database='EUROSOFT'
+
+
+import sys
+import web, pymssql
 
 WIT_NT = """
 SELECT TOP 100 NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,
@@ -225,12 +236,49 @@ WHERE Tyre_Size_ID=Size_ID
     AND Tyre_SerialNo='{sn}'
 """
 
+def ask(query, d=False):
+    conn = pymssql.connect(host=host, user=user, password=password,
+        database=database, charset='utf8', as_dict=d)
+
+    cur = conn.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
+    conn.close()
+    print rows
+    return rows
+    
+
 class index():
     def GET(self):
         return render.idx()
 
+class Table():
+    def GET(self):
+        i = web.input(action='WIT_NT', cid=None, tid=None)
+        act = i['action']
+        if act=='WIT_NT': q=WIT_NT
+        elif act=='WIT_NT_ID': q=WIT_NT_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_CUS': q=WIT_CUS
+        elif act=='WIT_CUS_ID': q=WIT_CUS_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_STO': q=WIT_STO
+        elif act=='WIT_STO_ID': q=WIT_STO_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_REJ': q=WIT_REJ
+        elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'],cid=i['cid'])
+#else: q = WIT_NT
+        resp = ask(q, True)
+        return render.tyretable(resp)
+
+class Json():
+    pass
+
+class Identify():
+    pass
+
 urls = (
     '/', 'index',
+    '/table/', 'Table',
+    '/json/', 'Data',
+    '/iden/', 'Identify',
 )
 template_globals = {
     'app_path': lambda p: web.ctx.homepath + p,
