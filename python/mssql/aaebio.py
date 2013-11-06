@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, json, collections
-import pymssql, web
-from time import strftime, localtime
+__version__ = '1.0.0'
 
+import sys
+from time import strftime, localtime
+import pymssql, web
 from date import gmt
 
 TIME_REPORT = """
@@ -80,17 +81,8 @@ def time_report(dt=0,department='production'):
         t.extend(result)
         rowarray_list.append(t)
         count += 1
-    print 'count', count
 
     return rowarray_list
-
-def create_json(date, department):
-    report = time_report(gmt(date), department)
-    j = json.dumps(report, ensure_ascii=False, indent=2).encode("utf8")
-    f = open(OUTPUT_JS, 'w')
-    f.write(j)
-    f.close()
-    return j
 
 def create_table(date, department):
     report = time_report(gmt(date), department)
@@ -104,7 +96,6 @@ class index:
 class TimeReport:
     def GET(self):
         i = web.input(date=None, department='production')
-        #return create_json(i.date, i.department)
         return create_table(i.date, i.department)
 
 urls = (

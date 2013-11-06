@@ -8,7 +8,9 @@ r = compile('\d{8}')
 
 def gmt(d='today'):
     tm = date.today()
-    if d == 'yesterday':
+    if d is None:
+        pass
+    elif d == 'yesterday':
         tm -= timedelta(1)
     elif len(d) == 8:
         if r.match(d) is not None:
