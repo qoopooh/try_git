@@ -33,7 +33,7 @@ WHERE TB_TA_RESULT.nDateTime = {date}
     AND TB_USER_DEPT.sDepartment<>'Production'
 ORDER BY TB_USER_DEPT.sDepartment, CONVERT(INT, TB_USER.sUserID)
 """
-OUTPUT_FILE = 'output.js'
+OUTPUT_JS = 'output.js'
 
 def work_time(s, e):
     if e < 0:
@@ -74,7 +74,7 @@ def time_report(dt=0,department='production'):
         end_time = strftime("%M:%S", localtime(row['nEndTime']))
         work = strftime("%M:%S", \
                 localtime(work_time(row['nStartTime'],row['nEndTime'])))
-        result = date, row['sUserID'], row['sUserName'], row['sDepartment'], \
+        result = row['sUserID'], date, row['sUserName'], row['sDepartment'], \
             start_time, end_time, work
         t = []
         t.extend(result)
@@ -87,20 +87,25 @@ def time_report(dt=0,department='production'):
 def create_json(date, department):
     report = time_report(gmt(date), department)
     j = json.dumps(report, ensure_ascii=False, indent=2).encode("utf8")
-    f = open(OUTPUT_FILE, 'w')
+    f = open(OUTPUT_JS, 'w')
     f.write(j)
     f.close()
     return j
 
+def create_table(date, department):
+    report = time_report(gmt(date), department)
+    return render.time_report(report)
+
 class index:
     def GET(self):
-        i = web.input()
+        i = web.input(name=None)
         return render.index(i.name)
 
 class TimeReport:
     def GET(self):
         i = web.input(date=None, department='production')
-        return create_json(i.date, i.department)
+        #return create_json(i.date, i.department)
+        return create_table(i.date, i.department)
 
 urls = (
     '/', 'index',

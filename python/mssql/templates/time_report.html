@@ -1,0 +1,23 @@
+$def with(report)
+<html>
+<body bgcolor="white">
+<table border="2" cellspacing="0" cellpadding="7">
+<tr><td></td></tr>
+<tr>
+    <th>ID</th>
+    <th>Date</th>
+    <th>User Name</th>
+    <th>Department</th>
+    <th>First-In Time</th>
+    <th>Last-Out Time</th>
+    <th>Work Time</th>
+</tr>
+$for row in report:
+    <tr>
+    $for col in row:
+        <td>$col</td>
+    </tr>
+</table>
+</body>
+</html>
+
