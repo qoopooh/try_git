@@ -5,7 +5,9 @@ import sys, json, collections
 import pymssql
 from time import strftime, localtime
 
-TIME_TODAY = """
+from date import gmt
+
+TIME_REPORT = """
 SELECT TB_TA_RESULT.nStartTime, TB_TA_RESULT.nEndTime, TB_USER.sUserID, TB_USER.sUserName, TB_USER_DEPT.sDepartment
 FROM TB_TA_RESULT INNER JOIN
     TB_USER ON TB_TA_RESULT.nUserIdn = TB_USER.nUserIdn LEFT OUTER JOIN
@@ -27,36 +29,45 @@ def work_time(s, e):
         return 0
     return w-60
 
-today=1383523200
-query = TIME_TODAY.format(date=today)
-count = 0
-rowarray_list = []
+def time_report(d=0):
 
-conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa',
-        database='BioStar', as_dict=True)
-cur = conn.cursor()
-cur.execute(query)
-rows=cur.fetchall()
+    count = 0
+    rowarray_list = []
 
-for row in rows:
-    date = strftime("%Y-%m-%d", localtime(today))
-    start_time = strftime("%M:%S", localtime(row['nStartTime']))
-    end_time = strftime("%M:%S", localtime(row['nEndTime']))
-    work = strftime("%M:%S", localtime(work_time(row['nStartTime'],row['nEndTime'])))
-    print date, row['sUserID'], row['sUserName'], row['sDepartment'], \
-        start_time, end_time, work
-    result = date, row['sUserID'], row['sUserName'], row['sDepartment'], \
-        start_time, end_time, work
-    t = []
-    t.extend(result)
-    rowarray_list.append(t)
-    count += 1
+    if d < 1:
+        return rowarray_list
 
-print 'count', count
-j = json.dumps(rowarray_list, ensure_ascii=False, indent=2).encode("utf8")
+    query = TIME_REPORT.format(date=d)
+    conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa',
+            database='BioStar', as_dict=True)
+    cur = conn.cursor()
+    cur.execute(query)
+    rows=cur.fetchall()
+    conn.close()
+
+    for row in rows:
+        date = strftime("%Y-%m-%d", localtime(d))
+        start_time = strftime("%M:%S", localtime(row['nStartTime']))
+        end_time = strftime("%M:%S", localtime(row['nEndTime']))
+        work = strftime("%M:%S", \
+                localtime(work_time(row['nStartTime'],row['nEndTime'])))
+        result = date, row['sUserID'], row['sUserName'], row['sDepartment'], \
+            start_time, end_time, work
+        t = []
+        t.extend(result)
+        rowarray_list.append(t)
+        count += 1
+    print 'count', count
+
+    return rowarray_list
+
+
+#report = time_report(gmt('today'))
+report = time_report(gmt('yesterday'))
+j = json.dumps(report, ensure_ascii=False, indent=2).encode("utf8")
+print j
 f = open(OUTPUT_FILE, 'w')
 f.write(j)
 f.close()
 
-conn.close()
 
