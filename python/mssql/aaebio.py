@@ -103,7 +103,10 @@ urls = (
     '/report', 'TimeReport',
     '/report/', 'TimeReport',
 )
-render = web.template.render('templates/')
+template_globals = {
+    'app_path': lambda p: web.ctx.homepath + p,
+}
+render = web.template.render('templates/', globals=template_globals)
 
 if __name__ == '__main__':
     app = web.application(urls, globals())
