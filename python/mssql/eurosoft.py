@@ -10,6 +10,8 @@ __all__ = (
         'IDENTIFY'
         )
 
+import web
+
 WIT_NT = """
 SELECT TOP 100 NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,
        Comp_ID,COUNT(Comp_ID) AS cnt
@@ -223,5 +225,20 @@ WHERE Tyre_Size_ID=Size_ID
     AND Tyre_SerialNo='{sn}'
 """
 
+class index():
+    def GET(self):
+        return render.idx()
+
+urls = (
+    '/', 'index',
+)
+template_globals = {
+    'app_path': lambda p: web.ctx.homepath + p,
+}
+render = web.template.render('templates/', globals=template_globals)
+
+if __name__ == '__main__':
+    app = web.application(urls, globals())
+    app.run()
 
 
