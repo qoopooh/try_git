@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, json, collections
-import pymssql
+import pymssql, web
 from time import strftime, localtime
 
 from date import gmt
@@ -61,13 +61,23 @@ def time_report(d=0):
 
     return rowarray_list
 
+def create_json():
+    report = time_report(gmt('yesterday'))
+    j = json.dumps(report, ensure_ascii=False, indent=2).encode("utf8")
+    f = open(OUTPUT_FILE, 'w')
+    f.write(j)
+    f.close()
+    return j
 
-#report = time_report(gmt('today'))
-report = time_report(gmt('yesterday'))
-j = json.dumps(report, ensure_ascii=False, indent=2).encode("utf8")
-print j
-f = open(OUTPUT_FILE, 'w')
-f.write(j)
-f.close()
+class index:
+    def GET(self):
+        return create_json()
 
+urls = (
+    '/', 'index'
+)
+
+if __name__ == '__main__':
+    app = web.application(urls, globals())
+    app.run()
 
