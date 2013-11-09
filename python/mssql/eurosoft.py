@@ -2,6 +2,13 @@
 # -*- coding: utf-8 -*-
 
 __version__ = '1.0.0'
+
+host='192.168.1.153'
+user='sa'
+password='sa'
+database='EUROSOFT'
+
+###############################################################################
 __all__ = (
         'WIT_NT', 'WIT_NT_ID',
         'WIT_CUS', 'WIT_CUS_ID',
@@ -14,13 +21,7 @@ __all__ = (
         'IDENTIFY'
         )
 
-host='192.168.1.153'
-user='sa'
-password='sa'
-database='EUROSOFT'
-
-
-import sys
+import sys, json
 import web, pymssql
 
 WIT_NT = """
@@ -253,8 +254,9 @@ class index():
         return render.idx()
 
 class Table():
+
     def GET(self):
-        i = web.input(action='WIT_NT', cid=None, tid=None)
+        i = web.input(action='WIT_NT', cid=None, tid=None, sn=None)
         act = i['action']
         if act=='WIT_NT': q=WIT_NT
         elif act=='WIT_NT_ID': q=WIT_NT_ID.format(tid=i['tid'],cid=i['cid'])
@@ -264,12 +266,20 @@ class Table():
         elif act=='WIT_STO_ID': q=WIT_STO_ID.format(tid=i['tid'],cid=i['cid'])
         elif act=='WIT_REJ': q=WIT_REJ
         elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'],cid=i['cid'])
-#else: q = WIT_NT
-        resp = ask(q, True)
+        else: q=IDENTIFY.format(tid=i['sn'])
+        return show_resp(q)
+
+    def show_resp(self, query):
+        resp = ask(query, True)
         return render.tyretable(resp)
 
 class Json():
-    pass
+
+    def show_resp(self, query):
+        resp = ask(query)
+        web.header('Content-Type', 'application/json')
+        return json.dumps(resp)
+
 
 class Identify():
     pass
@@ -277,8 +287,7 @@ class Identify():
 urls = (
     '/', 'index',
     '/table/', 'Table',
-    '/json/', 'Data',
-    '/iden/', 'Identify',
+    '/json/', 'Json',
 )
 template_globals = {
     'app_path': lambda p: web.ctx.homepath + p,
