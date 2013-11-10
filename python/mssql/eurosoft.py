@@ -35,8 +35,7 @@ GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,Comp_ID,
 ORDER BY Doc_Date DESC
 """
 
-WIT_NT_ID = """
-SELECT Tyre_SerialNo,Size_Name,Model_Name
+WIT_NT_ID = """SELECT Tyre_SerialNo,Size_Name,Model_Name
 FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel,tblCompany
 WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND NewTransDetail_Tyre_Code=Tyre_Code
@@ -46,51 +45,50 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND Comp_ID='{cid}'
 """
 
-WIT_CUS = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
-       Comp_ID,COUNT(Comp_ID) AS cnt
-FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction
+#WIT_CUS = """SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
+       #Comp_ID,COUNT(Comp_ID) AS cnt
+#FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction
+#WHERE ProdTransDetail_Casing_ID=Casing_ID
+    #AND Casing_Owner_ID=Comp_ID
+    #AND Casing_OwnerBranch_ID>0
+    #AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
+#GROUP BY ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
+      #Comp_ID,ProdTrans_Create_Date
+#ORDER BY ProdTrans_Create_Date DESC
+#"""
+
+WIT_CUS = """SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,
+    ProdTransDetail_IsConfirm,Comp_ID
+FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
+    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
+    FROM tblProductionTransactionDetail
+    GROUP BY ProdTransDetail_ProdTrans_ID) p
 WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
-    AND Casing_OwnerBranch_ID>0
     AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-GROUP BY ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
-      Comp_ID,ProdTrans_Create_Date
+    AND ProdTransDetail_ProdTrans_ID=p.id
+    AND ProdTransDetail_Serial=p.sn
+    AND Casing_OwnerBranch_ID>0
 ORDER BY ProdTrans_Create_Date DESC
 """
 
-#WIT_CUS_ID = """
-#SELECT Tyre_SerialNo,Size_Name,Model_Name
-#FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblModel,tblCompany
-#WHERE ProdTransDetail_Casing_ID=Casing_ID
-    #AND Casing_Owner_ID=Comp_ID
-    #AND Casing_Tyre_Serial=Tyre_SerialNo
-    #AND Casing_Tyre_Code=Tyre_Code
-    #AND Tyre_Size_ID=Size_ID
-    #AND Tyre_Model_ID=Model_ID
-    #AND Comp_ID='{cid}'
-    #AND ProdTransDetail_ProdTrans_ID='{tid}'
-#"""
-
-#WIT_CUS_ID = """
-#SELECT Tyre_SerialNo,Size_Name,LinerReserve_Liner_ID
-#FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
-     #tblProductionDetail,tblLinerReserve
-#WHERE ProdTransDetail_Casing_ID=Casing_ID
-    #AND Casing_Owner_ID=Comp_ID
-    #AND Casing_Tyre_Serial=Tyre_SerialNo
-    #AND Casing_Tyre_Code=Tyre_Code
-    #AND Tyre_Size_ID=Size_ID
-    #AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
-    #AND ProdDetail_Prod_ID=LinerReserve_Prod_ID
-    #AND Comp_ID='{cid}'
-    #AND ProdTransDetail_ProdTrans_ID='{tid}'
-#"""
+WIT_CUS_ID = """
+SELECT Tyre_SerialNo,Size_Name,Model_Name
+FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblModel,tblCompany
+WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND Casing_Owner_ID=Comp_ID
+    AND Casing_Tyre_Serial=Tyre_SerialNo
+    AND Casing_Tyre_Code=Tyre_Code
+    AND Tyre_Size_ID=Size_ID
+    AND Tyre_Model_ID=Model_ID
+    AND Comp_ID='{cid}'
+    AND ProdTransDetail_ProdTrans_ID='{tid}'
+"""
 
 WIT_CUS_ID = """
-SELECT Tyre_SerialNo,Size_Name,Liner_Name
+SELECT Tyre_SerialNo,Size_Name,LinerReserve_Liner_ID
 FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
-     tblProductionDetail,tblLinerReserve,tblLiner
+     tblProductionDetail,tblLinerReserve
 WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -98,11 +96,26 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Tyre_Size_ID=Size_ID
     AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
     AND ProdDetail_Prod_ID=LinerReserve_Prod_ID
-    AND LinerReserve_Liner_ID=Liner_ID
     AND Comp_ID='{cid}'
     AND ProdTransDetail_ProdTrans_ID='{tid}'
-GROUP BY Tyre_SerialNo,Size_Name,Liner_Name
 """
+
+#WIT_CUS_ID = """
+#SELECT Tyre_SerialNo,Size_Name,Liner_Name
+#FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
+     #tblProductionDetail,tblLinerReserve,tblLiner
+#WHERE ProdTransDetail_Casing_ID=Casing_ID
+    #AND Casing_Owner_ID=Comp_ID
+    #AND Casing_Tyre_Serial=Tyre_SerialNo
+    #AND Casing_Tyre_Code=Tyre_Code
+    #AND Tyre_Size_ID=Size_ID
+    #AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
+    #AND ProdDetail_Prod_ID=LinerReserve_Prod_ID
+    #AND LinerReserve_Liner_ID=Liner_ID
+    #AND Comp_ID='{cid}'
+    #AND ProdTransDetail_ProdTrans_ID='{tid}'
+#GROUP BY Tyre_SerialNo,Size_Name,Liner_Name
+#"""
 
 WIT_STO = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
