@@ -45,19 +45,8 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND Comp_ID='{cid}'
 """
 
-#WIT_CUS = """SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
-       #Comp_ID,COUNT(Comp_ID) AS cnt
-#FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction
-#WHERE ProdTransDetail_Casing_ID=Casing_ID
-    #AND Casing_Owner_ID=Comp_ID
-    #AND Casing_OwnerBranch_ID>0
-    #AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-#GROUP BY ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
-      #Comp_ID,ProdTrans_Create_Date
-#ORDER BY ProdTrans_Create_Date DESC
-#"""
-
-WIT_CUS = """SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,
+WIT_CUS = """
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,
     ProdTransDetail_IsConfirm,Comp_ID
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
@@ -72,75 +61,64 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
 ORDER BY ProdTrans_Create_Date DESC
 """
 
-WIT_CUS_ID = """
-SELECT Tyre_SerialNo,Size_Name,Model_Name
-FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblModel,tblCompany
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND Casing_Tyre_Serial=Tyre_SerialNo
-    AND Casing_Tyre_Code=Tyre_Code
-    AND Tyre_Size_ID=Size_ID
-    AND Tyre_Model_ID=Model_ID
-    AND Comp_ID='{cid}'
-    AND ProdTransDetail_ProdTrans_ID='{tid}'
-"""
-
-WIT_CUS_ID = """
-SELECT Tyre_SerialNo,Size_Name,LinerReserve_Liner_ID
+WIT_CUS_ID_CID = """
+SELECT Tyre_SerialNo,Size_Name,Liner_Name
 FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
-     tblProductionDetail,tblLinerReserve
+     tblProductionDetail,tblLiner
 WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
     AND Casing_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
     AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
-    AND ProdDetail_Prod_ID=LinerReserve_Prod_ID
+    AND ProdDetail_IntendLiner_ID=Liner_ID
     AND Comp_ID='{cid}'
     AND ProdTransDetail_ProdTrans_ID='{tid}'
 """
-
-#WIT_CUS_ID = """
-#SELECT Tyre_SerialNo,Size_Name,Liner_Name
-#FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
-     #tblProductionDetail,tblLinerReserve,tblLiner
-#WHERE ProdTransDetail_Casing_ID=Casing_ID
-    #AND Casing_Owner_ID=Comp_ID
-    #AND Casing_Tyre_Serial=Tyre_SerialNo
-    #AND Casing_Tyre_Code=Tyre_Code
-    #AND Tyre_Size_ID=Size_ID
-    #AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
-    #AND ProdDetail_Prod_ID=LinerReserve_Prod_ID
-    #AND LinerReserve_Liner_ID=Liner_ID
-    #AND Comp_ID='{cid}'
-    #AND ProdTransDetail_ProdTrans_ID='{tid}'
-#GROUP BY Tyre_SerialNo,Size_Name,Liner_Name
-#"""
+WIT_CUS_ID = """
+SELECT Tyre_SerialNo,Size_Name,Liner_Name
+FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,
+     tblProductionDetail,tblLiner
+WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND Casing_Tyre_Serial=Tyre_SerialNo
+    AND Casing_Tyre_Code=Tyre_Code
+    AND Tyre_Size_ID=Size_ID
+    AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
+    AND ProdDetail_IntendLiner_ID=Liner_ID
+    AND ProdTransDetail_ProdTrans_ID='{tid}'
+"""
 
 WIT_STO = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
-       Comp_ID,COUNT(Comp_ID) AS cnt
-FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,
+    ProdTransDetail_IsConfirm,Comp_ID
+FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
+    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
+    FROM tblProductionTransactionDetail
+    GROUP BY ProdTransDetail_ProdTrans_ID) p
 WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
-    AND Casing_OwnerBranch_ID=-1
     AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-GROUP BY ProdTransDetail_ProdTrans_ID,Comp_Name,ProdTransDetail_IsConfirm,
-      Comp_ID,ProdTrans_Create_Date
+    AND ProdTransDetail_ProdTrans_ID=p.id
+    AND ProdTransDetail_Serial=p.sn
+    AND Casing_OwnerBranch_ID=-1
 ORDER BY ProdTrans_Create_Date DESC
 """
 
 WIT_STO_ID = WIT_CUS_ID
+WIT_STO_ID_CID = WIT_CUS_ID_CID
 
 WIT_REJ = """
 SELECT TOP 100 RejectTransDetail_RejectTrans_ID,Comp_Name,
-       RejectTransDetail_IsConfirm,Comp_ID,COUNT(Comp_ID) as cnt
-FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction
+       RejectTransDetail_IsConfirm,Comp_ID
+FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
+    (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
+    FROM tblRejectTransactionDetail
+    GROUP BY RejectTransDetail_RejectTrans_ID) r
 WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
     AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
-GROUP BY RejectTransDetail_RejectTrans_ID,Comp_Name,RejectTransDetail_IsConfirm,
-      Comp_ID,RejectTrans_Create_Date
+    AND RejectTransDetail_RejectTrans_ID=r.id
+    AND RejectTransDetail_Serial=r.sn
 ORDER BY RejectTrans_Create_Date DESC
 """
 
@@ -156,7 +134,7 @@ WHERE RejectTransDetail_Casing_ID=Casing_ID
 """
 
 INV_NT = """
-SELECT Size_Name,COUNT(Size_ID)
+SELECT Size_Name,COUNT(Size_ID) as Qty
 FROM tblNewTyreStock,tblTyre,tblSize
 WHERE NewStock_Tyre_Serial=Tyre_SerialNo
     AND NewStock_Tyre_Code=Tyre_Code
@@ -175,7 +153,7 @@ WHERE NewStock_Tyre_Serial=Tyre_SerialNo
 """
 
 INV_CUS = """
-SELECT Size_Name,COUNT(Size_ID)
+SELECT Size_Name,COUNT(Size_ID) as Qty
 FROM tblProductionStock,tblCasing,tblTyre,tblSize
 WHERE ProdStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -198,7 +176,7 @@ WHERE ProdStock_Casing_ID=Casing_ID
 """
 
 INV_STO = """
-SELECT Size_Name,COUNT(Size_ID)
+SELECT Size_Name,COUNT(Size_ID) as Qty
 FROM tblProductionStock,tblCasing,tblTyre,tblSize
 WHERE ProdStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -221,7 +199,7 @@ WHERE ProdStock_Casing_ID=Casing_ID
 """
 
 INV_REJ = """
-SELECT Size_Name,COUNT(Size_ID)
+SELECT Size_Name,COUNT(Size_ID) as Qty
 FROM tblRejectStock,tblCasing,tblTyre,tblSize
 WHERE RejectStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -273,21 +251,59 @@ class Table():
         return self.show_resp(q)
 
     def get_query(self, i):
+        self._input = i
         act = i['action']
         if act=='WIT_NT': q=WIT_NT
         elif act=='WIT_NT_ID': q=WIT_NT_ID.format(tid=i['tid'],cid=i['cid'])
         elif act=='WIT_CUS': q=WIT_CUS
-        elif act=='WIT_CUS_ID': q=WIT_CUS_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_CUS_ID':
+            if i['cid'] is not None:
+                q=WIT_CUS_ID_CID.format(tid=i['tid'],cid=i['cid'])
+            else:
+                q=WIT_CUS_ID.format(tid=i['tid'])
         elif act=='WIT_STO': q=WIT_STO
         elif act=='WIT_STO_ID': q=WIT_STO_ID.format(tid=i['tid'],cid=i['cid'])
         elif act=='WIT_REJ': q=WIT_REJ
         elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='INV_NT': q=INV_NT
+        elif act=='INV_NT_ID': q=INV_NT_ID.format(sz=i['sz'])
+        elif act=='INV_CUS': q=INV_CUS
+        elif act=='INV_CUS_ID': q=INV_CUS_ID.format(sz=i['sz'])
+        elif act=='INV_STO': q=INV_STO
+        elif act=='INV_STO_ID': q=INV_STO_ID.format(sz=i['sz'])
+        elif act=='INV_REJ': q=INV_REJ
+        elif act=='INV_REJ_ID': q=INV_REJ_ID.format(sz=i['sz'])
         else: q=IDENTIFY.format(tid=i['sn'])
         return q
 
     def show_resp(self, query):
         resp = ask(query, as_dict=True)
+        for row in resp:
+            for k in row.keys():
+                if isinstance(k, int):
+                    del row[k]
+        resp = self.filter_PRI(resp)
+
         return render.tyretable(resp)
+
+    def filter_PRI(self, resp):
+        if self._input['action'] != 'WIT_STO' or len(resp) < 1:
+            return resp
+        if isinstance(resp[0], dict):
+            for row in resp:
+                if row['ProdTransDetail_ProdTrans_ID'][:3] == 'PRI':
+                    row['Comp_Name'] = None
+                    row['Comp_ID'] = 0
+        else:
+            l, i, tmp, resp = len(resp), 0, resp, []
+            while i<l:
+                if tmp[i][0][:3] == 'PRI':
+                    resp.append((tmp[i][0], None, tmp[i][2], 0))
+                else:
+                    resp.append(tmp[i])
+                i += 1
+
+        return resp
 
 class Json(Table):
 
@@ -298,10 +314,10 @@ class Json(Table):
 
     def show_resp(self, query):
         resp = ask(query)
+        resp = self.filter_PRI(resp)
         web.header('Content-Type', 'application/json')
         j = json.dumps(resp, ensure_ascii=False, indent=2)
         return j
-
 
 urls = (
     '/', 'index',
