@@ -3,10 +3,10 @@
 
 __version__ = '1.0.0'
 
-host='192.168.1.153'
-user='sa'
-password='sa'
-database='EUROSOFT'
+HOST='192.168.1.156'
+USER='sa'
+PASSWORD='sa'
+DATABASE='EUROSOFT'
 
 ###############################################################################
 __all__ = (
@@ -237,15 +237,14 @@ WHERE Tyre_Size_ID=Size_ID
     AND Tyre_SerialNo='{sn}'
 """
 
-def ask(query, d=False):
-    conn = pymssql.connect(host=host, user=user, password=password,
-        database=database, charset='utf8', as_dict=d)
+def ask(query, as_dict=False):
+    conn = pymssql.connect(host=HOST, user=USER, password=PASSWORD,
+        database=DATABASE, charset='utf8', as_dict=as_dict)
 
     cur = conn.cursor()
     cur.execute(query)
     rows = cur.fetchall()
     conn.close()
-    print rows
     return rows
     
 
@@ -256,7 +255,11 @@ class index():
 class Table():
 
     def GET(self):
-        i = web.input(action='WIT_NT', cid=None, tid=None, sn=None)
+        q = self.get_query(web.input(
+            action='WIT_NT', cid=None, tid=None, sn=None))
+        return self.show_resp(q)
+
+    def get_query(self, i):
         act = i['action']
         if act=='WIT_NT': q=WIT_NT
         elif act=='WIT_NT_ID': q=WIT_NT_ID.format(tid=i['tid'],cid=i['cid'])
@@ -267,22 +270,25 @@ class Table():
         elif act=='WIT_REJ': q=WIT_REJ
         elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'],cid=i['cid'])
         else: q=IDENTIFY.format(tid=i['sn'])
-        return show_resp(q)
+        return q
 
     def show_resp(self, query):
-        resp = ask(query, True)
+        resp = ask(query, as_dict=True)
         return render.tyretable(resp)
 
-class Json():
+class Json(Table):
+
+    def GET(self):
+        q = self.get_query(web.input(
+            action='WIT_NT', cid=None, tid=None, sn=None))
+        return self.show_resp(q)
 
     def show_resp(self, query):
         resp = ask(query)
         web.header('Content-Type', 'application/json')
-        return json.dumps(resp)
+        j = json.dumps(resp, ensure_ascii=False, indent=2)
+        return j
 
-
-class Identify():
-    pass
 
 urls = (
     '/', 'index',
@@ -297,5 +303,4 @@ render = web.template.render('templates/', globals=template_globals)
 if __name__ == '__main__':
     app = web.application(urls, globals())
     app.run()
-
 
