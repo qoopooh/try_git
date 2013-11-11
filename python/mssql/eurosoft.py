@@ -35,7 +35,8 @@ GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,Comp_ID,
 ORDER BY Doc_Date DESC
 """
 
-WIT_NT_ID = """SELECT Tyre_SerialNo,Size_Name,Model_Name
+WIT_NT_ID = """
+SELECT Tyre_SerialNo,Size_Name,Model_Name
 FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel,tblCompany
 WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND NewTransDetail_Tyre_Code=Tyre_Code
@@ -273,7 +274,7 @@ class Table():
         elif act=='INV_STO_ID': q=INV_STO_ID.format(sz=i['sz'])
         elif act=='INV_REJ': q=INV_REJ
         elif act=='INV_REJ_ID': q=INV_REJ_ID.format(sz=i['sz'])
-        else: q=IDENTIFY.format(tid=i['sn'])
+        else: q=IDENTIFY.format(sn=i['sn'])
         return q
 
     def show_resp(self, query):
