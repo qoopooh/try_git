@@ -6,8 +6,9 @@ import json
 import collections
 from eurosoft import *
 
+cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=aaebio\\bsserver;DATABASE=domotics;UID=sa;PWD=sa')
 #cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=COMTHAI;DATABASE=EUROSOFT;UID=sa;PWD=sa')
-cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=192.168.1.153;DATABASE=EUROSOFT;UID=sa;PWD=sa')
+#cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=192.168.1.153;DATABASE=EUROSOFT;UID=sa;PWD=sa')
 cursor = cnxn.cursor();
 
 #query = WIT_NT
@@ -17,7 +18,7 @@ cursor = cnxn.cursor();
 #query = WIT_CUS_ID.format(tid='PRI13100011', cid='124')
 #query = WIT_CUS_ID.format(tid='PRO13100022', cid='95')
 #query = WIT_STO
-query = WIT_STO_ID.format(tid='PRI13100011', cid='8')
+#query = WIT_STO_ID.format(tid='PRI13100011', cid='8')
 #query = WIT_REJ
 #query = WIT_REJ_ID.format(tid='RJI13100003', cid='116')
 #query = INV_NT
@@ -29,6 +30,7 @@ query = WIT_STO_ID.format(tid='PRI13100011', cid='8')
 #query = INV_REJ
 #query = INV_REJ_ID.format(sz='295/80R22.5')
 #query = IDENTIFY.format(sn='CVO46179H')
+query = 'SELECT * FROM command'
 cursor.execute(query)
 
 rows = cursor.fetchall()
