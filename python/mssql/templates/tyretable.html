@@ -6,18 +6,12 @@ $def with(resp)
 <body>
 <table border="2" cellspacing="0" cellpadding="7">
 <tr>Total: $len(resp)</tr>
-<tr>
 $if len(resp) > 0:
-    $for col in resp[0].keys():
-        <th>$col</th>
-    </tr>
     $for row in resp:
         <tr>
-        $for col in row.items():
-            <td>$col[1]</td>
+        $for col in row:
+            <td>$col</td>
         </tr>
-$else:
-      </tr>
 </table>
 </body>
 </html>

@@ -254,6 +254,7 @@ class Table():
     def GET(self):
         q = self.get_query(web.input(
             action='WIT_NT', cid=None, tid=None, sn=None))
+        web.header('Content-Type', 'text/html;charset=utf8')
         return self.show_resp(q)
 
     def get_query(self, i):
@@ -284,10 +285,6 @@ class Table():
 
     def show_resp(self, query):
         resp = ask(query, as_dict=True)
-        for row in resp:
-            for k in row.keys():
-                if isinstance(k, int):
-                    del row[k]
         resp = self.filter_PRI(resp)
 
         return render.tyretable(resp)
@@ -321,7 +318,7 @@ class Json(Table):
     def show_resp(self, query):
         resp = ask(query)
         resp = self.filter_PRI(resp)
-        web.header('Content-Type', 'application/json')
+        web.header('Content-Type', 'application/json;charset=utf8')
         j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
         with open('output.js', 'w') as f:
             print >> f, j
