@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -- coding: utf8 --
 
 __version__ = '1.0.0'
 
-HOST='192.168.1.156'
+HOST='192.168.1.153'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -22,7 +22,8 @@ __all__ = (
         )
 
 import sys, json
-import web, pymssql
+import web
+import pyodbc
 
 WIT_NT = """
 SELECT TOP 100 NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,
@@ -230,15 +231,24 @@ WHERE Tyre_Size_ID=Size_ID
 """
 
 def ask(query, as_dict=False):
-    conn = pymssql.connect(host=HOST, user=USER, password=PASSWORD,
-        database=DATABASE, charset='utf8', as_dict=as_dict)
+    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' +
+            DATABASE + ';UID=' + USER + ';PWD=' + PASSWORD)
 
     cur = conn.cursor()
     cur.execute(query)
     rows = cur.fetchall()
     conn.close()
-    return rows
-    
+
+    out_rows = []
+    for r in rows:
+        out_r = []
+        for c in r:
+            if isinstance(c, unicode):
+                c = c.encode('utf8')
+            out_r.append(c)
+        out_rows.append(tuple(out_r))
+    return tuple(out_rows)
+
 
 class index():
     def GET(self):
@@ -317,7 +327,8 @@ class Json(Table):
         resp = ask(query)
         resp = self.filter_PRI(resp)
         web.header('Content-Type', 'application/json')
-        j = json.dumps(resp, ensure_ascii=False, indent=2)
+        j = json.dumps(resp, indent=2).encode('utf8')
+#j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
         return j
 
 urls = (
