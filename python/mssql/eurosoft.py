@@ -241,12 +241,7 @@ def ask(query, as_dict=False):
 
     out_rows = []
     for r in rows:
-        out_r = []
-        for c in r:
-            if isinstance(c, unicode):
-                c = c.encode('utf8')
-            out_r.append(c)
-        out_rows.append(tuple(out_r))
+        out_rows.append(tuple(r))
     return tuple(out_rows)
 
 
@@ -327,8 +322,9 @@ class Json(Table):
         resp = ask(query)
         resp = self.filter_PRI(resp)
         web.header('Content-Type', 'application/json')
-        j = json.dumps(resp, indent=2).encode('utf8')
-#j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
+        j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
+        with open('output.js', 'w') as f:
+            print >> f, j
         return j
 
 urls = (
