@@ -15,9 +15,6 @@
 //-----------------------------------------------------------------------------
 #include "encrypt.h"
 
-
-
-
 // GLOBAL VARIABLES
 
 
@@ -27,7 +24,7 @@
 //    - result of encrypted char is always another char
 //    - routine uses a sequence of pw[] characters as password
 //-------------------------------------
-void Encrypt(unsigned char *msg, char phone_id)
+void Encrypt(char *msg, char phone_id)
 {
   unsigned char i,shift;
 
