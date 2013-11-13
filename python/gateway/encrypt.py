@@ -3,7 +3,7 @@
 class Encrypt():
     phone_id = '0'
     uuid = "1111111111222222222233333333334444444444" * 2
-    
+
     def encrypt(self, msg, phone_id=None, uuid=None):
         if phone_id is not None:
             self.phone_id = phone_id
@@ -75,7 +75,7 @@ class Encrypt():
 
 if __name__ == '__main__':
     e = Encrypt()
-    msg = e.encrypt("E,L,1\n", '8')
+    msg = e.encrypt("E,L,1,O,A,B,< phuchit Kanjanakhan >,Berm,9876543210ABCDEF\n", '8')
     print 'enc', msg
     msg = e.decrypt(msg)
     print 'dec', msg
