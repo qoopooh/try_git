@@ -40,7 +40,8 @@ def main(argv):
     e.uuid = uuid
     while True:
         data = s.recv(BUFFER_SIZE)
-        if len(data) < 1:
+        if not data or len(data) < 1:
+            s.close()
             print 'Disconnected'
             sys.exit()
         print "[RECV]", e.decrypt(data)
