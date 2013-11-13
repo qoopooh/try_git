@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="jquery-1.9.1.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="container">
+    <label>
+      IP:
+      <input type="text" id="ip">
+      <!--<input type="checkbox" id="connect" value="Connect">Connect</input>-->
+    </label>
+    <label>
+      Write:
+      <span id="write-info">-</span>
+    </label>
+    <label>
+      Read:
+      <span id="read-info">-</span>
+    </label>
+    <label>
+      Read count:
+      <span id="read-count">-</span>
+    </label>
+    <label>
+      Status:
+      <span id="status">-</span>
+    </label>
+    <label>
+      Send:
+      <input type="text" id="command">
+      <button id="write-button" type="button">Write</button>
+      <input type="checkbox" id="uid" value="uid">Register</input>
+      <!--<input type="checkbox" id="zero">Zero</input>-->
+    </label>
+  </div>
+  <script src="encryption.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,27 @@
+{
+  "name": "A-Touch Gateway Stream",
+  "version": "0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "description": "A-Touch software on Gateway module\nThis is fork of A-Touch Gateway, it just always open connection",
+
+  "app": {
+    "background": {
+      "scripts": [ "background.js" ]
+    }
+  },
+
+  "icons": {
+    "128": "assets/logo-domotics-icon.png"
+  },
+
+  "permissions": [
+    {
+      "socket": [
+        "tcp-connect:*:1470"
+      ]
+    },
+    "storage"
+  ]
+}
+

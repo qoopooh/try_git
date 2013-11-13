@@ -1,0 +1,48 @@
+
+body {
+  background-color: #c8c8ff;
+  font-family: "helvetica neue", helvetica, sans-serif;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+label {
+  display: block;
+  padding: 20px;
+  border-bottom: solid 1px #ddd;
+  border-right: solid 1px #ddd;
+  width: 480px;
+}
+
+label {
+  color: #999;
+}
+
+#status, #write-info, #read-info {
+  color: #000;
+}
+
+#position-input {
+  display: block;
+   -webkit-appearance:none !important;
+  width: 90%;
+  margin: 20px auto;
+  height: 6px;
+  background: rgb(13, 168, 97);
+}
+
+#position-input::-webkit-slider-thumb {
+  -webkit-appearance:none !important;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background: rgb(67, 135, 253);
+}
+
+#container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 480px;
+}
+
