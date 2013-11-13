@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 
 import sys, getopt
+from socket import socket, AF_INET, SOCK_STREAM
+from encrypt import Encrypt
+
+TCP_PORT = 1470
+BUFFER_SIZE = 1024
+REQ_PHONE_ID = "R,U,{uuid}\r\n"
 
 def main(argv):
     gateway = 'localhost'
@@ -22,6 +28,22 @@ def main(argv):
             uuid = arg
 
     print gateway, uuid
+    s = socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((gateway, TCP_PORT))
+    s.send(REQ_PHONE_ID.format(uuid=uuid))
+    data = s.recv(BUFFER_SIZE)
+    if len(data) != 9:
+        print 'Incorrect message'
+        sys.exit(1)
+    e = Encrypt()
+    e.phone_id = data[4]
+    e.uuid = uuid
+    while True:
+        data = s.recv(BUFFER_SIZE)
+        if len(data) < 1:
+            print 'Disconnected'
+            sys.exit()
+        print "[RECV]", e.decrypt(data)
 
 if __name__ == "__main__":
     main(sys.argv)
