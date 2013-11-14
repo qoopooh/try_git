@@ -2,10 +2,13 @@
 
 import tornado.ioloop
 import tornado.web
+import tornado.websocket
 
 from tornado.options import define, options, parse_command_line
 
 define("port", default=8888, help="run on the given port", type=int)
+
+clients = dict()
 
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -13,8 +16,23 @@ class IndexHandler(tornado.web.RequestHandler):
         self.write("This is your response")
         self.finish()
 
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
+    def open(self, *args):
+        self.id = self.get_argument("Id")
+        self.stream.set_nodelay(True)
+        clients[self.id] = {"id": self.id, "object": self}
+
+    def on_message(self, message):
+        print "Client %s received a message: %s" % (self.id, message)
+
+    def on_close(self):
+        if self.id in clients:
+            del clients[self.id]
+
+
 app = tornado.web.Application([
     (r'/', IndexHandler),
+    (r'/', WebSocketHandler),
 ])
 
 if __name__ == '__main__':
