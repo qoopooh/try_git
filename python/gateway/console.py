@@ -9,6 +9,7 @@ HEX = False
 
 import sys, getopt
 import socket
+from time import localtime, strftime
 from encrypt import Encrypt
 
 BUFFER_SIZE = 1024
@@ -53,15 +54,13 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
     if len(data) != 9:
         print 'Incorrect message'
         sys.exit(1)
-    e = Encrypt()
-    e.phone_id = data[4]
-    e.uuid = uuid * 2
+    e = Encrypt(uuid=uuid, phone_id=data[4])
     while True:
         data = s.recv(BUFFER_SIZE)
         if len(data) < 1:
             print 'Disconnected'
             sys.exit()
-        print "[RECV]", len(data), remove_newline(e.decrypt(data))
+        print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), remove_newline(e.decrypt(data))
         if f_hex:
             print_hex(data, True)
 
