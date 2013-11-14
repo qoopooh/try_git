@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <button  type=button onclick="WebSocketTest()">Run WebSocket</button>
+    <input id="tx_msg" value="Hi"></input>
+    <button  id= "tx_button" type=button onclick="Send()">Send</button>
+    <div id="messages" style="height:200px;background:black;color:white;"></div>
+    <script type="text/javascript">
+      var messageContainer = document.getElementById("messages");
+      var tx_msg = document.getElementById("tx_msg");
+      var tx_button = document.getElementById("tx_button");
+      var ws = null;
+
+      console.log(tx_button);
+      tx_button.disabled = true;
+      function WebSocketTest() {
+        if ("WebSocket" in window) {
+          messageContainer.innerHTML = "WebSocket is supported by your Browser!";
+          ws = new WebSocket("ws://localhost:8888/ws?Id=123456789");
+          ws.onopen = function() {
+            tx_button.disabled = false;
+            ws.send("Hello WebSocket");
+            console.log('send');
+          };
+          ws.onmessage = function (evt) {
+            var received_msg = evt.data;
+            messageContainer.innerHTML = "Message is received... "
+                + evt.data + "<br/>" + messageContainer.innerHTML;
+          };
+          ws.onclose = function() {
+            tx_button.disabled = true;
+            messageContainer.innerHTML = "Connection is closed...";
+            console.log('close');
+            ws = null;
+          };
+        } else {
+          messageContainer.innerHTML = "WebSocket NOT supported by your Browser!";
+          console.log('Not support');
+        }
+        console.log('WebSocketTest function');
+      }
+
+      function Send() {
+        if (ws) {
+          ws.send(tx_msg.value);
+        }
+      }
+    </script>
+  </body>
+</html>
+

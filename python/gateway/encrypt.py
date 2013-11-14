@@ -1,19 +1,35 @@
 #!/usr/bin/env python
 
-class Encrypt():
-    phone_id = '0'
-    uuid = "1111111111222222222233333333334444444444" * 2
+class Encrypt(object):
 
-    def encrypt(self, msg, phone_id=None, uuid=None):
-        if phone_id is not None:
-            self.phone_id = phone_id
-        if uuid is not None:
-            if len(uuid) == 40:
-                self.uuid = uuid * 2
-            elif len(uuid) == 80:
-                self.uuid = uuid
-        if len(msg) > len(self.uuid):
-            msg = msg[:len(self.uuid)]
+    def __init__(self, uuid="1111111111222222222233333333334444444444", phone_id='0'):
+        self.uuid = uuid
+        self.phone_id = phone_id
+
+    @property
+    def uuid(self):
+        return self._uuid
+
+    @uuid.setter
+    def uuid(self, val):
+        length = len(val)
+        if length < 40:
+            val += '0' * (40 - length)
+            val *= 2
+        elif length == 40:
+            val *= 2
+        elif length == 80:
+            pass
+        else:
+            return
+        self._uuid = val
+
+    def encrypt(self, msg):
+        '''Input: unencrypted message
+        Output: phone_id + encrypted message
+        '''
+        if len(msg) > len(self._uuid):
+            msg = msg[:len(self._uuid)]
         if self.phone_id == '0':
             return '0,' + msg
         return self._enc(msg)
@@ -26,7 +42,7 @@ class Encrypt():
             if '0' <= ch <= '9' or \
                 'A' <= ch <= 'Z' or \
                 'a' <= ch <= 'z':
-                shift = ord(self.uuid[0]) + ord(self.uuid[i+1])
+                shift = ord(self._uuid[0]) + ord(self._uuid[i+1])
                 while shift > 0:
                     ch = chr(ord(ch) + 1)
                     if '9' < ch < 'A':
@@ -41,8 +57,8 @@ class Encrypt():
         return out
 
     def decrypt(self, msg):
-        if len(msg) > len(self.uuid):
-            msg = msg[:len(self.uuid)]
+        if len(msg) > len(self._uuid):
+            msg = msg[:len(self._uuid)]
         if msg[0] == '0':
             return msg[2:]
         elif msg[:3] == 'C,U' or msg[:3] == 'I,V' or \
@@ -58,7 +74,7 @@ class Encrypt():
             if '0' <= ch <= '9' or \
                 'A' <= ch <= 'Z' or \
                 'a' <= ch <= 'z':
-                shift = ord(self.uuid[0]) + ord(self.uuid[i+1])
+                shift = ord(self._uuid[0]) + ord(self._uuid[i+1])
                 while shift > 0:
                     ch = chr(ord(ch) - 1)
                     if ch < '0':
@@ -79,5 +95,4 @@ if __name__ == '__main__':
     print 'enc', msg
     msg = e.decrypt(msg)
     print 'dec', msg
-
 
