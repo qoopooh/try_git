@@ -25,6 +25,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         print "Client %s received a message: %s" % (self.id, message)
+        self.write_message("You said: " + message);
 
     def on_close(self):
         if self.id in clients:
@@ -33,7 +34,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 app = tornado.web.Application([
     (r'/', IndexHandler),
-    (r'/', WebSocketHandler),
+    (r'/ws', WebSocketHandler),
 ])
 
 if __name__ == '__main__':
