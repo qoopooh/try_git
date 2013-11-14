@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 
+############### Default Values ####################
+GATEWAY = '192.168.1.39'
+TCP_PORT = 1470
+UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf"
+###################################################
+
 import sys, getopt
 import socket
 from encrypt import Encrypt
 
-TCP_PORT = 1470
 BUFFER_SIZE = 1024
 REQ_PHONE_ID = "R,U,{uuid}\r\n"
 
 def remove_newline(msg):
     return msg.replace('\r\n','')
 
-def main(argv):
-    gateway = 'localhost'
-    uuid = "AAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD"
+def main(argv, gateway=GATEWAY, uuid=UUID):
     help_msg = argv[0] + ' -g <gateway> -u <uuid>' 
 
     try:
