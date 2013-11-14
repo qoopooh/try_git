@@ -13,8 +13,9 @@ clients = dict()
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
-        self.write("This is your response")
-        self.finish()
+        #self.write("This is your response")
+        #self.finish()
+        self.render("index.html")
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self, *args):
