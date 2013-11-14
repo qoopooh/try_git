@@ -24,7 +24,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         clients[self.id] = {"id": self.id, "object": self}
 
     def on_message(self, message):
-        print "Client %s received a message: %s" % (self.id, message)
+        print "Client %s sent a message: %s" % (self.id, message)
         self.write_message("You said: " + message);
 
     def on_close(self):

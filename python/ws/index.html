@@ -13,13 +13,12 @@
           messageContainer.innerHTML = "WebSocket is supported by your Browser!";
           var ws = new WebSocket("ws://localhost:8888/ws?Id=123456789");
           ws.onopen = function() {
-            ws.send("Message to send");
+            ws.send("Hello WebSocket");
             console.log('send');
           };
           ws.onmessage = function (evt) { 
             var received_msg = evt.data;
-            messageContainer.innerHTML = "Message is received...";
-            console.log('receive', evt.data);
+            messageContainer.innerHTML = "Message is received... " + evt.data;
           };
           ws.onclose = function() { 
             messageContainer.innerHTML = "Connection is closed...";
