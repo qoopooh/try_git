@@ -8,6 +8,9 @@ TCP_PORT = 1470
 BUFFER_SIZE = 1024
 REQ_PHONE_ID = "R,U,{uuid}\r\n"
 
+def remove_newline(msg):
+    return msg.replace('\r\n','')
+
 def main(argv):
     gateway = 'localhost'
     uuid = "AAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD"
@@ -32,19 +35,19 @@ def main(argv):
     s.connect((gateway, TCP_PORT))
     s.send(REQ_PHONE_ID.format(uuid=uuid))
     data = s.recv(BUFFER_SIZE)
-    print 'HS', data
+    print '[HANDSHAKE]', data
     if len(data) != 9:
         print 'Incorrect message'
         sys.exit(1)
     e = Encrypt()
     e.phone_id = data[4]
-    e.uuid = uuid
+    e.uuid = uuid * 2
     while True:
         data = s.recv(BUFFER_SIZE)
         if len(data) < 1:
             print 'Disconnected'
             sys.exit()
-        print "[RECV]", e.decrypt(data)
+        print "[RECV]", len(data), remove_newline(e.decrypt(data))
 
 if __name__ == "__main__":
     main(sys.argv)
