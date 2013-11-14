@@ -1,10 +1,11 @@
 package com.aae.stx10;
 
-import java.util.Enumeration;
-
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
+
+import java.util.Enumeration;
+
 
 /**
  * ST110 USB
@@ -45,5 +46,15 @@ public class App
     {
         System.out.println( "Hello World!" );
         listPorts();
+        try
+        {
+            (new TwoWaySerialComm()).connect("/dev/ttyS80");
+        }
+        catch ( Exception e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
+

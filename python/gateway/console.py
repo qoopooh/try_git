@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, getopt
-from socket import socket, AF_INET, SOCK_STREAM
+import socket
 from encrypt import Encrypt
 
 TCP_PORT = 1470
@@ -28,10 +28,11 @@ def main(argv):
             uuid = arg
 
     print gateway, uuid
-    s = socket(socket.AF_INET, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((gateway, TCP_PORT))
     s.send(REQ_PHONE_ID.format(uuid=uuid))
     data = s.recv(BUFFER_SIZE)
+    print 'HS', data
     if len(data) != 9:
         print 'Incorrect message'
         sys.exit(1)
