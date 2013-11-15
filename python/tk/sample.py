@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from Tkinter import Tk, BOTH, Frame, Button
+from Tkinter import Tk, BOTH, Frame, Button, Label
+from PIL import Image, ImageTk
 
 class App(Frame):
 
@@ -20,6 +21,11 @@ class App(Frame):
         self.hi_there["text"] = "Hello",
         self.hi_there["command"] = self.say_hi
         self.hi_there.pack({"side": "left"})
+
+        kpdf = Image.open("qt/kpdf.png")
+        self.kpdftk = ImageTk.PhotoImage(kpdf)
+        self.label1 = Label(self, image=self.kpdftk)
+        self.label1.place(x=200, y=10)
 
         self.parent.title("Sample V.01")
         self.pack(fill=BOTH, expand=1)
