@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import Tkinter
+from Tkinter import *
 
 class App(Frame):
     def say_hi(self):
@@ -18,7 +18,7 @@ class App(Frame):
         self.hi_there["text"] = "Hello",
         self.hi_there["command"] = self.say_hi
 
-        self.hi.pack({"side": "left"})
+        self.hi_there.pack({"side": "left"})
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
