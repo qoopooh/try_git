@@ -58,7 +58,7 @@ void Encrypt(char *msg, char phone_id)
 //-------------------------------------
 //
 //-------------------------------------
-void Decrypt(unsigned char *encrypted_msg)
+void Decrypt(char *encrypted_msg)
 {
   unsigned char i,shift;
   
@@ -84,6 +84,7 @@ void Decrypt(unsigned char *encrypted_msg)
     i++;
     }
     encr_decr_message[i] = LINE_FEED;
+    encr_decr_message[i+1] = '\0';
 }
 
 

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-unsigned char encr_decr_message[MAX_TX_BUFF_LEN];      // encrypted message
+char encr_decr_message[MAX_TX_BUFF_LEN];      // encrypted message
 
 const char *unit_id = \
 "11111111112222222222333333333344444444441111111111222222222233333333334444444444";
@@ -25,6 +25,8 @@ int main (int argc, char* argv[])
 
   Encrypt(msg, phone_id);
   cout << "Decrypt ends" << endl << encr_decr_message << endl;
+  Decrypt(encr_decr_message);
+  cout << "Decrypt message" << endl << encr_decr_message << endl;
 
   return 0;
 }
