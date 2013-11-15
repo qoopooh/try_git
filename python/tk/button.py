@@ -6,7 +6,7 @@ ZetCode Tkinter tutorial
 
 In this script, we use pack manager
 to position two buttons in the
-bottom right corner of the window. 
+bottom right corner of the window.
 
 author: Jan Bodnar
 last modified: December 2010
@@ -20,7 +20,7 @@ from ttk import Frame, Button, Style
 class Example(Frame):
 
     def __init__(self, parent):
-        Frame.__init__(self, parent)   
+        Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
 
@@ -46,9 +46,9 @@ def main():
     root = Tk()
     root.geometry("300x200+300+300")
     app = Example(root)
-    root.mainloop()  
+    root.mainloop()
 
 
 if __name__ == '__main__':
-    main()  
+    main()
 
