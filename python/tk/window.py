@@ -26,6 +26,7 @@ class Example(Frame):
     def initUI(self):
 
         self.parent.title("Windows")
+        self.parent.iconbitmap(default='../aae/Logo_Only.ico')
         self.style = Style()
         self.style.theme_use("default")
         self.pack(fill=BOTH, expand=1)

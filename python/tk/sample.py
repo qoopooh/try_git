@@ -22,7 +22,7 @@ class App(Frame):
         self.hi_there["command"] = self.say_hi
         self.hi_there.pack({"side": "left"})
 
-        kpdf = Image.open("qt/kpdf.png")
+        kpdf = Image.open("../qt/kpdf.png")
         self.kpdftk = ImageTk.PhotoImage(kpdf)
         self.label1 = Label(self, image=self.kpdftk)
         self.label1.place(x=200, y=10)
