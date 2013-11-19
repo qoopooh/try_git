@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
-HOST='192.168.1.153'
+HOST='127.0.0.1'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -26,7 +26,7 @@ import web
 import pyodbc
 
 WIT_NT = """
-SELECT TOP 100 NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,
+SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,Comp_Name,NewTransDetail_IsConfirm as isconf,
        Comp_ID,COUNT(Comp_ID) AS cnt
 FROM tblNewTyreTransactionDetail,tblDocument,tblCompany
 WHERE NewTransDetail_NewTrans_ID=Doc_Transaction_ID
@@ -48,8 +48,8 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
 """
 
 WIT_CUS = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,
-    ProdTransDetail_IsConfirm,Comp_ID
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
+    ProdTransDetail_IsConfirm as isconf,Comp_ID
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
@@ -91,8 +91,8 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
 """
 
 WIT_STO = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID,Comp_Name,
-    ProdTransDetail_IsConfirm,Comp_ID
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
+    ProdTransDetail_IsConfirm as isconf,Comp_ID
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
@@ -110,8 +110,8 @@ WIT_STO_ID = WIT_CUS_ID
 WIT_STO_ID_CID = WIT_CUS_ID_CID
 
 WIT_REJ = """
-SELECT TOP 100 RejectTransDetail_RejectTrans_ID,Comp_Name,
-       RejectTransDetail_IsConfirm,Comp_ID
+SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
+       RejectTransDetail_IsConfirm as isconf,Comp_ID
 FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
     (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
     FROM tblRejectTransactionDetail
@@ -230,7 +230,7 @@ WHERE Tyre_Size_ID=Size_ID
     AND Tyre_SerialNo='{sn}'
 """
 
-def ask(query, as_dict=False):
+def ask(query):
     conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' +
             DATABASE + ';UID=' + USER + ';PWD=' + PASSWORD)
 
@@ -242,6 +242,22 @@ def ask(query, as_dict=False):
     out_rows = []
     for r in rows:
         out_rows.append(tuple(r))
+    return tuple(out_rows)
+
+
+def ask_json(query):
+    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' +
+            DATABASE + ';UID=' + USER + ';PWD=' + PASSWORD)
+
+    cur = conn.cursor()
+    cur.execute(query)
+    cols = [col[0] for col in cur.description]
+    rows = cur.fetchall()
+    conn.close()
+
+    out_rows = []
+    for row in rows:
+        out_rows.append(dict(zip(cols, row)))
     return tuple(out_rows)
 
 
@@ -284,7 +300,7 @@ class Table():
         return q
 
     def show_resp(self, query):
-        resp = ask(query, as_dict=True)
+        resp = ask(query)
         resp = self.filter_PRI(resp)
 
         return render.tyretable(resp)
@@ -294,7 +310,7 @@ class Table():
             return resp
         if isinstance(resp[0], dict):
             for row in resp:
-                if row['ProdTransDetail_ProdTrans_ID'][:3] == 'PRI':
+                if row['tid'][:3] == 'PRI':
                     row['Comp_Name'] = None
                     row['Comp_ID'] = 0
         else:
@@ -316,7 +332,7 @@ class Json(Table):
         return self.show_resp(q)
 
     def show_resp(self, query):
-        resp = ask(query)
+        resp = ask_json(query)
         resp = self.filter_PRI(resp)
         web.header('Content-Type', 'application/json;charset=utf8')
         j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
@@ -335,6 +351,7 @@ template_globals = {
 render = web.template.render('templates/', globals=template_globals)
 
 if __name__ == '__main__':
+    print "Eurosoft Web Application", __version__
     app = web.application(urls, globals())
     app.run()
 
