@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 import sys
 from time import strftime, localtime
@@ -66,10 +66,8 @@ def gen_report(dt=0,department=None,startdate=0,enddate=0):
     conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa',
             database='BioStar', as_dict=True)
     cur = conn.cursor()
-    print 'param', dt, department, startdate, enddate
     if dt == 0:
         query = MONTHLY_REPORT.format(startdate=startdate, enddate=enddate)
-        print query
     elif department == 'production':
         query = PRODUCTION_REPORT.format(date=dt)
     else:
@@ -125,8 +123,10 @@ class MonthlyReport:
 
 urls = (
     '/', 'index',
-    '/monthly/', 'MonthlyReport',
+    '/report', 'TimeReport',
     '/report/', 'TimeReport',
+    '/monthly', 'MonthlyReport',
+    '/monthly/', 'MonthlyReport',
 )
 template_globals = {
     'app_path': lambda p: web.ctx.homepath + p,
