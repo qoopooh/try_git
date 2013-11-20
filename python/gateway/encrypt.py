@@ -2,9 +2,19 @@
 
 class Encrypt(object):
 
-    def __init__(self, uuid="1111111111222222222233333333334444444444", phone_id='0'):
+    def __init__(self, uuid="1111111111222222222233333333334444444444", \
+            phone_id='0', only_compatible=True):
         self.uuid = uuid
         self.phone_id = phone_id
+        self._only_app = only_compatible
+
+    @property
+    def only(self):
+        return self._only_app
+
+    @only.setter
+    def only(self, val):
+        self._only_app = val
 
     @property
     def uuid(self):
@@ -43,6 +53,8 @@ class Encrypt(object):
                 'A' <= ch <= 'Z' or \
                 'a' <= ch <= 'z':
                 shift = ord(self._uuid[0]) + ord(self._uuid[i+1])
+                if not self._only_app:
+                    shift -= 0x60
                 while shift > 0:
                     ch = chr(ord(ch) + 1)
                     if '9' < ch < 'A':
@@ -75,6 +87,8 @@ class Encrypt(object):
                 'A' <= ch <= 'Z' or \
                 'a' <= ch <= 'z':
                 shift = ord(self._uuid[0]) + ord(self._uuid[i+1])
+                if not self._only_app:
+                    shift -= 0x60
                 while shift > 0:
                     ch = chr(ord(ch) - 1)
                     if ch < '0':

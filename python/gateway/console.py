@@ -61,7 +61,8 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
             s.close()
             print 'Disconnected'
             sys.exit()
-        print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), remove_newline(e.decrypt(data))
+        print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
+                remove_newline(data[:2] + e.decrypt(data))
         if f_hex:
             print_hex(data, True)
 
