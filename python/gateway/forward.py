@@ -7,11 +7,12 @@ UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf"
 HEX = False
 ###################################################
 
-import sys, getopt
+import sys, getopt, os
 from socket import *
 from time import localtime, strftime
-from Queue import Queue
+from Queue import Queue, Empty
 from threading import Thread
+from fcntl import fcntl, F_SETFL
 
 from encrypt import Encrypt
 
@@ -28,19 +29,14 @@ def print_hex(data, p=False):
         print s
     return s
 
-def listen_gateway(s, e, q):
+def listen_gateway(s, q):
     while True:
         data = s.recv(BUFFER_SIZE)
         if not data or len(data) < 1:
             s.close()
             print 'Disconnected'
             sys.exit()
-        dec = e.decrypt(data)
-        print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
-                remove_newline(data[:2] + dec)
-        #if f_hex:
-            #print_hex(data, True)
-        q.put(dec)
+        q.put(data)
 
 
 
@@ -75,12 +71,34 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
         print 'Incorrect message'
         sys.exit(1)
     e = Encrypt(uuid=uuid, phone_id=data[4])
-    t = Thread(target=listen_gateway, args=(s, e, q_gw_recv))
+    t = Thread(target=listen_gateway, args=(s, q_gw_recv))
     t.daemon = True
     t.start()
     
+    host = socket(AF_INET, SOCK_STREAM)
+    host.bind(('localhost', TCP_PORT))
+    host.listen(1)
+    conn, addr = host.accept()
+    fcntl(conn, F_SETFL, os.O_NONEBLOCK)
+    print 'Connected by', addr
+    #while True:
+        #data = conn.recv(1024)
+        #if not data: break
+        #count += 1
+        #conn.sendall(data + str(count))
     while True:
-        pass
+        try:
+            data = q_gw_recv.get(timeout=1)
+            dec = e.decrypt(data)
+            print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
+                    remove_newline(data[:2] + dec)
+            if f_hex:
+                print_hex(data, True)
+        except Empty:
+            pass
+
+        print '.'
+    conn.close()
 
 if __name__ == "__main__":
     main(sys.argv)
