@@ -30,6 +30,8 @@ class Encrypt(object):
             val *= 2
         elif length == 80:
             pass
+        elif length > 40:
+            val = val[:40] * 2
         else:
             return
         self._uuid = val

@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 ############### Default Values ####################
+#GATEWAY = '188.82.100.29'
 GATEWAY = '192.168.1.39'
-HOST = '192.168.1.44'
+HOST = 'localhost'
 TCP_PORT = 1470
 #UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf" # chrome
-UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
+#UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
+#UUID = "unknown80f94bfcae14353012345678901234567" # android tablet
+UUID = "82b6e7e9da3f4d4f8d70cc5e1a1426c100000000" # Sergio's ipad
 HEX = False
 ###################################################
 
@@ -16,13 +19,13 @@ from socket import *
 from time import localtime, strftime
 from Queue import Queue, Empty
 from threading import Thread
-from fcntl import fcntl, F_SETFL
 
 from encrypt import Encrypt
 
 BUFFER_SIZE = 1024
 TIMEOUT = 0.05
-REQ_PHONE_ID = "R,U,{uuid}\r\n"
+REQ_UUID = "R,U"
+REQ_PHONE_ID = REQ_UUID + ",{uuid}\r\n"
 
 def remove_newline(msg):
     return msg.replace('\r\n','')
@@ -47,22 +50,23 @@ def listen_gateway(s, q):
 
 def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
     q_gw_recv = Queue()
-    help_msg = argv[0] + ' -g <gateway> -u <uuid>'
+    help_msg = argv[0] + '-h <host> -g <gateway> -u <uuid>'
+    local = HOST
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hxg:u:", ["gateway=", "uuid="])
+        opts, args = getopt.getopt(argv[1:], "xh:g:u:", \
+            ["host", "gateway=", "uuid="])
     except getopt.GetoptError:
         print help_msg
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-h':
-            print help_msg
-            sys.exit()
+        if opt in ("-h", "--host"):
+            local = arg
         elif opt in ("-g", "--gateway"):
             gateway = arg
         elif opt in ("-u", "--uuid"):
             uuid = arg
-        elif opt in ("-x", "--hex"):
+        elif opt == "-x":
             f_hex = True
 
 
@@ -82,9 +86,9 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
     t.start()
     
     host = socket(AF_INET, SOCK_STREAM)
-    host.bind((HOST, TCP_PORT))
+    host.bind((local, TCP_PORT))
     host.listen(1)
-    print '[HOST]', HOST, TCP_PORT
+    print '[HOST]', local, TCP_PORT
     conn, addr = host.accept()
     conn.settimeout(TIMEOUT)
     print 'Connected by', addr
@@ -103,6 +107,9 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
 
         try:
             data = conn.recv(1024)
+            if REQ_UUID in data:
+                e.uuid = data[data.index(REQ_UUID) + 4:]
+                print "[NEW UUID]", e.uuid
             if len(data) < 1:
                 break
             dec = e.decrypt(data)
