@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
+__version__ = '0.0.1'
+
 ############### Default Values ####################
 GATEWAY = '192.168.1.39'
+HOST = '192.168.1.44'
 TCP_PORT = 1470
-UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf"
+#UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf" # chrome
+UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
 HEX = False
 ###################################################
 
@@ -17,6 +21,7 @@ from fcntl import fcntl, F_SETFL
 from encrypt import Encrypt
 
 BUFFER_SIZE = 1024
+TIMEOUT = 0.05
 REQ_PHONE_ID = "R,U,{uuid}\r\n"
 
 def remove_newline(msg):
@@ -61,7 +66,8 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
             f_hex = True
 
 
-    print gateway, uuid
+    print '[VERSION]', __version__
+    print '[GATEWAY]', gateway, uuid
     s = socket(AF_INET, SOCK_STREAM)
     s.connect((gateway, TCP_PORT))
     s.send(REQ_PHONE_ID.format(uuid=uuid))
@@ -76,28 +82,38 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
     t.start()
     
     host = socket(AF_INET, SOCK_STREAM)
-    host.bind(('localhost', TCP_PORT))
+    host.bind((HOST, TCP_PORT))
     host.listen(1)
+    print '[HOST]', HOST, TCP_PORT
     conn, addr = host.accept()
-    fcntl(conn, F_SETFL, os.O_NONEBLOCK)
+    conn.settimeout(TIMEOUT)
     print 'Connected by', addr
-    #while True:
-        #data = conn.recv(1024)
-        #if not data: break
-        #count += 1
-        #conn.sendall(data + str(count))
+    cnt = 0
     while True:
         try:
-            data = q_gw_recv.get(timeout=1)
+            data = q_gw_recv.get(timeout=TIMEOUT)
             dec = e.decrypt(data)
             print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
                     remove_newline(data[:2] + dec)
+            conn.sendall(data)
             if f_hex:
                 print_hex(data, True)
         except Empty:
             pass
 
-        print '.'
+        try:
+            data = conn.recv(1024)
+            if len(data) < 1:
+                break
+            dec = e.decrypt(data)
+            print "[SENT %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
+                    remove_newline(data[:2] + dec)
+            s.sendall(data)
+        except timeout:
+            if cnt > 1000:
+                cnt = 0
+                print 'tout'
+
     conn.close()
 
 if __name__ == "__main__":

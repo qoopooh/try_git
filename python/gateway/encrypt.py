@@ -69,8 +69,11 @@ class Encrypt(object):
         return out
 
     def decrypt(self, msg):
-        if len(msg) > len(self._uuid):
+        len_msg = len(msg)
+        if len_msg > len(self._uuid):
             msg = msg[:len(self._uuid)]
+        elif len_msg < 5:
+            return msg
         if msg[0] == '0':
             return msg[2:]
         elif msg[:3] == 'C,U' or msg[:3] == 'I,V' or \
