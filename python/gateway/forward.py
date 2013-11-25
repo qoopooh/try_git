@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 ############### Default Values ####################
 #GATEWAY = '188.82.100.29'
@@ -8,10 +8,11 @@ GATEWAY = '192.168.1.32'
 HOST = '192.168.1.44'
 TCP_PORT = 1470
 #UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf" # chrome
-#UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
+UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
 #UUID = "unknown80f94bfcae14353012345678901234567" # android tablet
 #UUID = "82b6e7e9da3f4d4f8d70cc5e1a1426c100000000" # Sergio's ipad
-UUID = "6b6c90b1f70643baa0cd0b84ec65fc5800000000" # breeze's iphone
+#UUID = "6b6c90b1f70643baa0cd0b84ec65fc5800000000" # breeze's iphone
+#UUID = "8b9dc8142baa417bb49337343133633f00000000" # breeze's iphone 2
 HEX = False
 ONLY = True
 ###################################################
@@ -110,13 +111,13 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
         try:
             data = conn.recv(1024)
             if REQ_UUID in data:
-                e.uuid = data[data.index(REQ_UUID) + 4:]
-                print "[NEW UUID]", e.uuid
+                e.uuid = data[(data.index(REQ_UUID) + 4):]
+                print "[ENC UUID]", e.uuid
             if len(data) < 1:
                 print "[CLIENT] Disconnected"
                 conn, addr = host.accept()
                 conn.settimeout(TIMEOUT)
-                print 'Connected by', addr
+                print '[CLIENT] Connected by', addr
             dec = e.decrypt(data)
             print "[SENT %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
                     remove_newline(data[:2] + dec)
