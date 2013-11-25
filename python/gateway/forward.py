@@ -4,14 +4,16 @@ __version__ = '0.0.2'
 
 ############### Default Values ####################
 #GATEWAY = '188.82.100.29'
-GATEWAY = '192.168.1.39'
-HOST = 'localhost'
+GATEWAY = '192.168.1.32'
+HOST = '192.168.1.44'
 TCP_PORT = 1470
 #UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf" # chrome
 #UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
 #UUID = "unknown80f94bfcae14353012345678901234567" # android tablet
-UUID = "82b6e7e9da3f4d4f8d70cc5e1a1426c100000000" # Sergio's ipad
+#UUID = "82b6e7e9da3f4d4f8d70cc5e1a1426c100000000" # Sergio's ipad
+UUID = "6b6c90b1f70643baa0cd0b84ec65fc5800000000" # breeze's iphone
 HEX = False
+ONLY = True
 ###################################################
 
 import sys, getopt, os
@@ -42,7 +44,7 @@ def listen_gateway(s, q):
         data = s.recv(BUFFER_SIZE)
         if not data or len(data) < 1:
             s.close()
-            print 'Disconnected'
+            print "[SERVER] Disconnected"
             sys.exit()
         q.put(data)
 
@@ -80,7 +82,7 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
     if len(data) != 9:
         print 'Incorrect message'
         sys.exit(1)
-    e = Encrypt(uuid=uuid, phone_id=data[4])
+    e = Encrypt(uuid=uuid, phone_id=data[4], only_compatible=ONLY)
     t = Thread(target=listen_gateway, args=(s, q_gw_recv))
     t.daemon = True
     t.start()
@@ -111,7 +113,10 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
                 e.uuid = data[data.index(REQ_UUID) + 4:]
                 print "[NEW UUID]", e.uuid
             if len(data) < 1:
-                break
+                print "[CLIENT] Disconnected"
+                conn, addr = host.accept()
+                conn.settimeout(TIMEOUT)
+                print 'Connected by', addr
             dec = e.decrypt(data)
             print "[SENT %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
                     remove_newline(data[:2] + dec)
