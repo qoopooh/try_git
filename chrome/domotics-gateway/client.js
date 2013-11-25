@@ -53,6 +53,7 @@ function readData(cb) {
 
 function extractReadMessage(data, callback) {
   var str = "";
+
   if (isEncryptedMessage(data)) {
     str = decrypt(data);
   } else {
@@ -114,19 +115,19 @@ function sendCommand(cmd, callback) {
 }
 
 function requestPhoneId(callback) {
-  writeCommand("R,U," + uuid, function(str) {
+  writeCommand("0,R,U," + uuid, function(str) {
     if (str[0] === '-')
       return callback(false);
     if (str.length < 9) {
       setStatus("R,U response error");
       return callback(false);
     }
-    if (str[6] !== '1') {
+    if (str[8] !== '1') {
       setStatus("Cannot get Phone ID");
       return callback(false);
     }
-    setPhoneId(str[4], function() {
-      setCurrentPhoneId(str[4]);
+    setPhoneId(str[6], function() {
+      setCurrentPhoneId(str[6]);
       return callback(true);
     });
   });
