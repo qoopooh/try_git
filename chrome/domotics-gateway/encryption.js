@@ -7,7 +7,7 @@ var f_debug = false;
 // others data will return true
 // check before sending command
 function isEncryptionCommand(data) {
-  var code = data[2];
+  var code = data[4];
 
   if ((data[0] == '0')
       || (code == 'U')
@@ -25,8 +25,8 @@ Function: Check receiving message
 function isEncryptedMessage(data) {
 var value = new Uint8Array(data)[0];
 
-  if ((value < 49)
-      || (value > 57)) {
+  if ((value < 0x31)
+      || (value > 0x39)) {
     return false;
   }
   return true;

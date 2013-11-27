@@ -3,7 +3,8 @@
 
 __version__ = '1.0.1'
 
-HOST='127.0.0.1'
+#HOST='127.0.0.1'
+HOST='192.168.1.151'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -14,6 +15,10 @@ __all__ = (
         'WIT_CUS', 'WIT_CUS_ID',
         'WIT_STO', 'WIT_STO_ID',
         'WIT_REJ', 'WIT_REJ_ID',
+        'RCV_NT', 'RCV_NT_ID',
+        'RCV_CUS', 'RCV_CUS_ID',
+        'RCV_STO', 'RCV_STO_ID',
+        'RCV_REJ', 'RCV_REJ_ID',
         'INV_NT', 'INV_NT_ID',
         'INV_CUS', 'INV_CUS_ID',
         'INV_STO', 'INV_STO_ID',
@@ -31,8 +36,18 @@ SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,Comp_Name,NewTransDetail_IsConf
 FROM tblNewTyreTransactionDetail,tblDocument,tblCompany
 WHERE NewTransDetail_NewTrans_ID=Doc_Transaction_ID
     AND Doc_Comp_ID=Comp_ID
+    AND NewTransDetail_NewTrans_ID LIKE '%NTO%'
 GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,Comp_ID,
       Doc_Date
+ORDER BY Doc_Date DESC
+"""
+
+RCV_NT = """
+SELECT TOP 100 NewTransDetail_NewTrans_ID as tid, MAX(NewTransDetail_Serial) as sn,
+       NewTransDetail_IsConfirm as isconf
+FROM tblNewTyreTransactionDetail
+WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
+GROUP BY NewTransDetail_NewTrans_ID
 ORDER BY Doc_Date DESC
 """
 
