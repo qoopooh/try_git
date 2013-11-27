@@ -48,7 +48,6 @@ SELECT TOP 100 NewTransDetail_NewTrans_ID as tid, MAX(NewTransDetail_Serial) as 
 FROM tblNewTyreTransactionDetail
 WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
 GROUP BY NewTransDetail_NewTrans_ID
-ORDER BY Doc_Date DESC
 """
 
 WIT_NT_ID = """
@@ -62,6 +61,15 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND Comp_ID='{cid}'
 """
 
+RCV_NT_ID = """
+SELECT Tyre_SerialNo,Size_Name,Model_Name
+FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel,tblCompany
+WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
+    AND NewTransDetail_Tyre_Code=Tyre_Code
+    AND Tyre_Size_ID=Size_ID
+    AND Tyre_Model_ID=Model_ID
+    AND NewTransDetail_NewTrans_ID='{tid}'
+"""
 WIT_CUS = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
     ProdTransDetail_IsConfirm as isconf,Comp_ID
@@ -75,6 +83,24 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=p.id
     AND ProdTransDetail_Serial=p.sn
     AND Casing_OwnerBranch_ID>0
+    AND tid LIKE '%PRO%'
+ORDER BY ProdTrans_Create_Date DESC
+"""
+
+RCV_CUS = """
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
+    ProdTransDetail_IsConfirm as isconf,Comp_ID
+FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
+    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
+    FROM tblProductionTransactionDetail
+    GROUP BY ProdTransDetail_ProdTrans_ID) p
+WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND Casing_Owner_ID=Comp_ID
+    AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
+    AND ProdTransDetail_ProdTrans_ID=p.id
+    AND ProdTransDetail_Serial=p.sn
+    AND Casing_OwnerBranch_ID>0
+    AND tid LIKE '%PRI%'
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -118,6 +144,24 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=p.id
     AND ProdTransDetail_Serial=p.sn
     AND Casing_OwnerBranch_ID=-1
+    AND tid LIKE '%PRO%'
+ORDER BY ProdTrans_Create_Date DESC
+"""
+
+RCV_STO = """
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Sup_Name,
+    ProdTransDetail_IsConfirm as isconf,Sup_ID
+FROM tblProductionTransactionDetail,tblCasing,tblSupplier,tblProductionTransaction,
+    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
+    FROM tblProductionTransactionDetail
+    GROUP BY ProdTransDetail_ProdTrans_ID) p
+WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND Casing_Owner_ID=Sup_ID
+    AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
+    AND ProdTransDetail_ProdTrans_ID=p.id
+    AND ProdTransDetail_Serial=p.sn
+    AND Casing_OwnerBranch_ID=-1
+    AND tid LIKE '%PRI%'
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -136,6 +180,23 @@ WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
     AND RejectTransDetail_RejectTrans_ID=r.id
     AND RejectTransDetail_Serial=r.sn
+    AND tid LIKE '%RJO%'
+ORDER BY RejectTrans_Create_Date DESC
+"""
+
+RCV_REJ = """
+SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
+       RejectTransDetail_IsConfirm as isconf,Comp_ID
+FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
+    (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
+    FROM tblRejectTransactionDetail
+    GROUP BY RejectTransDetail_RejectTrans_ID) r
+WHERE RejectTransDetail_Casing_ID=Casing_ID
+    AND Casing_Owner_ID=Comp_ID
+    AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
+    AND RejectTransDetail_RejectTrans_ID=r.id
+    AND RejectTransDetail_Serial=r.sn
+    AND tid LIKE '%RJI%'
 ORDER BY RejectTrans_Create_Date DESC
 """
 
