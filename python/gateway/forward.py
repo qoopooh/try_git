@@ -4,7 +4,7 @@ __version__ = '0.0.3'
 
 ############### Default Values ####################
 #GATEWAY = '188.82.100.29'
-GATEWAY = '192.168.1.32'
+GATEWAY = '192.168.1.31'
 HOST = '192.168.1.44'
 TCP_PORT = 1470
 #UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf" # chrome
@@ -14,7 +14,7 @@ UUID = "0123456789ABCDEF212a7c75af448aa012345678" # android
 #UUID = "6b6c90b1f70643baa0cd0b84ec65fc5800000000" # breeze's iphone
 #UUID = "8b9dc8142baa417bb49337343133633f00000000" # breeze's iphone 2
 HEX = False
-ONLY = True
+ONLY = False
 ###################################################
 
 import sys, getopt, os
@@ -118,6 +118,7 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
                 conn, addr = host.accept()
                 conn.settimeout(TIMEOUT)
                 print '[CLIENT] Connected by', addr
+                continue
             dec = e.decrypt(data)
             print "[SENT %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
                     remove_newline(data[:2] + dec)
