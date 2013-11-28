@@ -2,6 +2,8 @@
 package com.atouch;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -145,6 +147,12 @@ public class Gui extends javax.swing.JFrame {
     }
 
     protected void updateButtonActionPerformed(ActionEvent evt) {
+        try {
+            List<Usr> usrs = Usr.getList();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
