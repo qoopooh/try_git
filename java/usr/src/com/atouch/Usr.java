@@ -1,11 +1,14 @@
 
 package com.atouch;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,16 +51,62 @@ public class Usr {
         else
             mMode = Mode.Unknown;
         mBaud = bytesToNumber(Arrays.copyOfRange(data, 24, 27));
-        System.out.println(bytesToHex(data));
+        System.out.println("[FOUND] " + bytesToHex(data));
         System.out.println("mac: " + mMac);
-        System.out.println("dest: " + mDestIp + " " + Integer.toString(mDestPort));
-        System.out.println("host: " + mHostIp + " " + Integer.toString(mHostPort));
+        System.out.println("dest: " + mDestIp + " " +
+                Integer.toString(mDestPort));
+        System.out.println("host: " + mHostIp + " " +
+                Integer.toString(mHostPort));
         System.out.println("gateway: " + mGatewayIp);
-        System.out.println("mode: " + mMode + " baud: " + Integer.toString(mBaud));
+        System.out.println("mode: " + mMode + " baud: " +
+                Integer.toString(mBaud));
     }
 
     private String extractMac(byte[] data) {
         return bytesToHex(data);
+    }
+
+    public String getMac() {
+        return mMac;
+    }
+
+    public String getIp() {
+        return mHostIp;
+    }
+
+    public String getPort() {
+        return Integer.toString(mHostPort);
+    }
+
+    /**
+     * @return
+     */
+    private byte[] getBytes() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] mac = hexStringToByteArray(mMac);
+        byte[] destIp = ipToByteArray(mDestIp);
+        byte[] destPort = intToByteArray(mDestPort, 2);
+        byte[] hostIp = ipToByteArray(mHostIp);
+        byte[] hostPort = intToByteArray(mHostPort, 2);
+        byte[] gatewayIp = ipToByteArray(mGatewayIp);
+        byte[] baud = intToByteArray(mBaud, 3);
+
+        try {
+            baos.write(mac);
+            baos.write(SETTING_MSG.getBytes());
+            baos.write(destIp);
+            baos.write(destPort);
+            baos.write(hostIp);
+            baos.write(hostPort);
+            baos.write(gatewayIp);
+            baos.write((byte) mMode.ordinal());
+            baos.write(baud);
+            baos.write(SETTING_MSG.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return baos.toByteArray();
     }
 
     public static String bytesToHex(byte[] bytes) {
@@ -99,6 +148,39 @@ public class Usr {
         return result;
     }
 
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+    public static byte[] ipToByteArray(String s) {
+        byte[] ip = new byte[4];
+        int i = ip.length - 1;
+        String[] addr = s.split("\\.");
+
+        for (String dec : addr) {
+            ip[i--] = (byte) (Integer.valueOf(dec) & 0xFF);
+        }
+
+        return ip;
+    }
+
+    public static byte[] intToByteArray(int number, int byteNr) {
+        byte[] b = new byte[byteNr];
+
+        for (int i = 0; i < byteNr; i++) {
+            b[i] = (byte) (number & 0xFF);
+            number >>= 8;
+        }
+
+        return b;
+    }
+
     public static List<Usr> getList() throws IOException {
         byte[] host_ip = InetAddress.getLocalHost().getAddress();
         DatagramSocket serverSocket = new DatagramSocket(UDP_PORT);
@@ -129,11 +211,17 @@ public class Usr {
         return out;
     }
 
-    public String getMac() {
-        return mMac;
-    }
+    public static void update(Usr u, String ip, String port) throws IOException {
+        u.mHostIp = ip;
+        u.mHostPort = Integer.valueOf(port);
 
-    public String getIp() {
-        return mHostIp;
+        byte[] buf = u.getBytes();
+        InetAddress address = InetAddress.getByName(ALL_IP);
+        DatagramPacket packet = new DatagramPacket(buf, buf.length,
+                address, UDP_PORT);
+        DatagramSocket s = new DatagramSocket(UDP_PORT);
+        s.send(packet);
+        s.close();
+        System.out.println("[UPDATE] " + bytesToHex(buf));
     }
 }

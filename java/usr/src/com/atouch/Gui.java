@@ -3,15 +3,19 @@ package com.atouch;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class Gui extends javax.swing.JFrame {
 
@@ -27,6 +31,7 @@ public class Gui extends javax.swing.JFrame {
     private DefaultListModel listModel;
     private JList list;
     private List<Usr> mUsrList;
+    private Usr mSelectedUsr;
 
     public Gui() {
         initComponents();
@@ -59,9 +64,13 @@ public class Gui extends javax.swing.JFrame {
         list = new JList(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
-        // list.addListSelectionListener(this);
-        list.setVisibleRowCount(5);
+        list.setVisibleRowCount(4);
+        list.addListSelectionListener(mLsl);
         JScrollPane listScrollPane = new JScrollPane(list);
+
+        URL iconURL = getClass().getResource("/com/atouch/logo-domotics-icon.png");
+        ImageIcon icon = new ImageIcon(iconURL);
+        setIconImage(icon.getImage());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
                 getContentPane());
@@ -145,12 +154,33 @@ public class Gui extends javax.swing.JFrame {
                                                 .addComponent(listScrollPane))
                                 .addContainerGap(21, Short.MAX_VALUE)));
         pack();
-        // updateButtonActionPerformed(null); // TODO: remove after test
+        refreshList();
     }
 
     protected void updateButtonActionPerformed(ActionEvent evt) {
+        setUsr();
+        refreshList();
+    }
+
+    private void setUsr() {
+        if (mSelectedUsr == null)
+            return;
+        try {
+            Usr.update(mSelectedUsr, ipTextField.getText(), portTextField.getText());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void refreshList() {
         try {
             listModel.clear();
+            mSelectedUsr = null;
             mUsrList = Usr.getList();
             if (mUsrList.size() < 1)
                 return;
@@ -162,6 +192,36 @@ public class Gui extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
+
+    private ListSelectionListener mLsl = new ListSelectionListener()
+    {
+        @Override
+        public void valueChanged(ListSelectionEvent evt)
+        {
+            if (evt.getValueIsAdjusting())
+            {
+                // System.out.println("Eventhandler called evt.getValueIsAdjusting() true");
+                return;
+            }
+            else
+            {
+                String val = (String) list.getSelectedValue();
+                if ((mUsrList == null) || (val == null) || (mUsrList.size() < 1))
+                    return;
+                System.out.println("[SELECT] " + val);
+                String mac = val.split(" ")[0];
+
+                for (Usr u : mUsrList) {
+                    if (!u.getMac().equals(mac))
+                        continue;
+                    ipTextField.setText(u.getIp());
+                    portTextField.setText(u.getPort());
+                    mSelectedUsr = u;
+                    break;
+                }
+            }
+        }
+    };
 
     /**
      * @param args
