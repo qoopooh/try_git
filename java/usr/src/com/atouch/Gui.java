@@ -13,10 +13,8 @@ public class Gui extends javax.swing.JFrame {
 	 * 
 	 */
     private static final long serialVersionUID = 1L;
-    private JTextField tempTextField;
-    private JLabel celsiusLabel;
-    private JButton convertButton;
-    private JLabel fahrenheitLabel;
+    private JButton updateButton;
+    private JLabel dummyLabel;
     private JLabel ipLabel;
     private JTextField ipTextField;
     private JLabel portLabel;
@@ -27,28 +25,24 @@ public class Gui extends javax.swing.JFrame {
     }
 
     private void initComponents() {
-        tempTextField = new javax.swing.JTextField();
-        celsiusLabel = new javax.swing.JLabel();
-        convertButton = new javax.swing.JButton();
-        fahrenheitLabel = new javax.swing.JLabel();
+        updateButton = new javax.swing.JButton();
+        dummyLabel = new javax.swing.JLabel();
         ipLabel = new javax.swing.JLabel();
         ipTextField = new javax.swing.JTextField();
         portLabel = new javax.swing.JLabel();
         portTextField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Celsius Converter");
+        setTitle("Domotics Gateway Setting");
 
-        celsiusLabel.setText("Celsius");
-
-        convertButton.setText("Convert");
-        convertButton.addActionListener(new java.awt.event.ActionListener() {
+        updateButton.setText("Update");
+        updateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                convertButtonActionPerformed(evt);
+                updateButtonActionPerformed(evt);
             }
         });
 
-        fahrenheitLabel.setText("Fahrenheit");
+        dummyLabel.setText("                                   ");
         ipLabel.setText("Module IP:");
         portLabel.setText("Module Port:");
 
@@ -88,16 +82,16 @@ public class Gui extends javax.swing.JFrame {
                                                 .addGroup(
                                                         layout.createSequentialGroup()
                                                                 .addComponent(
-                                                                        convertButton)
+                                                                        updateButton)
                                                                 .addPreferredGap(
                                                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(
-                                                                        fahrenheitLabel)))
+                                                                        dummyLabel)))
                                 .addContainerGap(27, Short.MAX_VALUE)));
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL,
                 new java.awt.Component[] {
-                        convertButton, ipLabel, portLabel
+                        updateButton, ipLabel, portLabel
                 });
 
         layout.setVerticalGroup(layout
@@ -130,18 +124,13 @@ public class Gui extends javax.swing.JFrame {
                                 .addGroup(
                                         layout.createParallelGroup(
                                                 javax.swing.GroupLayout.Alignment.BASELINE)
-                                                .addComponent(convertButton)
-                                                .addComponent(fahrenheitLabel))
+                                                .addComponent(updateButton)
+                                                .addComponent(dummyLabel))
                                 .addContainerGap(21, Short.MAX_VALUE)));
         pack();
     }
 
-    protected void convertButtonActionPerformed(ActionEvent evt) {
-        String c = tempTextField.getText();
-        int tempFahr = (int) ((Double.parseDouble(c))
-                * 1.8 + 32);
-        System.out.println("Convert " + c + " celsius");
-        fahrenheitLabel.setText(tempFahr + " Fahrenheit");
+    protected void updateButtonActionPerformed(ActionEvent evt) {
     }
 
     /**
