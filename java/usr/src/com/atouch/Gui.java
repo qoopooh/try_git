@@ -17,6 +17,10 @@ public class Gui extends javax.swing.JFrame {
     private JLabel celsiusLabel;
     private JButton convertButton;
     private JLabel fahrenheitLabel;
+    private JLabel ipLabel;
+    private JTextField ipTextField;
+    private JLabel portLabel;
+    private JTextField portTextField;
 
     public Gui() {
         initComponents();
@@ -27,6 +31,10 @@ public class Gui extends javax.swing.JFrame {
         celsiusLabel = new javax.swing.JLabel();
         convertButton = new javax.swing.JButton();
         fahrenheitLabel = new javax.swing.JLabel();
+        ipLabel = new javax.swing.JLabel();
+        ipTextField = new javax.swing.JTextField();
+        portLabel = new javax.swing.JLabel();
+        portTextField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Celsius Converter");
@@ -41,6 +49,8 @@ public class Gui extends javax.swing.JFrame {
         });
 
         fahrenheitLabel.setText("Fahrenheit");
+        ipLabel.setText("Module IP:");
+        portLabel.setText("Module Port:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
                 getContentPane());
@@ -56,14 +66,25 @@ public class Gui extends javax.swing.JFrame {
                                                 .addGroup(
                                                         layout.createSequentialGroup()
                                                                 .addComponent(
-                                                                        tempTextField,
+                                                                        ipLabel,
                                                                         javax.swing.GroupLayout.PREFERRED_SIZE,
                                                                         javax.swing.GroupLayout.DEFAULT_SIZE,
                                                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(
                                                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(
-                                                                        celsiusLabel))
+                                                                        ipTextField))
+                                                .addGroup(
+                                                        layout.createSequentialGroup()
+                                                                .addComponent(
+                                                                        portLabel,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        portTextField))
                                                 .addGroup(
                                                         layout.createSequentialGroup()
                                                                 .addComponent(
@@ -76,7 +97,7 @@ public class Gui extends javax.swing.JFrame {
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL,
                 new java.awt.Component[] {
-                        convertButton, tempTextField
+                        convertButton, ipLabel, portLabel
                 });
 
         layout.setVerticalGroup(layout
@@ -88,11 +109,22 @@ public class Gui extends javax.swing.JFrame {
                                         layout.createParallelGroup(
                                                 javax.swing.GroupLayout.Alignment.BASELINE)
                                                 .addComponent(
-                                                        tempTextField,
+                                                        ipLabel,
                                                         javax.swing.GroupLayout.PREFERRED_SIZE,
                                                         javax.swing.GroupLayout.DEFAULT_SIZE,
                                                         javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(celsiusLabel))
+                                                .addComponent(ipTextField))
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(
+                                        layout.createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(
+                                                        portLabel,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(portTextField))
                                 .addPreferredGap(
                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(
@@ -105,8 +137,10 @@ public class Gui extends javax.swing.JFrame {
     }
 
     protected void convertButtonActionPerformed(ActionEvent evt) {
-        int tempFahr = (int) ((Double.parseDouble(tempTextField.getText()))
+        String c = tempTextField.getText();
+        int tempFahr = (int) ((Double.parseDouble(c))
                 * 1.8 + 32);
+        System.out.println("Convert " + c + " celsius");
         fahrenheitLabel.setText(tempFahr + " Fahrenheit");
     }
 
