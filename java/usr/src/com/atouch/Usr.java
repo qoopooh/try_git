@@ -128,4 +128,12 @@ public class Usr {
         serverSocket.close();
         return out;
     }
+
+    public String getMac() {
+        return mMac;
+    }
+
+    public String getIp() {
+        return mHostIp;
+    }
 }

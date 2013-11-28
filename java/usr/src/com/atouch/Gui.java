@@ -26,6 +26,7 @@ public class Gui extends javax.swing.JFrame {
     private JTextField portTextField;
     private DefaultListModel listModel;
     private JList list;
+    private List<Usr> mUsrList;
 
     public Gui() {
         initComponents();
@@ -144,12 +145,19 @@ public class Gui extends javax.swing.JFrame {
                                                 .addComponent(listScrollPane))
                                 .addContainerGap(21, Short.MAX_VALUE)));
         pack();
-        updateButtonActionPerformed(null); // TODO: remove after test
+        // updateButtonActionPerformed(null); // TODO: remove after test
     }
 
     protected void updateButtonActionPerformed(ActionEvent evt) {
         try {
-            List<Usr> usrs = Usr.getList();
+            listModel.clear();
+            mUsrList = Usr.getList();
+            if (mUsrList.size() < 1)
+                return;
+            for (Usr u : mUsrList) {
+                String item = u.getMac() + " " + u.getIp();
+                listModel.addElement(item);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
