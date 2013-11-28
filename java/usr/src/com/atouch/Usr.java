@@ -38,18 +38,18 @@ public class Usr {
 
     public Usr(byte[] data) {
         mMac = extractMac(Arrays.copyOfRange(data, 0, 6));
-        mDestIp = bytesToIp(Arrays.copyOfRange(data, 7, 11));
-        mDestPort = bytesToNumber(Arrays.copyOfRange(data, 11, 13));
-        mHostIp = bytesToIp(Arrays.copyOfRange(data, 13, 17));
-        mHostPort = bytesToNumber(Arrays.copyOfRange(data, 17, 19));
-        mGatewayIp = bytesToIp(Arrays.copyOfRange(data, 19, 23));
+        mDestIp = BinaryConversion.bytesToIp(Arrays.copyOfRange(data, 7, 11));
+        mDestPort = BinaryConversion.bytesToNumber(Arrays.copyOfRange(data, 11, 13));
+        mHostIp = BinaryConversion.bytesToIp(Arrays.copyOfRange(data, 13, 17));
+        mHostPort = BinaryConversion.bytesToNumber(Arrays.copyOfRange(data, 17, 19));
+        mGatewayIp = BinaryConversion.bytesToIp(Arrays.copyOfRange(data, 19, 23));
         int mode = (data[23] & 0xFF);
         if (mode < Mode.values().length)
             mMode = Mode.values()[mode];
         else
             mMode = Mode.Unknown;
-        mBaud = bytesToNumber(Arrays.copyOfRange(data, 24, 27));
-        System.out.println("[FOUND] " + bytesToHex(data));
+        mBaud = BinaryConversion.bytesToNumber(Arrays.copyOfRange(data, 24, 27));
+        System.out.println("[FOUND] " + BinaryConversion.bytesToHex(data));
         System.out.println("mac: " + mMac);
         System.out.println("dest: " + mDestIp + " " +
                 Integer.toString(mDestPort));
@@ -61,7 +61,7 @@ public class Usr {
     }
 
     private String extractMac(byte[] data) {
-        return bytesToHex(data);
+        return BinaryConversion.bytesToHex(data);
     }
 
     public String getMac() {
@@ -81,13 +81,13 @@ public class Usr {
      */
     private byte[] getBytes() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] mac = hexStringToByteArray(mMac);
-        byte[] destIp = ipToByteArray(mDestIp);
-        byte[] destPort = intToByteArray(mDestPort, 2);
-        byte[] hostIp = ipToByteArray(mHostIp);
-        byte[] hostPort = intToByteArray(mHostPort, 2);
-        byte[] gatewayIp = ipToByteArray(mGatewayIp);
-        byte[] baud = intToByteArray(mBaud, 3);
+        byte[] mac = BinaryConversion.hexStringToByteArray(mMac);
+        byte[] destIp = BinaryConversion.ipToByteArray(mDestIp);
+        byte[] destPort = BinaryConversion.intToByteArray(mDestPort, 2);
+        byte[] hostIp = BinaryConversion.ipToByteArray(mHostIp);
+        byte[] hostPort = BinaryConversion.intToByteArray(mHostPort, 2);
+        byte[] gatewayIp = BinaryConversion.ipToByteArray(mGatewayIp);
+        byte[] baud = BinaryConversion.intToByteArray(mBaud, 3);
 
         try {
             baos.write(mac);
@@ -105,78 +105,6 @@ public class Usr {
         }
 
         return baos.toByteArray();
-    }
-
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        int v;
-        for (int j = 0; j < bytes.length; j++) {
-            v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
-    public static String bytesToIp(byte[] bytes) {
-        String ip = new String();
-
-        int b = (bytes[bytes.length - 1] & 0xFF);
-        ip = Integer.toString(b);
-        for (int j = bytes.length - 2; j >= 0; j--) {
-            b = (bytes[j] & 0xFF);
-            ip += '.' + Integer.toString(b);
-        }
-        return ip;
-    }
-
-    /**
-     * Little endian conversion
-     * 
-     * @param bytes
-     * @return number
-     */
-    public static int bytesToNumber(byte[] bytes) {
-        int result = 0;
-        int digit = 0;
-
-        for (byte b : bytes) {
-            result += (b & 0xFF) << (8 * digit++);
-        }
-        return result;
-    }
-
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
-    public static byte[] ipToByteArray(String s) {
-        byte[] ip = new byte[4];
-        int i = ip.length - 1;
-        String[] addr = s.split("\\.");
-
-        for (String dec : addr) {
-            ip[i--] = (byte) (Integer.valueOf(dec) & 0xFF);
-        }
-
-        return ip;
-    }
-
-    public static byte[] intToByteArray(int number, int byteNr) {
-        byte[] b = new byte[byteNr];
-
-        for (int i = 0; i < byteNr; i++) {
-            b[i] = (byte) (number & 0xFF);
-            number >>= 8;
-        }
-
-        return b;
     }
 
     public static List<Usr> getList() throws IOException {
@@ -220,6 +148,6 @@ public class Usr {
         DatagramSocket s = new DatagramSocket(UDP_PORT);
         s.send(packet);
         s.close();
-        System.out.println("[UPDATE] " + bytesToHex(buf));
+        System.out.println("[UPDATE] " + BinaryConversion.bytesToHex(buf));
     }
 }
