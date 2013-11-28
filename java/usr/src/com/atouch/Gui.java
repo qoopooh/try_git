@@ -144,13 +144,13 @@ public class Gui extends javax.swing.JFrame {
                                                 .addComponent(listScrollPane))
                                 .addContainerGap(21, Short.MAX_VALUE)));
         pack();
+        updateButtonActionPerformed(null); // TODO: remove after test
     }
 
     protected void updateButtonActionPerformed(ActionEvent evt) {
         try {
             List<Usr> usrs = Usr.getList();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
