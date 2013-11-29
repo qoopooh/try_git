@@ -24,7 +24,7 @@
 //    - result of encrypted char is always another char
 //    - routine uses a sequence of pw[] characters as password
 //-------------------------------------
-void Encrypt(char *msg, char phone_id)
+void Encrypt(unsigned char *msg, char phone_id)
 {
   unsigned char i,shift;
 
@@ -58,7 +58,7 @@ void Encrypt(char *msg, char phone_id)
 //-------------------------------------
 //
 //-------------------------------------
-void Decrypt(char *encrypted_msg)
+void Decrypt(unsigned char *encrypted_msg)
 {
   unsigned char i,shift;
   

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-char encr_decr_message[MAX_TX_BUFF_LEN];      // encrypted message
+unsigned char encr_decr_message[MAX_TX_BUFF_LEN];      // encrypted message
 
 const char *unit_id = \
 "11111111111111111111111111111111111111111111111111111111111111111111111111111111";
@@ -12,7 +12,7 @@ const char *unit_id = \
 
 const char *k_list = "E,L,1\n";
 
-char msg[80];
+unsigned char msg[80];
 char phone_id;
 
 int main (int argc, char* argv[])
@@ -21,7 +21,7 @@ int main (int argc, char* argv[])
   memcpy(msg, k_list, strlen(k_list));
   cout << "UUID: " << unit_id << endl;
   cout << "Unit: " << phone_id << endl;
-  cout << msg << endl;
+  cout << "Message: " << msg << endl;
 
   Encrypt(msg, phone_id);
   cout << "Encrypt message: " << encr_decr_message << endl;
