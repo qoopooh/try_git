@@ -11,18 +11,20 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 public class Gui extends javax.swing.JFrame {
 
-    /**
-	 * 
-	 */
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.1";
+    public static final String PASSKEY = "A-touch";
+
     private static final long serialVersionUID = 1L;
     private JButton updateButton;
     private JLabel ipLabel;
@@ -34,8 +36,12 @@ public class Gui extends javax.swing.JFrame {
     private List<Usr> mUsrList;
     private Usr mSelectedUsr;
 
+    private boolean pass;
+
     public Gui() {
         initComponents();
+        refreshList();
+        pass = false;
     }
 
     private void initComponents() {
@@ -57,6 +63,16 @@ public class Gui extends javax.swing.JFrame {
 
         ipLabel.setText("Module IP:");
         portLabel.setText("Module Port:");
+        ipTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateButtonActionPerformed(evt);
+            }
+        });
+        portTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateButtonActionPerformed(evt);
+            }
+        });
 
         listModel = new DefaultListModel();
         listModel.addElement("0057C7294D62 192.168.1.254");
@@ -72,6 +88,22 @@ public class Gui extends javax.swing.JFrame {
         URL iconURL = getClass().getResource("/com/atouch/logo-domotics-icon.png");
         ImageIcon icon = new ImageIcon(iconURL);
         setIconImage(icon.getImage());
+
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
                 getContentPane());
@@ -155,17 +187,32 @@ public class Gui extends javax.swing.JFrame {
                                                 .addComponent(listScrollPane))
                                 .addContainerGap(21, Short.MAX_VALUE)));
         pack();
-        refreshList();
     }
 
     protected void updateButtonActionPerformed(ActionEvent evt) {
+        String cmd = evt.getActionCommand();
+        System.out.println("[ACTION] " + cmd);
+        if (!pass) {
+            String aWord = PASSKEY;
+            PassDialog pd = new PassDialog(this, aWord);
+            pd.setVisible(true);
+            if (!pd.getResult())
+                return;
+            pass = true;
+        }
         setUsr();
         refreshList();
     }
 
     private void setUsr() {
-        if (mSelectedUsr == null)
+        if (mSelectedUsr == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select the module first.",
+                    "Try again",
+                    JOptionPane.ERROR_MESSAGE);
             return;
+        }
         try {
             Usr.update(mSelectedUsr, ipTextField.getText(), portTextField.getText());
         } catch (IOException e) {

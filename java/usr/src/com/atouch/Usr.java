@@ -17,6 +17,7 @@ public class Usr {
     static final String SETTING_MSG = "110415";
     static final String ALL_IP = "192.168.1.255";
     static final int UDP_PORT = 1500;
+    static final boolean DEBUG = false;
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     public enum Mode {
@@ -50,14 +51,13 @@ public class Usr {
             mMode = Mode.Unknown;
         mBaud = BinaryConversion.bytesToNumber(Arrays.copyOfRange(data, 24, 27));
         System.out.println("[FOUND] " + BinaryConversion.bytesToHex(data));
+        if (!DEBUG)
+            return;
         System.out.println("mac: " + mMac);
-        System.out.println("dest: " + mDestIp + " " +
-                Integer.toString(mDestPort));
-        System.out.println("host: " + mHostIp + " " +
-                Integer.toString(mHostPort));
+        System.out.println("dest: " + mDestIp + " " + Integer.toString(mDestPort));
+        System.out.println("host: " + mHostIp + " " + Integer.toString(mHostPort));
         System.out.println("gateway: " + mGatewayIp);
-        System.out.println("mode: " + mMode + " baud: " +
-                Integer.toString(mBaud));
+        System.out.println("mode: " + mMode + " baud: " + Integer.toString(mBaud));
     }
 
     private String extractMac(byte[] data) {
