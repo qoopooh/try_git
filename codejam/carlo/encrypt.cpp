@@ -33,7 +33,7 @@ void Encrypt(char *msg, char phone_id)
   i=2;              // first char is phone number [1,9], not encrypted
   while (msg[i-2] != LINE_FEED)
     {
-    shift = unit_id[i-1] + unit_id[0];
+    shift = unit_id[i-1] + unit_id[0] - 0x60;
     encr_decr_message[i] = msg[i-2];
     if ((encr_decr_message[i] >= '0' && encr_decr_message[i] <= '9') || (encr_decr_message[i] >= 'A' && encr_decr_message[i] <= 'Z') || (encr_decr_message[i] >= 'a' && encr_decr_message[i] <= 'z'))
       {
@@ -65,7 +65,7 @@ void Decrypt(char *encrypted_msg)
   i=0;              // first char is phone number [1,9], not encrypted
   while (encrypted_msg[i+2] != LINE_FEED)
     {
-    shift = unit_id[i+1] + unit_id[0];
+    shift = unit_id[i+1] + unit_id[0] - 0x60;
     encr_decr_message[i] = encrypted_msg[i+2];
     if ((encr_decr_message[i] >= '0' && encr_decr_message[i] <= '9') || (encr_decr_message[i] >= 'A' && encr_decr_message[i] <= 'Z') || (encr_decr_message[i] >= 'a' && encr_decr_message[i] <= 'z'))
       {

@@ -7,7 +7,8 @@ using namespace std;
 char encr_decr_message[MAX_TX_BUFF_LEN];      // encrypted message
 
 const char *unit_id = \
-"11111111112222222222333333333344444444441111111111222222222233333333334444444444";
+"11111111111111111111111111111111111111111111111111111111111111111111111111111111";
+//"11111111112222222222333333333344444444441111111111222222222233333333334444444444";
 
 const char *k_list = "E,L,1\n";
 
@@ -16,17 +17,17 @@ char phone_id;
 
 int main (int argc, char* argv[])
 {
-  phone_id = '8';
+  phone_id = '2';
   memcpy(msg, k_list, strlen(k_list));
-  cout << "Decrypt beginning" << endl;
-  cout << unit_id << endl;
-  cout << phone_id << endl;
+  cout << "UUID: " << unit_id << endl;
+  cout << "Unit: " << phone_id << endl;
   cout << msg << endl;
 
   Encrypt(msg, phone_id);
-  cout << "Decrypt ends" << endl << encr_decr_message << endl;
+  cout << "Encrypt message: " << encr_decr_message << endl;
   Decrypt(encr_decr_message);
-  cout << "Decrypt message" << endl << encr_decr_message << endl;
+  cout << "Decrypt message: " << encr_decr_message << endl;
 
   return 0;
 }
+
