@@ -43,11 +43,10 @@ ORDER BY Doc_Date DESC
 """
 
 RCV_NT = """
-SELECT TOP 100 NewTransDetail_NewTrans_ID as tid, MAX(NewTransDetail_Serial) as sn,
+SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,
        NewTransDetail_IsConfirm as isconf
 FROM tblNewTyreTransactionDetail
 WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
-GROUP BY NewTransDetail_NewTrans_ID
 """
 
 WIT_NT_ID = """
@@ -63,13 +62,14 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
 
 RCV_NT_ID = """
 SELECT Tyre_SerialNo,Size_Name,Model_Name
-FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel,tblCompany
+FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel
 WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND NewTransDetail_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
     AND Tyre_Model_ID=Model_ID
     AND NewTransDetail_NewTrans_ID='{tid}'
 """
+
 WIT_CUS = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
     ProdTransDetail_IsConfirm as isconf,Comp_ID
@@ -83,7 +83,7 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=p.id
     AND ProdTransDetail_Serial=p.sn
     AND Casing_OwnerBranch_ID>0
-    AND tid LIKE '%PRO%'
+    AND ProdTransDetail_ProdTrans_ID LIKE '%PRO%'
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -100,7 +100,7 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=p.id
     AND ProdTransDetail_Serial=p.sn
     AND Casing_OwnerBranch_ID>0
-    AND tid LIKE '%PRI%'
+    AND ProdTransDetail_ProdTrans_ID LIKE '%PRI%'
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -131,6 +131,9 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID='{tid}'
 """
 
+RCV_CUS_ID_CID = WIT_CUS_ID_CID
+RCV_CUS_ID = WIT_CUS_ID
+
 WIT_STO = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
     ProdTransDetail_IsConfirm as isconf,Comp_ID
@@ -144,7 +147,7 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=p.id
     AND ProdTransDetail_Serial=p.sn
     AND Casing_OwnerBranch_ID=-1
-    AND tid LIKE '%PRO%'
+    AND ProdTransDetail_ProdTrans_ID LIKE '%PRO%'
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -161,12 +164,12 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=p.id
     AND ProdTransDetail_Serial=p.sn
     AND Casing_OwnerBranch_ID=-1
-    AND tid LIKE '%PRI%'
+    AND ProdTransDetail_ProdTrans_ID LIKE '%PRI%'
 ORDER BY ProdTrans_Create_Date DESC
 """
 
 WIT_STO_ID = WIT_CUS_ID
-WIT_STO_ID_CID = WIT_CUS_ID_CID
+RCV_STO_ID = WIT_STO_ID
 
 WIT_REJ = """
 SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
@@ -208,8 +211,9 @@ WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND Casing_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
     AND RejectTransDetail_RejectTrans_ID='{tid}'
-    AND Casing_Owner_ID='{cid}'
 """
+
+RCV_REJ_ID = WIT_REJ_ID
 
 INV_NT = """
 SELECT Size_Name,COUNT(Size_ID) as Qty
@@ -364,6 +368,18 @@ class Table():
         elif act=='WIT_STO_ID': q=WIT_STO_ID.format(tid=i['tid'],cid=i['cid'])
         elif act=='WIT_REJ': q=WIT_REJ
         elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='RCV_NT': q=RCV_NT
+        elif act=='RCV_NT_ID': q=RCV_NT_ID.format(tid=i['tid'])
+        elif act=='RCV_CUS': q=RCV_CUS
+        elif act=='RCV_CUS_ID':
+            if i['cid'] is not None:
+                q=RCV_CUS_ID_CID.format(tid=i['tid'],cid=i['cid'])
+            else:
+                q=RCV_CUS_ID.format(tid=i['tid'])
+        elif act=='RCV_STO': q=RCV_STO
+        elif act=='RCV_STO_ID': q=RCV_STO_ID.format(tid=i['tid'])
+        elif act=='RCV_REJ': q=RCV_REJ
+        elif act=='RCV_REJ_ID': q=RCV_REJ_ID.format(tid=i['tid'],cid=i['cid'])
         elif act=='INV_NT': q=INV_NT
         elif act=='INV_NT_ID': q=INV_NT_ID.format(sz=i['sz'])
         elif act=='INV_CUS': q=INV_CUS
