@@ -25,7 +25,7 @@ void StReader::onReadyRead()
 
 void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
 {
-    raiseStatusMessage(tr("Get command no. ") + QString::number((int)cmdName));
+//    raiseStatusMessage(tr("Get command no. ") + QString::number((int)cmdName));
     switch (cmdName) {
     case AaeCommand::CmdGetSerialNumber: {
         QByteArray ba = aaeCommand->getPayload ();
@@ -70,17 +70,22 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
         }
         int id_len = (int) ba.at (5);
         if (ba.size () >= id_len + 6) {
-          QByteArray tag_id = ba.mid (6, id_len);
-          emit readingEpc (tag_id.toHex ());
-          emit readingEpcString (tag_id.data());
+            QByteArray tag_id = ba.mid (6, id_len);
+            emit readingEpc (tag_id.toHex ());
+            emit readingEpcString (tag_id.data());
 
-          biotag->fromEpc(tag_id.data(), tag_id.length());
-          emit readingTagCode(QString(biotag->getCode().c_str()));
+            biotag->fromEpc(tag_id.data(), tag_id.length());
+            emit readingTagCode(QString(biotag->getCode().c_str()));
         }
         delete biotag;
     }
         break;
     case AaeCommand::CmdHeartbeatInterrupt: {
+        static int hb_count = 0;
+
+        ++hb_count;
+//        if (hb_count % 3 == 0)
+            raiseStatusMessage(tr("Heartbeat: ") + QString::number((int)hb_count));
         emit heartbeatSignal ();
     }
         break;

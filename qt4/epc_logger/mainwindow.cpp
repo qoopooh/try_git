@@ -126,7 +126,7 @@ void MainWindow::onEpc(const QByteArray &ba)
 
   msg += ba.data();
   ui->textEditLog->append(msg);
-  setShelfAndBag(ba.data());
+  setEpcNumber(ba.data());
 }
 
 void MainWindow::onEpcString(const QString &epc)
@@ -149,7 +149,7 @@ void MainWindow::insertDupplicatedTag(const QString epc)
   msg += ", " + QString::number(prev_epc_count);
 }
 
-void MainWindow::setShelfAndBag(const QByteArray &epchex)
+void MainWindow::setEpcNumber(const QByteArray &epchex)
 {
   BiominTag tag;
   QByteArray ba(QByteArray::fromHex(epchex));
@@ -158,16 +158,16 @@ void MainWindow::setShelfAndBag(const QByteArray &epchex)
 
   tag.fromEpc(ba.data(), ba.length());
   data.append(tag.getCode().c_str());
-  if ((tag.getType() == BiominTag::Cabinet) && (data.compare(ui->lineEditShelf->text()) != 0)) {
-//    if ((epc[0] == 'S') && (data.compare(ui->lineEditShelf->text()) != 0)) {
-    ui->lineEditShelf->setText(data);
-    ui->lineEditShelf->setStyleSheet("QLineEdit{background: orange;}");
-    shelf_changed_tout = 300;
-  } else if ((tag.getType() == BiominTag::Bag) && (data.compare(ui->lineEditBag->text()) != 0)) {
-//  } else if ((epc[0] == 'B') && (data.compare(ui->lineEditBag->text()) != 0)) {
-    ui->lineEditBag->setText(data);
-    ui->lineEditBag->setStyleSheet("QLineEdit{background: orange;}");
-    bag_changed_tout = 300;
+  if ((tag.getType() == BiominTag::Cabinet) && (data.compare(ui->lineEditCount->text()) != 0)) {
+//    if ((epc[0] == 'S') && (data.compare(ui->lineEditCount->text()) != 0)) {
+    ui->lineEditCount->setText(data);
+    ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
+    count_changed_tout = 300;
+  } else if ((tag.getType() == BiominTag::Bag) && (data.compare(ui->lineEditTotal->text()) != 0)) {
+//  } else if ((epc[0] == 'B') && (data.compare(ui->lineEditTotal->text()) != 0)) {
+    ui->lineEditTotal->setText(data);
+    ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
+    db_changed_tout = 300;
   }
 }
 
@@ -183,16 +183,16 @@ void MainWindow::on10msTimer()
     if ((clk10msCounter % 50) == 0) {
     }
 
-    if (shelf_changed_tout) {
-      --shelf_changed_tout;
-      if (!shelf_changed_tout) {
-        ui->lineEditShelf->setStyleSheet("QLineEdit{background: white;}");
+    if (count_changed_tout) {
+      --count_changed_tout;
+      if (!count_changed_tout) {
+        ui->lineEditCount->setStyleSheet("QLineEdit{background: white;}");
       }
     }
-    if (bag_changed_tout) {
-      --bag_changed_tout;
-      if (!bag_changed_tout) {
-        ui->lineEditBag->setStyleSheet("QLineEdit{background: white;}");
+    if (db_changed_tout) {
+      --db_changed_tout;
+      if (!db_changed_tout) {
+        ui->lineEditTotal->setStyleSheet("QLineEdit{background: white;}");
       }
     }
 }
@@ -218,10 +218,10 @@ void MainWindow::on_pushButtonClear_clicked()
   prev_epc = "";
   prev_epc_count = 0;
 
-  ui->lineEditShelf->setText("-");
-  ui->lineEditShelf->setStyleSheet("QLineEdit{background: white;}");
-  ui->lineEditBag->setText("-");
-  ui->lineEditBag->setStyleSheet("QLineEdit{background: white;}");
+  ui->lineEditCount->setText("-");
+  ui->lineEditCount->setStyleSheet("QLineEdit{background: white;}");
+  ui->lineEditTotal->setText("-");
+  ui->lineEditTotal->setStyleSheet("QLineEdit{background: white;}");
   ui->textEditLog->clear();
   delete model;
   model = new EpcTreeModel("");

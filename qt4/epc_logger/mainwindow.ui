@@ -156,12 +156,12 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Shelf:</string>
+         <string>Count:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEditShelf">
+       <widget class="QLineEdit" name="lineEditCount">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
@@ -193,12 +193,12 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Bag:  </string>
+         <string>Total:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEditBag">
+       <widget class="QLineEdit" name="lineEditTotal">
         <property name="font">
          <font>
           <pointsize>14</pointsize>

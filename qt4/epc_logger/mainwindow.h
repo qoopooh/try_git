@@ -61,15 +61,15 @@ private:
     bool vcom;
     QString prev_epc;
     int prev_epc_count;
-    int shelf_changed_tout;
-    int bag_changed_tout;
+    int count_changed_tout;
+    int db_changed_tout;
 
     QTimer *clk10msTimer;
     quint32 clk10msCounter;
 
     void getReaderChannels();
     void insertDupplicatedTag(const QString);
-    void setShelfAndBag(const QByteArray &);
+    void setEpcNumber(const QByteArray &);
     void updateActions();
 };
 
