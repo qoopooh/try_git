@@ -6,7 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     vcom(false),
     prev_epc(""),
-    prev_epc_count(0)
+    prev_epc_count(0),
+    m_db(new EpcDb())
 {
     ui->setupUi(this);
     createLogTable();
@@ -144,10 +145,11 @@ void MainWindow::setEpcNumber(const QByteArray &epchex)
     ui->lineEditCount->setText(QString::number(tree_count));
     ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
     count_changed_tout = 300;
-//  } else if ((tag.getType() == BiominTag::Bag) && (data.compare(ui->lineEditTotal->text()) != 0)) {
-//    ui->lineEditTotal->setText(data);
-//    ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
-//    db_changed_tout = 300;
+    if (m_db->addEpc(epchex)) {
+      ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
+        ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
+        db_changed_tout = 300;
+    }
   }
 }
 

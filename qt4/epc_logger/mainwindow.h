@@ -10,6 +10,7 @@
 #include "streader.h"
 #include "aaecommand.h"
 #include "epctreemodel.h"
+#include "epcdb.h"
 
 namespace Ui {
     class MainWindow;
@@ -51,6 +52,7 @@ private:
     int prev_epc_count;
     int count_changed_tout;
     int db_changed_tout;
+    EpcDb *m_db;
 
     QTimer *clk10msTimer;
     quint32 clk10msCounter;

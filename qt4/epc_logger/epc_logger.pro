@@ -4,14 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 include(../lib/qextserialport-1.2rc/src/qextserialport.pri)
 CONFIG += qextserialport
 lessThan(QT_MAJOR_VERSION, 5) {
 } else {
   QT += widgets
 }
-TARGET = Shelf-and-bag
+TARGET = EpcLogger
 TEMPLATE = app
 
 HEADERS  += mainwindow.h \
@@ -20,7 +20,8 @@ HEADERS  += mainwindow.h \
     streader.h \
     aaereader.h \
     epctreeitem.h \
-    epctreemodel.h
+    epctreemodel.h \
+    epcdb.h
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -29,7 +30,8 @@ SOURCES += main.cpp\
     streader.cpp \
     aaereader.cpp \
     epctreeitem.cpp \
-    epctreemodel.cpp
+    epctreemodel.cpp \
+    epcdb.cpp
 
 FORMS    += mainwindow.ui
 
@@ -39,6 +41,8 @@ RESOURCES += \
 win32 {
 #    RC_FILE = tiretag.rc
 }
+
+
 
 
 
