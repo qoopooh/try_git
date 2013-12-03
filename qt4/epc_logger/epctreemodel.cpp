@@ -181,3 +181,7 @@ void EpcTreeModel::insertEpc(const QString &epc)
   rootItem->appendChild(item);
 }
 
+int EpcTreeModel::count()
+{
+  return rootItem->childCount();
+}

@@ -59,7 +59,6 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
     }
         break;
     case AaeCommand::CmdInventorySingle: {
-        BiominTag *biotag = new BiominTag();
         QByteArray ba = aaeCommand->getPayload();
         int id_count = (int) ba.at (1);
         if (id_count < 1) {
@@ -73,11 +72,7 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
             QByteArray tag_id = ba.mid (6, id_len);
             emit readingEpc (tag_id.toHex ());
             emit readingEpcString (tag_id.data());
-
-            biotag->fromEpc(tag_id.data(), tag_id.length());
-            emit readingTagCode(QString(biotag->getCode().c_str()));
         }
-        delete biotag;
     }
         break;
     case AaeCommand::CmdHeartbeatInterrupt: {
@@ -90,18 +85,13 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
     }
         break;
     case AaeCommand::CmdInventoryCyclicInterrupt: {
-        BiominTag *biotag = new BiominTag();
         QByteArray ba = aaeCommand->getPayload();
         int len = (int) ba.at (1);
         if (ba.size () >= len + 2) {
             ba = ba.mid (2, len);
             emit readingEpc (ba.toHex ());
             emit readingEpcString (QString(ba.data()));
-
-            biotag->fromEpc(ba.data(), ba.length());
-            emit readingTagCode(QString(biotag->getCode().c_str()));
         }
-        delete biotag;
     }
         break;
     default:

@@ -25,6 +25,7 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
     void insertEpc(const QString &epc);
+    int count();
 
 signals:
 

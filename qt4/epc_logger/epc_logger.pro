@@ -20,8 +20,7 @@ HEADERS  += mainwindow.h \
     streader.h \
     aaereader.h \
     epctreeitem.h \
-    epctreemodel.h \
-    biomin.h
+    epctreemodel.h
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -30,8 +29,7 @@ SOURCES += main.cpp\
     streader.cpp \
     aaereader.cpp \
     epctreeitem.cpp \
-    epctreemodel.cpp \
-    biomin.cpp
+    epctreemodel.cpp
 
 FORMS    += mainwindow.ui
 
@@ -41,6 +39,8 @@ RESOURCES += \
 win32 {
 #    RC_FILE = tiretag.rc
 }
+
+
 
 
 

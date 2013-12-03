@@ -20,13 +20,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(stReader, SIGNAL(raiseStatusMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
     connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
     connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
-//    connect(stReader, SIGNAL(readingEpcString(QString)), this, SLOT(onEpcString(QString)));
-    connect(stReader, SIGNAL(readingTagCode(QString)), this, SLOT(onEpcString(QString)));
 
     connect(clk10msTimer, SIGNAL(timeout()), this, SLOT(on10msTimer()));
     clk10msTimer->start(10);
     clk10msCounter = 0;
 
+    channel = ui->comboBoxPort->currentText();
+    stReader->connectReader(channel);
+    ui->checkBoxConnect->setChecked(true);
     ui->statusBar->showMessage(tr("Started!"));
 }
 
@@ -67,7 +68,6 @@ void MainWindow::getReaderChannels()
         ui->comboBoxPort->addItem(channels.at(i));
     }
     ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1); // for window
-//    ui->comboBoxPort->setCurrentIndex(0); // for ttyACM0
 }
 
 void MainWindow::on_checkBoxConnect_clicked(bool checked)
@@ -76,7 +76,6 @@ void MainWindow::on_checkBoxConnect_clicked(bool checked)
         if (stReader->isConnected())
             return;
         channel = ui->comboBoxPort->currentText();
-
         stReader->connectReader(channel);
     } else {
         if (!stReader->isConnected())
@@ -131,43 +130,24 @@ void MainWindow::onEpc(const QByteArray &ba)
 
 void MainWindow::onEpcString(const QString &epc)
 {
-  insertDupplicatedTag(epc);
   model->insertEpc(epc);
   updateActions();
 }
 
-void MainWindow::insertDupplicatedTag(const QString epc)
-{
-  QString msg;
-  QString epc_id, epc_count;
-
-  prev_epc = epc;
-  prev_epc_count = 1;
-  msg = QTime::currentTime().toString("hh:mm:ss.zzz") + " EPC: ";
-  msg += epc;
-//    setShelfAndBag(epc);
-  msg += ", " + QString::number(prev_epc_count);
-}
-
 void MainWindow::setEpcNumber(const QByteArray &epchex)
 {
-  BiominTag tag;
-  QByteArray ba(QByteArray::fromHex(epchex));
-//  QString data = epc.mid(1);
-  QString data;
+  static int tree_count = 0;
 
-  tag.fromEpc(ba.data(), ba.length());
-  data.append(tag.getCode().c_str());
-  if ((tag.getType() == BiominTag::Cabinet) && (data.compare(ui->lineEditCount->text()) != 0)) {
-//    if ((epc[0] == 'S') && (data.compare(ui->lineEditCount->text()) != 0)) {
-    ui->lineEditCount->setText(data);
+  onEpcString(epchex);
+  if (model->count() != tree_count) {
+    tree_count = model->count();
+    ui->lineEditCount->setText(QString::number(tree_count));
     ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
     count_changed_tout = 300;
-  } else if ((tag.getType() == BiominTag::Bag) && (data.compare(ui->lineEditTotal->text()) != 0)) {
-//  } else if ((epc[0] == 'B') && (data.compare(ui->lineEditTotal->text()) != 0)) {
-    ui->lineEditTotal->setText(data);
-    ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
-    db_changed_tout = 300;
+//  } else if ((tag.getType() == BiominTag::Bag) && (data.compare(ui->lineEditTotal->text()) != 0)) {
+//    ui->lineEditTotal->setText(data);
+//    ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
+//    db_changed_tout = 300;
   }
 }
 
@@ -210,7 +190,6 @@ void MainWindow::on_pushButtonStop_clicked()
 void MainWindow::on_pushButtonSingle_clicked()
 {
   stReader->inventorySingle();
-  //stReader->sendTestData();
 }
 
 void MainWindow::on_pushButtonClear_clicked()

@@ -3,7 +3,6 @@
 
 #include "aaereader.h"
 #include "aaecommand.h"
-#include "biomin.h"
 
 class StReader : public AaeReader
 {

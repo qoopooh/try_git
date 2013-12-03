@@ -20,18 +20,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    enum FLASH_STATE{
-        FLASH_STATE_IDLE,
-        FLASH_STATE_GOTOBL,
-        FLASH_STATE_GOTOBL_DELAY,
-        FLASH_STATE_STARTBL,
-        FLASH_STATE_FLASHING,
-        FLASH_STATE_FLASHED,
-        FLASH_STATE_GOTOFW,
-        FLASH_STATE_FAIL,
-        FLASH_STATE_UNDEF = 0xFE
-    };
-
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -68,7 +56,6 @@ private:
     quint32 clk10msCounter;
 
     void getReaderChannels();
-    void insertDupplicatedTag(const QString);
     void setEpcNumber(const QByteArray &);
     void updateActions();
 };
