@@ -8,7 +8,7 @@ class EpcDb
 public:
     EpcDb();
     ~EpcDb();
-    bool addEpc(const QByteArray &epchex);
+    bool addEpc(const QByteArray &epchex, int atten);
     int getEpcCount();
     void clear();
 

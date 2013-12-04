@@ -57,7 +57,6 @@ private:
     EpcDb *m_db;
 
     QTimer *clk10msTimer;
-    quint32 clk10msCounter;
 
     void getReaderChannels();
     void setEpcNumber(const QByteArray &);

@@ -9,35 +9,34 @@ MainWindow::MainWindow(QWidget *parent) :
     prev_epc_count(0),
     m_db(new EpcDb())
 {
-    ui->setupUi(this);
-    createLogTable();
+  ui->setupUi(this);
+  createLogTable();
 
-    stReader = new StReader(this);
-    clk10msTimer = new QTimer(this);
-    getReaderChannels();
+  stReader = new StReader(this);
+  clk10msTimer = new QTimer(this);
+  getReaderChannels();
 
-    connect(stReader, SIGNAL(connection(bool)), this, SLOT(setConnectingControl(bool)));
-    connect(stReader, SIGNAL(raiseErrorMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
-    connect(stReader, SIGNAL(raiseStatusMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
-    connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
-    connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
-    connect(ui->actionE_xit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->actionE_xport, SIGNAL(triggered()), this, SLOT(onExportDatabase()));
-    connect(ui->action_Delete, SIGNAL(triggered()), this, SLOT(onDeleteDatabase()));
+  connect(stReader, SIGNAL(connection(bool)), this, SLOT(setConnectingControl(bool)));
+  connect(stReader, SIGNAL(raiseErrorMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
+  connect(stReader, SIGNAL(raiseStatusMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
+  connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
+  connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
+  connect(ui->actionE_xit, SIGNAL(triggered()), this, SLOT(close()));
+  connect(ui->actionE_xport, SIGNAL(triggered()), this, SLOT(onExportDatabase()));
+  connect(ui->action_Delete, SIGNAL(triggered()), this, SLOT(onDeleteDatabase()));
 
-    connect(clk10msTimer, SIGNAL(timeout()), this, SLOT(on10msTimer()));
-    clk10msTimer->start(10);
-    clk10msCounter = 0;
+  connect(clk10msTimer, SIGNAL(timeout()), this, SLOT(on10msTimer()));
+  clk10msTimer->start(10);
 
-    channel = ui->comboBoxPort->currentText();
-    stReader->connectReader(channel);
-    ui->checkBoxConnect->setChecked(true);
-    ui->statusBar->showMessage(tr("Started!"));
+  channel = ui->comboBoxPort->currentText();
+  stReader->connectReader(channel);
+  ui->checkBoxConnect->setChecked(true);
+  ui->statusBar->showMessage(tr("Started!"));
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+  delete ui;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -61,17 +60,17 @@ void MainWindow::createLogTable()
 
 void MainWindow::on_pushButtonRefresh_clicked()
 {
-    getReaderChannels();
+  getReaderChannels();
 }
 void MainWindow::getReaderChannels()
 {
-    QList<QString> channels = AaeReader::discovery();
+  QList<QString> channels = AaeReader::discovery();
 
-    ui->comboBoxPort->clear();
-    for (int i = 0; i<channels.size(); i++){
-        ui->comboBoxPort->addItem(channels.at(i));
-    }
-    ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1); // for window
+  ui->comboBoxPort->clear();
+  for (int i = 0; i<channels.size(); i++){
+    ui->comboBoxPort->addItem(channels.at(i));
+  }
+  ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1); // for window
 }
 
 void MainWindow::on_checkBoxConnect_clicked(bool checked)
@@ -148,10 +147,10 @@ void MainWindow::setEpcNumber(const QByteArray &epchex)
     ui->lineEditCount->setText(QString::number(tree_count));
     ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
     count_changed_tout = 300;
-    if (m_db->addEpc(epchex)) {
+    if (m_db->addEpc(epchex, 0)) {
       ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
-        ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
-        db_changed_tout = 300;
+      ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
+      db_changed_tout = 300;
     }
   }
 }
@@ -163,11 +162,6 @@ void MainWindow::updateActions()
 
 void MainWindow::on10msTimer()
 {
-  clk10msCounter++;
-
-//  if ((clk10msCounter % 50) == 0) {
-//  }
-
   if (count_changed_tout) {
     --count_changed_tout;
     if (!count_changed_tout) {
