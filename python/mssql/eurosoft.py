@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 #HOST='127.0.0.1'
-HOST='192.168.1.151'
+HOST='192.168.1.152'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -183,7 +183,7 @@ WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
     AND RejectTransDetail_RejectTrans_ID=r.id
     AND RejectTransDetail_Serial=r.sn
-    AND tid LIKE '%RJO%'
+    AND RejectTransDetail_RejectTrans_ID LIKE '%RJO%'
 ORDER BY RejectTrans_Create_Date DESC
 """
 
@@ -199,7 +199,7 @@ WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
     AND RejectTransDetail_RejectTrans_ID=r.id
     AND RejectTransDetail_Serial=r.sn
-    AND tid LIKE '%RJI%'
+    AND RejectTransDetail_RejectTrans_ID LIKE '%RJI%'
 ORDER BY RejectTrans_Create_Date DESC
 """
 
@@ -365,21 +365,17 @@ class Table():
             else:
                 q=WIT_CUS_ID.format(tid=i['tid'])
         elif act=='WIT_STO': q=WIT_STO
-        elif act=='WIT_STO_ID': q=WIT_STO_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_STO_ID': q=WIT_STO_ID.format(tid=i['tid'])
         elif act=='WIT_REJ': q=WIT_REJ
-        elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_REJ_ID': q=WIT_REJ_ID.format(tid=i['tid'])
         elif act=='RCV_NT': q=RCV_NT
         elif act=='RCV_NT_ID': q=RCV_NT_ID.format(tid=i['tid'])
         elif act=='RCV_CUS': q=RCV_CUS
-        elif act=='RCV_CUS_ID':
-            if i['cid'] is not None:
-                q=RCV_CUS_ID_CID.format(tid=i['tid'],cid=i['cid'])
-            else:
-                q=RCV_CUS_ID.format(tid=i['tid'])
+        elif act=='RCV_CUS_ID': q=RCV_CUS_ID.format(tid=i['tid'])
         elif act=='RCV_STO': q=RCV_STO
         elif act=='RCV_STO_ID': q=RCV_STO_ID.format(tid=i['tid'])
         elif act=='RCV_REJ': q=RCV_REJ
-        elif act=='RCV_REJ_ID': q=RCV_REJ_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='RCV_REJ_ID': q=RCV_REJ_ID.format(tid=i['tid'])
         elif act=='INV_NT': q=INV_NT
         elif act=='INV_NT_ID': q=INV_NT_ID.format(sz=i['sz'])
         elif act=='INV_CUS': q=INV_CUS
