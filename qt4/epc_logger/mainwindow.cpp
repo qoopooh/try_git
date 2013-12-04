@@ -30,7 +30,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
   channel = ui->comboBoxPort->currentText();
   stReader->connectReader(channel);
-  stReader->getAttenuation();
   ui->checkBoxConnect->setChecked(true);
   ui->statusBar->showMessage(tr("Started!"));
 }
@@ -45,9 +44,9 @@ void MainWindow::resizeEvent(QResizeEvent *event)
   int w = event->size().width();
   int h = event->size().height();
 
-  ui->tabWidgetLog->resize(w - 20, h - 150);
-  ui->treeViewLog->resize(w - 20, h - 170);
-  ui->textEditLog->resize(w - 20, h - 170);
+  ui->tabWidgetLog->resize(w - 20, h - 170);
+  ui->treeViewLog->resize(w - 20, h - 190);
+  ui->textEditLog->resize(w - 20, h - 190);
   ui->groupBoxControl->resize(w - 20, ui->groupBoxControl->size().height());
 }
 
@@ -141,6 +140,7 @@ void MainWindow::onEpcString(const QString &epc)
 void MainWindow::onAttenuation(const int &attn)
 {
   m_attn = attn;
+  stReader->inventoryCyclic(true);
 }
 
 void MainWindow::setEpcNumber(const QByteArray &epchex)
@@ -196,7 +196,8 @@ void MainWindow::onExportDatabase()
 void MainWindow::onDeleteDatabase()
 {
   QMessageBox::StandardButton reply;
-  reply = QMessageBox::question(this, "Database Clean Up", "Do you really want to delete database?",
+  reply = QMessageBox::question(this, "Database Clean Up",
+                                "Do you really want to delete database?",
                                 QMessageBox::Yes|QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     qDebug() << "Yes was clicked";
@@ -208,7 +209,7 @@ void MainWindow::onDeleteDatabase()
 
 void MainWindow::on_pushButtonStart_clicked()
 {
-  stReader->inventoryCyclic(true);
+  stReader->getAttenuation();
 }
 
 void MainWindow::on_pushButtonStop_clicked()

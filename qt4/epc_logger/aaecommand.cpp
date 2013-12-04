@@ -255,6 +255,13 @@ void AaeCommand::switchCheckingCmd12()
         }
     }
         break;
+    case READER_RF: {
+        switch (cmd2) {
+        case GET_ATTENUATION: cmd = CmdGetAttenuation; break;
+        default: cmd = CmdUndef; break;
+        }
+    }
+        break;
     case READER_CONTROL: {
         switch (cmd2) {
         case SET_HEART_BEAT: cmd = CmdSetHeartbeat; break;
@@ -342,6 +349,11 @@ void AaeCommand::switchSendingCmd12(const AAE_COMMAND _command, int *_payloadSiz
     case CmdSwitchFwMode: {
         dataPacket.append ((char) READER_COMMON);
         dataPacket.append ((char) SWITCH_FW_MODE);
+    }
+        break;
+    case CmdGetAttenuation: {
+        dataPacket.append ((char) READER_RF);
+        dataPacket.append ((char) GET_ATTENUATION);
     }
         break;
     case CmdSetHeartbeat: {

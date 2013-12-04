@@ -105,12 +105,12 @@ public:
 
     /* From Reader SW Tool */
     enum GROUP_REPORT_ID_AAE{
-        READER_COMMON  		= 0x01,
-        READER_RF           	= 0x02,
-        READER_CONTROL   	= 0x03,
-        READER_TAG_MODE   	= 0x04,
-        TAG_FUNCTIONS   	= 0x50,
-        INTERRUPT           	= 0x90
+        READER_COMMON               = 0x01,
+        READER_RF                   = 0x02,
+        READER_CONTROL              = 0x03,
+        READER_TAG_MODE             = 0x04,
+        TAG_FUNCTIONS               = 0x50,
+        INTERRUPT                   = 0x90
     };
     enum READER_COMMON_GROUP{
         GET_SERIAL_NUMBER           = 0x01,

@@ -59,7 +59,7 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
         break;
     case AaeCommand::CmdGetAttenuation: {
         QByteArray ba = aaeCommand->getPayload();
-        emit attenuation(static_cast<int>(ba[2]));
+        emit attenuation(static_cast<int>(ba[4]));
         }
         break;
     case AaeCommand::CmdInventoryCyclic: {
