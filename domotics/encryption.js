@@ -64,7 +64,7 @@ function encrypt(data) {
     if (((out[i] >= 48) && (out[i] <= 57))
         || ((out[i] >= 65) && (out[i] <= 90))
         || ((out[i] >= 97) && (out[i] <= 122))) {
-      shift = uid[i-1] + uid[0];
+      shift = uid[i-1] + uid[0] - 0x60;
       if (f_debug) {
         log('shift: ' + shift);
         log('out[' + i + ']: ' + out[i]);
@@ -103,7 +103,7 @@ function decrypt(data) {
     if (((out[i] >= 48) && (out[i] <= 57))
         || ((out[i] >= 65) && (out[i] <= 90))
         || ((out[i] >= 97) && (out[i] <= 122))) {
-      shift = uid[i+1] + uid[0];
+      shift = uid[i+1] + uid[0] - 0x60;
       if (f_debug) {
         log('shift: ' + shift);
         log('out[' + i + ']: ' + out[i]);

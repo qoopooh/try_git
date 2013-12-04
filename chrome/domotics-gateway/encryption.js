@@ -81,7 +81,7 @@ function encrypt(data) {
     if (((dat >= 48) && (dat <= 57))
         || ((dat >= 65) && (dat <= 90))
         || ((dat >= 97) && (dat <= 122))) {
-      shift = uid[i-1] + uid[0];
+      shift = uid[i-1] + uid[0] - 0x60;
       if (f_debug) {
         console.log('shift: ' + shift);
         console.log('out[' + i + ']: ' + dat);
@@ -121,7 +121,7 @@ function decrypt(data) {
     if (((dat >= 48) && (dat <= 57))
         || ((dat >= 65) && (dat <= 90))
         || ((dat >= 97) && (dat <= 122))) {
-      shift = uid[i+1] + uid[0];
+      shift = uid[i+1] + uid[0] - 0x60;
       if (f_debug) {
         console.log('shift: ' + shift);
         console.log('out[' + i + ']: ' + dat);

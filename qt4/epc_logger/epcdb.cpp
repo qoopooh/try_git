@@ -65,6 +65,28 @@ int EpcDb::getEpcCount()
 
 void EpcDb::clear()
 {
-
+  db.open();
+  QSqlQuery query("DELETE FROM epc");
+  query.exec();
+  db.close();
 }
 
+void EpcDb::report(const QString &path)
+{
+  int number = 0;
+
+  qDebug() << "File name: " << path;
+  QFile file(path);
+  file.open(QIODevice::WriteOnly);
+  QTextStream stream(&file);
+  db.open();
+  QSqlQuery query("SELECT * FROM epc");
+  while (query.next()) {
+    ++number;
+    stream << "'" << query.value(0).toString() << "," << query.value(1).toString()
+           << "," << query.value(2).toString() << endl;
+  }
+  qDebug() << "count " << number;
+  file.close();
+  db.close();
+}

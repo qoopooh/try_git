@@ -39,6 +39,7 @@ signals:
     void request(const QString &s);
     void error(const QString &s);
     void timeout(const QString &s);
+    void attenuation(const int &attn);
 
 public slots:
     void disconnectReader();

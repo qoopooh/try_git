@@ -5,8 +5,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     vcom(false),
-    prev_epc(""),
-    prev_epc_count(0),
+    m_attn(-1),
     m_db(new EpcDb())
 {
   ui->setupUi(this);
@@ -21,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(stReader, SIGNAL(raiseStatusMessage(QString)), ui->statusBar, SLOT(showMessage(QString)));
   connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
   connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
+  connect(stReader, SIGNAL(attenuation(int)), this, SLOT(onAttenuation(int)));
   connect(ui->actionE_xit, SIGNAL(triggered()), this, SLOT(close()));
   connect(ui->actionE_xport, SIGNAL(triggered()), this, SLOT(onExportDatabase()));
   connect(ui->action_Delete, SIGNAL(triggered()), this, SLOT(onDeleteDatabase()));
@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   channel = ui->comboBoxPort->currentText();
   stReader->connectReader(channel);
+  stReader->getAttenuation();
   ui->checkBoxConnect->setChecked(true);
   ui->statusBar->showMessage(tr("Started!"));
 }
@@ -137,6 +138,11 @@ void MainWindow::onEpcString(const QString &epc)
   updateActions();
 }
 
+void MainWindow::onAttenuation(const int &attn)
+{
+  m_attn = attn;
+}
+
 void MainWindow::setEpcNumber(const QByteArray &epchex)
 {
   static int tree_count = 0;
@@ -147,7 +153,7 @@ void MainWindow::setEpcNumber(const QByteArray &epchex)
     ui->lineEditCount->setText(QString::number(tree_count));
     ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
     count_changed_tout = 300;
-    if (m_db->addEpc(epchex, 0)) {
+    if (m_db->addEpc(epchex, m_attn)) {
       ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
       ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
       db_changed_tout = 300;
@@ -184,7 +190,7 @@ void MainWindow::onExportDatabase()
     return;
   if (!fn.endsWith(".csv", Qt::CaseInsensitive))
     fn += ".csv"; // default
-  qDebug() << "File name: " << fn;
+  m_db->report(fn);
 }
 
 void MainWindow::onDeleteDatabase()
@@ -194,7 +200,7 @@ void MainWindow::onDeleteDatabase()
                                 QMessageBox::Yes|QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     qDebug() << "Yes was clicked";
-    close();
+    m_db->clear();
   } else {
     qDebug() << "Yes was *not* clicked";
   }
@@ -217,12 +223,9 @@ void MainWindow::on_pushButtonSingle_clicked()
 
 void MainWindow::on_pushButtonClear_clicked()
 {
-  prev_epc = "";
-  prev_epc_count = 0;
-
   ui->lineEditCount->setText("-");
   ui->lineEditCount->setStyleSheet("QLineEdit{background: white;}");
-  ui->lineEditTotal->setText("-");
+  ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
   ui->lineEditTotal->setStyleSheet("QLineEdit{background: white;}");
   ui->textEditLog->clear();
   delete model;

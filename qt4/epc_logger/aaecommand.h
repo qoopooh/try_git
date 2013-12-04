@@ -1,4 +1,4 @@
-﻿#ifndef AAECOMMAND_H
+#ifndef AAECOMMAND_H
 #define AAECOMMAND_H
 
 #include <QObject>
@@ -177,6 +177,7 @@ public:
     QByteArray inventoryCyclic(const INVENTORY_MODE inventoryMode);
     QByteArray inventorySingle();
     QByteArray getPayload();
+    QByteArray getAttenuation();
     /* Boot Loader */
     QByteArray getReaderTypeCommand();
     QByteArray getHardwareRevisionCommand();

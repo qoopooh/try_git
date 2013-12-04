@@ -34,6 +34,7 @@ private slots:
     void onReaderPacketIn(const QByteArray &input);
     void onEpc(const QByteArray &);
     void onEpcString(const QString &);
+    void onAttenuation(const int &);
     void on10msTimer();
     void onExportDatabase();
     void onDeleteDatabase();
@@ -50,10 +51,9 @@ private:
     StReader *stReader;
     QString channel;
     bool vcom;
-    QString prev_epc;
-    int prev_epc_count;
     int count_changed_tout;
     int db_changed_tout;
+    int m_attn;
     EpcDb *m_db;
 
     QTimer *clk10msTimer;

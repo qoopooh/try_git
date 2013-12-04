@@ -52,11 +52,20 @@ void StReader::emitCommand(AaeCommand::AAE_COMMAND cmdName)
     case AaeCommand::CmdGetSoftwareRevision:
     case AaeCommand::CmdGetBootloaderRevision:
     case AaeCommand::CmdSwitchBlMode:
-    case AaeCommand::CmdSwitchFwMode:
+    case AaeCommand::CmdSwitchFwMode: {
+        QByteArray ba = aaeCommand->getPayload();
+        emit dataReceived(ba.toHex ());
+        }
+        break;
+    case AaeCommand::CmdGetAttenuation: {
+        QByteArray ba = aaeCommand->getPayload();
+        emit attenuation(static_cast<int>(ba[2]));
+        }
+        break;
     case AaeCommand::CmdInventoryCyclic: {
         QByteArray ba = aaeCommand->getPayload();
         emit dataReceived(ba.toHex ());
-    }
+        }
         break;
     case AaeCommand::CmdInventorySingle: {
         QByteArray ba = aaeCommand->getPayload();
@@ -103,6 +112,12 @@ void StReader::sendTestData()
 {
   sendDataToReader(aaeCommand->getSoftwareRevisionCommand());
 }
+
+void StReader::getAttenuation()
+{
+  sendDataToReader(aaeCommand->getAttenuation());
+}
+
 void StReader::inventorySingle()
 {
   sendDataToReader(aaeCommand->inventorySingle());

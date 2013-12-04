@@ -10,6 +10,7 @@ class StReader : public AaeReader
 public:
     StReader(QObject *parent = 0);
     void sendTestData();
+    void getAttenuation();
     void inventorySingle();
     void inventoryCyclic(bool);
     bool gotoBootloaderMode();

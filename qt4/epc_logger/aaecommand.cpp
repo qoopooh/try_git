@@ -1,4 +1,4 @@
-﻿#include "aaecommand.h"
+#include "aaecommand.h"
 
 AaeCommand::AaeCommand(QObject *parent) :
     QObject(parent)
@@ -391,13 +391,17 @@ QByteArray AaeCommand::inventoryCyclic(const INVENTORY_MODE inventoryMode)
 }
 QByteArray AaeCommand::inventorySingle()
 {
-    QByteArray _payload;
-
-    return setCommand(AaeCommand::CmdInventorySingle, 0, NULL);
+  return setCommand(AaeCommand::CmdInventorySingle, 0, NULL);
 }
+
+QByteArray AaeCommand::getAttenuation()
+{
+  return setCommand(AaeCommand::CmdGetAttenuation, 0, NULL);
+}
+
 QByteArray AaeCommand::getPayload()
 {
-    return payload;
+  return payload;
 }
 
 /* Boot Loader */

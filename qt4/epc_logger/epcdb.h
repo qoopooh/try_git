@@ -11,6 +11,7 @@ public:
     bool addEpc(const QByteArray &epchex, int atten);
     int getEpcCount();
     void clear();
+    void report(const QString &path);
 
 private:
     QSqlDatabase db;
