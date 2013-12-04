@@ -10,6 +10,7 @@ public:
     ~EpcDb();
     bool addEpc(const QByteArray &epchex);
     int getEpcCount();
+    void clear();
 
 private:
     QSqlDatabase db;

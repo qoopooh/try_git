@@ -35,6 +35,8 @@ private slots:
     void onEpc(const QByteArray &);
     void onEpcString(const QString &);
     void on10msTimer();
+    void onExportDatabase();
+    void onDeleteDatabase();
 
     void on_checkBoxConnect_clicked(bool checked);
     void on_pushButtonStart_clicked();
