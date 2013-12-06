@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Tire Tag Logger V0.01</string>
+   <string>Tire Tag Logger V0.02</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
@@ -117,7 +117,7 @@
       <string>Stop</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButtonSingle">
+    <widget class="QPushButton" name="pushButtonAttenuation">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -127,7 +127,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Single</string>
+      <string>Attenuation</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonClear">

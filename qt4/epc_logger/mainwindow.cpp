@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     vcom(false),
+    attenuation_tout(200),
     m_attn(-1),
     m_db(new EpcDb())
 {
@@ -105,6 +106,9 @@ void MainWindow::onReaderPacketIn(const QByteArray &input)
     case AaeCommand::CmdGetSerialNumber:
       msg += "sn.: ";
       break;
+    case AaeCommand::CmdGetAttenuation:
+      msg += "Attenuation.: ";
+      break;
     case AaeCommand::CmdInventoryCyclic:
       msg += "Inventory cyclic: ";
       break;
@@ -140,7 +144,6 @@ void MainWindow::onEpcString(const QString &epc)
 void MainWindow::onAttenuation(const int &attn)
 {
   m_attn = attn;
-  stReader->inventoryCyclic(true);
 }
 
 void MainWindow::setEpcNumber(const QByteArray &epchex)
@@ -180,6 +183,12 @@ void MainWindow::on10msTimer()
       ui->lineEditTotal->setStyleSheet("QLineEdit{background: white;}");
     }
   }
+  if (attenuation_tout) {
+    --attenuation_tout;
+    if (!attenuation_tout) {
+      stReader->getAttenuation();
+    }
+  }
 }
 
 void MainWindow::onExportDatabase()
@@ -209,7 +218,8 @@ void MainWindow::onDeleteDatabase()
 
 void MainWindow::on_pushButtonStart_clicked()
 {
-  stReader->getAttenuation();
+  stReader->inventoryCyclic(true);
+  ui->tabWidgetLog->setCurrentIndex(0);
 }
 
 void MainWindow::on_pushButtonStop_clicked()
@@ -217,9 +227,10 @@ void MainWindow::on_pushButtonStop_clicked()
   stReader->inventoryCyclic(false);
 }
 
-void MainWindow::on_pushButtonSingle_clicked()
+void MainWindow::on_pushButtonAttenuation_clicked()
 {
-  stReader->inventorySingle();
+  stReader->getAttenuation();
+  ui->tabWidgetLog->setCurrentIndex(1);
 }
 
 void MainWindow::on_pushButtonClear_clicked()
