@@ -2,13 +2,16 @@
 
 import os
 
+def rem(f):
+    os.remove(f)
+    print f
+
 for root, dirs, files in os.walk("./"):
     for name in files:
-        if name.endswith((".bak", ".o", ".hzo", ".hzx", ".eep")):
-            os.remove(os.path.join(root, name))
-            print name
+        if name.endswith((".bak", ".o", ".hzo", ".hzx", ".eep", ".~PrjGrp", \
+                    ".db")):
+            rem(os.path.join(root, name))
         if "conflicted" in name:
-            os.remove(os.path.join(root, name))
-            print name
+            rem(os.path.join(root, name))
 
 
