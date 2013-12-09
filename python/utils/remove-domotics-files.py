@@ -2,16 +2,23 @@
 
 import os
 
-def rem(f):
+def rem(name, path=None):
+    if path is None:
+        f = name
+    else:
+        f = os.path.join(path, name)
+
     os.remove(f)
-    print f
+    print "[DEL]", f
 
 for root, dirs, files in os.walk("./"):
     for name in files:
-        if name.endswith((".bak", ".o", ".hzo", ".hzx", ".eep", ".~PrjGrp", \
-                    ".db")):
-            rem(os.path.join(root, name))
+        if name.endswith(( \
+                    ".bak", ".o", ".hzo", ".hzx", ".eep", ".~PrjGrp", \
+                    )):
+            # Cannot remove *.db since subversion
+            rem(name=name, path=root)
         if "conflicted" in name:
-            rem(os.path.join(root, name))
+            rem(name=name, path=root)
 
 
