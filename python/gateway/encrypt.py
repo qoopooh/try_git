@@ -3,10 +3,11 @@
 class Encrypt(object):
 
     def __init__(self, uuid="1111111111222222222233333333334444444444", \
-            phone_id='0', only_compatible=True):
+            phone_id='0', only_compatible=False):
         self.uuid = uuid
         self.phone_id = phone_id
         self._only_app = only_compatible
+        print self.uuid, self.phone_id, self._only_app
 
     @property
     def only(self):

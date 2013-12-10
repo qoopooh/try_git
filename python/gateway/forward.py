@@ -27,7 +27,7 @@ from encrypt import Encrypt
 
 BUFFER_SIZE = 1024
 TIMEOUT = 0.05
-REQ_UUID = "R,U"
+REQ_UUID = "0,R,U"
 REQ_PHONE_ID = REQ_UUID + ",{uuid}\r\n"
 
 def remove_newline(msg):
@@ -80,10 +80,10 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
     s.send(REQ_PHONE_ID.format(uuid=uuid))
     data = s.recv(BUFFER_SIZE)
     print '[HANDSHAKE]', data
-    if len(data) != 9:
+    if len(data) != 11:
         print 'Incorrect message'
         sys.exit(1)
-    e = Encrypt(uuid=uuid, phone_id=data[4], only_compatible=ONLY)
+    e = Encrypt(uuid=uuid, phone_id=data[6], only_compatible=ONLY)
     t = Thread(target=listen_gateway, args=(s, q_gw_recv))
     t.daemon = True
     t.start()
@@ -111,7 +111,7 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
         try:
             data = conn.recv(1024)
             if REQ_UUID in data:
-                e.uuid = data[(data.index(REQ_UUID) + 4):]
+                e.uuid = data[(data.index(REQ_UUID) + 6):]
                 print "[ENC UUID]", e.uuid
             if len(data) < 1:
                 print "[CLIENT] Disconnected"
