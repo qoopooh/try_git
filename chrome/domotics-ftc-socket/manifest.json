@@ -1,9 +1,9 @@
 {
-  "name": "A-Touch Gateway Stream",
+  "name": "Domotics FTC Socket",
   "version": "0.1",
   "manifest_version": 2,
   "minimum_chrome_version": "23",
-  "description": "A-Touch software on Gateway module\nThis is fork of A-Touch Gateway, it just always open connection",
+  "description": "This application is used for debugging FTC bus over IP",
 
   "app": {
     "background": {
@@ -12,6 +12,7 @@
   },
 
   "icons": {
+    "16": "assets/icon-16.png",
     "128": "assets/logo-domotics-icon.png"
   },
 
