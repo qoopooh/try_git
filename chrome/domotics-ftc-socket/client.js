@@ -1,9 +1,11 @@
 var sockId = -1;
 var readCount = 0;
-var IP = "192.168.1.101";
 var PORT = 1470;
 var f_manualConnect = false;
-var f_zero = false;
+var f_translate = true;
+var f_oneline = true;
+var f_receive = true;
+
 
 /**
   * write data(string)
@@ -64,74 +66,6 @@ function extractReadMessage(data, callback) {
   }
 }
 
-function writeCommand(cmd, cb) {
-  if (f_manualConnect) {
-    writeData($("#command").val(), function(str) {
-      cb(str);
-    });
-  } else {
-    connectTcp(true, function(res) {
-      if (res !== 0) {
-        console.log("there is some error");
-        chrome.socket.disconnect(sockId);
-        return cb("" + res);
-      }
-      writeData(cmd, function(str) {
-        console.log("Send without connection");
-        connectTcp(false, function() {
-          cb(str);
-        });
-      });
-    });
-  }
-}
-
-function sendCommand(cmd, callback) {
-  if (isEncryptionCommand(cmd)) {
-    var id = getCurrentPhoneId();
-
-    if ((id !== '0') && !$("#uid").is(":checked")) {
-      setPhoneId(id, function() {
-        writeCommand(encrypt(cmd), function(str) {
-          return callback();
-        });
-      });
-    } else {
-      requestPhoneId(function(success) {
-        if (success)
-          writeCommand(encrypt(cmd), function(str) {
-            return callback();
-          });
-        else
-          return callback();
-      });
-    }
-  } else {
-    writeCommand(cmd, function(str) {
-      return callback();
-    });
-  }
-}
-
-function requestPhoneId(callback) {
-  writeCommand("R,U," + uuid, function(str) {
-    if (str[0] === '-')
-      return callback(false);
-    if (str.length < 9) {
-      setStatus("R,U response error");
-      return callback(false);
-    }
-    if (str[6] !== '1') {
-      setStatus("Cannot get Phone ID");
-      return callback(false);
-    }
-    setPhoneId(str[4], function() {
-      setCurrentPhoneId(str[4]);
-      return callback(true);
-    });
-  });
-}
-
 function setStatus(status) {
   document.getElementById('status').innerText = status;
 }
@@ -149,59 +83,32 @@ function str2ab(str) {
   return buf;
 }
 
-function onConnected(res, cb) {
-  console.log("Connect result:", res);
-  if (!res) {
-    setStatus('Connected');
-    disableOnConnect(true);
-  } else {
-    setStatus('Failed ' + res);
-    disableOnConnect(false);
-  }
-  if (cb) {
-    return cb(res);
-  } else {
-    return;
-  }
-}
-
 function connectTcp(connecting, callback) {
   if (sockId === -1) {
     if (!connecting)
-      if (callback)
-        return callback(0);
-      else
-        return;
-    IP = $("#ip").val();
+      return callback(0);
     chrome.socket.create('tcp', {}, function(createInfo) {
       sockId = createInfo.socketId;
-      chrome.socket.connect(sockId, IP, PORT, function(res) {
-        console.log("Firsly open connection");
-        onConnected(res, callback);
+      chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
+        log("Firsly open connection");
+        callback(res);
       });
     });
   } else {
     chrome.socket.getInfo(sockId, function(socketInfo) {
       if (socketInfo.connected === connecting)
-        if (callback)
-          return callback(0);
-        else
-          return;
+        return callback(0);
       if (connecting) {
-        IP = $("#ip").val();
-        chrome.socket.connect(sockId, IP, PORT, function(res) {
-          console.log("Open connection");
-          onConnected(res, callback);
+        chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
+          log("Open connection");
+          callback(res);
         });
       } else {
         chrome.socket.disconnect(sockId);
-        console.log("Close connection");
+        log("Close connection");
         setStatus('Disconnected');
         disableOnConnect(false);
-        if (callback)
-          return callback(0);
-        else
-          return;
+        return callback(0);
       }
     });
   }
@@ -209,14 +116,17 @@ function connectTcp(connecting, callback) {
 
 function disableOnConnect(connected) {
   $("#ip").prop('disabled', connected);
-  /*$("#connect").prop('checked', connected);*/
+  $("#btnAddress").prop('disabled', !connected);
+  $("#btnVersion").prop('disabled', !connected);
 }
 
-function waitResponse(on) {
-  $("#command").prop('disabled', on);
-  $("#write-button").prop('disabled', on);
+function log(msg) {
+  var currentdate = new Date(); 
+  var time = zeroPad(currentdate.getHours()) + ":"  
+      + zeroPad(currentdate.getMinutes()) + ":" 
+      + zeroPad(currentdate.getSeconds());
+  $("#messagewindow").prepend(time + '-> ' + msg + '<br/>');
 }
-
 
 //////////////////////////
 // Gateway
@@ -224,40 +134,15 @@ function waitResponse(on) {
 
 var gws = {};
 var current_gateway = "192.168.1.39";
-var command = "E,V";
 
-function getCurrentPhoneId() {
-  current_gateway = $("#ip").val();
-  if (!gws[current_gateway]) {
-    gws[current_gateway] = '0';
-  }
-  console.log("getCurrentPhoneId", current_gateway, gws);
-  return gws[current_gateway];
-}
-
-function setCurrentPhoneId(id) {
-  if (gws[current_gateway] === id)
-    return;
-  current_gateway = $("#ip").val();
-  gws[current_gateway] = id;
-  chrome.storage.sync.set({ 'gws': gws });
-  console.log("setCurrentPhoneId", current_gateway, id, gws);
-}
-
-function setCurrentGateway(cb) {
-  if ($("#ip").val() !== current_gateway) {
-    current_gateway = $("#ip").val();
+function setCurrentGateway(obj, cb) {
+  var _ip = $(obj).val();
+  if (current_gateway != _ip) {
+    current_gateway = _ip;
     chrome.storage.sync.set({ 'current_gateway': current_gateway });
-    if (cb)
-      cb();
-  } else if (cb) {
-    cb();
   }
-}
-
-function selectGateway() {
-  $("#ip").val(current_gateway);
-  $("#command").val(command);
+  if (cb)
+    cb();
 }
 //////////////////////////
 // Gateway
@@ -266,8 +151,6 @@ function selectGateway() {
 
 function clearStorage() {
   chrome.storage.sync.set({
-      /*'myUuid': '',*/
-    'command': '',
     'current_gateway': '',
     'gws': {}
   });
@@ -278,8 +161,8 @@ function startJqm() {
   $("#ip").keypress(function(e) {
     if (e.which === 13) {
       e.preventDefault();
-      setCurrentGateway(function() {
-        $("#write-button").click();
+      setCurrentGateway(this, function() {
+        $('#chkConnect').trigger('click');
       });
     } else if (e.which === 96) { // ` undo
       e.preventDefault();
@@ -287,57 +170,37 @@ function startJqm() {
     }
   });
   $("#ip").focusout(function (e) {
-    setCurrentGateway();
+    setCurrentGateway(this);
   });
-  /*$("#connect").change(function() {*/
-  /*if ($(this).is(":checked")) {*/
-  /*console.log("connecting");*/
-  /*} else {*/
-  /*console.log("disconnecting");*/
-  /*}*/
-  /*connectTcp($(this).is(":checked"));*/
-  /*f_manualConnect = $(this).is(":checked");*/
-  /*});*/
-  $("#command").keypress(function (e) {
-    if (e.which === 13) {
-      e.preventDefault();
-      $(this).select();
-      $("#write-button").click();
-    } else if (e.which === 0x60) { // ` undo
-      e.preventDefault();
-      $(this).val(command);
-    }
-  });
-  $("#write-button").click(function() {
-    var cmd = $("#command").val();
-    waitResponse(true);
-    var timer1 = setTimeout(function() {
-      setStatus("Timeout");
-      console.log("timeout");
-      disableOnConnect(false);
-      waitResponse(false);
-      chrome.socket.destroy(sockId);
-      sockId = -1;
-    }, 3000);
-    sendCommand(cmd, function() {
-      clearTimeout(timer1);
-      waitResponse(false);
+  $("#chkConnect").change(function (e) {
+    connectTcp($(this).prop('checked'), function(res) {
+      if (!res) {
+        disableOnConnect(true);
+      } else {
+        disableOnConnect(false);
+      }
     });
-    if (cmd !== command) {
-      command = cmd;
-      chrome.storage.sync.set({ 'command': cmd });
-    }
   });
-  $("#zero").change(function() {
-    if ($(this).is(":checked"))
-      f_zero = true;
-    else
-      f_zero = false;
+  $("#btnClear").click(function() {
+    $("#messagewindow").text("");
   });
+  $("#chkTranslate").click(function() {
+    f_translate = $(this).prop('checked');
+  });
+  $("#chkOneLine").click(function() {
+    f_oneline = $(this).prop('checked');
+  });
+  $("#chkReceive").click(function() {
+    f_receive = $(this).prop('checked');
+  });
+
+  f_translate = $("#chkTranslate").prop('checked');
+  f_oneline = $("#chkOneLine").prop('checked');
+  f_receive = $("#chkReceive").prop('checked');
+
   /*clearStorage();*/
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
-    command = items.command;
     gws = items.gws; // comment out to clear storage
     if (!gws) {
       gws = {};
@@ -345,13 +208,11 @@ function startJqm() {
     if (!current_gateway) {
       current_gateway = "192.168.1.39";
     }
-    if (!command) {
-      command = "E,L,1";
-    }
 
-    selectGateway();
+    $("#ip").val(current_gateway);
     disableOnConnect(false);
-    console.log('chrome.storage.sync.get: ' + current_gateway + ':' + command);
+    clearDevice();
+    console.log('chrome.storage.sync.get: ' + current_gateway);
     console.log('gws:', gws);
   });
 }
