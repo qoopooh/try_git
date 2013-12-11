@@ -18,6 +18,7 @@ ONLY = False
 ###################################################
 
 import sys, getopt, os
+import time as tm
 from socket import *
 from time import localtime, strftime
 from Queue import Queue, Empty
@@ -102,7 +103,9 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
             dec = e.decrypt(data)
             print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
                     remove_newline(data[:2] + dec)
-            conn.sendall(data)
+            conn.sendall(data[:2])
+            tm.sleep(0.5)
+            conn.sendall(data[2:])
             if f_hex:
                 print_hex(data, True)
         except Empty:
