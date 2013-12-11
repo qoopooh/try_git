@@ -294,19 +294,23 @@ app.get('/css/:file', function(req,res) {
     res.sendfile(path.join(__dirname, 'public', 'css', req.params.file));
 });
 
+var msg_nr = 1;
 var ftc = io.of('/ftc');
 ftc.on('connection', function(socket) {
   log('on connect');
   socket.on('enquiry', function(data) {
     if (data.cmd === 'address') {
-      var buf = new Buffer([0x48, FTC_COMMANDS.CMD_ADDRESS , 0xAA, 1]);
+      var buf = new Buffer([0x4C, FTC_COMMANDS.CMD_ADDRESS , 0xAA, msg_nr]);
 
       calculateCheckSum(buf, sendFtc);
     } else if (data.cmd === 'version') {
-      var buf = new Buffer([0x48, FTC_COMMANDS.CMD_SOFT_VERSION , 0xAA, 1]);
+      var buf = new Buffer([0x4C, FTC_COMMANDS.CMD_SOFT_VERSION , 0xAA, msg_nr]);
 
       calculateCheckSum(buf, sendFtc);
     }
+    msg_nr += 1;
+    if (msg_nr > 250)
+      msg_nr = 1;
   });
 });
 

@@ -1,18 +1,24 @@
 var f_translate = true;
 var f_oneline = true;
+var f_receive = true;
 
 var productCode = {
+  '31':'W-4Sec',
+  '32':'W-4Sec',
+  '33':'W-4Sec',
   '41':'D-8OnOff',
   '43':'W-2OnOff',
   '44':'W-1Shutter',
   '45':'W-1Dim',
+  '47':'B-8Sec',
   '4C':'W-InpKeyb',
   '50':'W-Dim010V',
   '54':'W-Themo',
   '55':'D-4Shutter',
   '5B':'W-2VLess',
   '5C':'D-Gateway',
-  '5E':'W-DimRGB'
+  '5E':'W-DimRGB',
+  '57':'W-FM2BT',
 }
 var commandCode = {
   '41':'CMD_ANALOG',
@@ -352,12 +358,16 @@ $(document).ready(function() {
   document.getElementById("chkTranslate").checked = f_translate;
   document.getElementById("chkOneLine").disabled = !f_translate;
   document.getElementById("chkOneLine").checked = f_oneline;
+  document.getElementById("chkReceive").checked = f_receive;
   $("#chkTranslate").click(function() {
     f_translate = document.getElementById("chkTranslate").checked;
     document.getElementById("chkOneLine").disabled = !f_translate;
   });
   $("#chkOneLine").click(function() {
     f_oneline = document.getElementById("chkOneLine").checked;
+  });
+  $("#chkReceive").click(function() {
+    f_receive = document.getElementById("chkReceive").checked;
   });
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
@@ -371,6 +381,9 @@ $(document).ready(function() {
   });
   var chat = io.connect('/ftc');
   chat.on('message', function(msg) {
+    if (!f_receive)
+      return;
+
     var words = msg.split(' ');
     var currentdate = new Date(); 
     var time = zeroPad(currentdate.getHours()) + ":"  
