@@ -39,10 +39,41 @@ label {
   background: rgb(67, 135, 253);
 }
 
-#container {
+#container, #controlbuttons {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 480px;
+}
+
+#chatwindow{
+  position:absolute;
+  top:100px;left:0;right:0;bottom:50px;
+  /* if you wish to use all of your space, use
+  height:100px;
+  position:relative;
+  position:absolute; top:0;left:0;right:0;bottom:0;
+  or drop the chatdwindow div */
+}
+
+#messagewindow, #inputcontainer{
+  position:absolute;
+  left:0;
+  right:0;
+  border:1px solid #000;
+}
+
+#messagewindow {   
+  overflow:auto;
+  top:0;
+  bottom:1em;
+}
+
+#inputcontainer{
+  bottom:0;
+  height:49px;
+  padding:.5em;
+  margin-top:1em;
+}
+
+#inputcontainer > p{
+  margin:0;
 }
 

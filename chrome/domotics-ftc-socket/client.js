@@ -274,6 +274,7 @@ function clearStorage() {
 }
 
 function startJqm() {
+  $("#currenttime").text(new Date());
   $("#ip").keypress(function(e) {
     if (e.which === 13) {
       e.preventDefault();

@@ -5,35 +5,24 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="container">
-    <label>
-      IP:
-      <input type="text" id="ip">
-      <!--<input type="checkbox" id="connect" value="Connect">Connect</input>-->
-    </label>
-    <label>
-      Write:
-      <span id="write-info">-</span>
-    </label>
-    <label>
-      Read:
-      <span id="read-info">-</span>
-    </label>
-    <label>
-      Read count:
-      <span id="read-count">-</span>
-    </label>
-    <label>
-      Status:
-      <span id="status">-</span>
-    </label>
-    <label>
-      Send:
-      <input type="text" id="command">
-      <button id="write-button" type="button">Write</button>
-      <input type="checkbox" id="uid" value="uid">Register</input>
-      <!--<input type="checkbox" id="zero">Zero</input>-->
-    </label>
+  <h4>FTC Over IP V0.1</h4>
+  <p id="currenttime">date</p>
+  <div id="chatwindow">
+    <div id="messagewindow">
+    <!-- messages -->
+    Message
+    </div>
+  </div>
+  <div id="inputcontainer">
+    <input id="chkTranslate" type="checkbox">Translate message</input>
+    <input id="chkOneLine" type="checkbox" checked>1 line message</input>
+    <input id="chkReceive" type="checkbox" checked>Receive message</input>
+    <button id="btnClear" type="button">Clear</button>
+    <button id="btnAddress" type="button">Address</button>
+    <button id="btnVersion" type="button">Version</button>
+    <select id="selectCommandDevices">
+      <option>-</option>
+    </select>
   </div>
   <script src="client.js"></script>
 </body>
