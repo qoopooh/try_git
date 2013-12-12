@@ -12,7 +12,6 @@ var f_receive = true;
   */
 function writeData(data, cb) {
   console.log("write:", data);
-  data += "\r\n";
 
   var buffer = new ArrayBuffer(data.length);
   var uint8View = new Uint8Array(buffer);
@@ -24,50 +23,55 @@ function writeData(data, cb) {
   chrome.socket.write(sockId, buffer, function(writeInfo) {
     var i = writeInfo.bytesWritten;
     console.log("written length:", i);
-
-    if (i<0) {
-      document.getElementById('write-info').innerText = "-";
-      setStatus("Cannot write data");
-      return cb("-");
-    } else {
-      document.getElementById('write-info').innerText = data;
-      readData(cb);
-    }
+    cb();
   });
 }
 
-/**
-  * return String
-  */
-function readData(cb) {
+function readData() {
   chrome.socket.read(sockId, function(readInfo) {
-    console.log("read length:", readInfo.data.byteLength);
-    if (!readInfo.data.byteLength)
-      return cb("-");
-    extractReadMessage(readInfo.data, function(str) {
-      document.getElementById('read-info').innerText = str.replace(/\r/g, "");
-      document.getElementById('read-count').innerText = ++readCount;
-      setStatus("-");
-      return cb(str);
-    });
+    if (readInfo.resultCode > 0) {
+      getFtcMessage(new Uint8Array(readInfo.data), function(msg) {
+        if (!msg)
+          return;
+        translate(msg.split(' '), function(text) {
+          log(text);
+        });
+      });
+      /*msg = ab2hexstr(readInfo.data);*/
+      /*console.log(readInfo.data.byteLength, msg);*/
+    } else {
+      console.log("read failed");
+    }
+    readData();
   });
 }
 
 function extractReadMessage(data, callback) {
-  var str = "";
-  if (isEncryptedMessage(data)) {
-    str = decrypt(data);
-  } else {
-    str = ab2str(data);
-  }
+  var str = ab2str(data);
   console.log("read:", str);
-  if (callback) {
-    return callback(str);
-  }
+  return callback(str);
 }
 
-function setStatus(status) {
-  document.getElementById('status').innerText = status;
+
+function hexString(uint8) {
+  var text = uint8.toString(16).toUpperCase();
+  if (text.length === 1)
+    text = '0' + text;
+  return text;
+}
+
+function ab2hexstr(buf) {
+  var bufView = new Uint8Array(buf);
+  var msg = "";
+
+  if (bufView.length < 1)
+    return msg;
+
+  msg = hexString(bufView[0]);
+  for (var i=1; i<bufView.length; i++) {
+    msg += " " + hexString(bufView[i]);
+  }
+  return msg;
 }
 
 function ab2str(buf) {
@@ -90,7 +94,7 @@ function connectTcp(connecting, callback) {
     chrome.socket.create('tcp', {}, function(createInfo) {
       sockId = createInfo.socketId;
       chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
-        log("Firsly open connection");
+        log("Firsly open connection: " + sockId);
         callback(res);
       });
     });
@@ -100,15 +104,13 @@ function connectTcp(connecting, callback) {
         return callback(0);
       if (connecting) {
         chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
-          log("Open connection");
+          log("Open connection: " + sockId);
           callback(res);
         });
       } else {
         chrome.socket.disconnect(sockId);
-        log("Close connection");
-        setStatus('Disconnected');
-        disableOnConnect(false);
-        return callback(0);
+        log("Close connection: " + sockId);
+        return callback(-1);
       }
     });
   }
@@ -118,6 +120,10 @@ function disableOnConnect(connected) {
   $("#ip").prop('disabled', connected);
   $("#btnAddress").prop('disabled', !connected);
   $("#btnVersion").prop('disabled', !connected);
+}
+
+function zeroPad(number) {
+  return (number < 10) ? '0' + number : number;
 }
 
 function log(msg) {
@@ -132,7 +138,6 @@ function log(msg) {
 // Gateway
 //////////////////////////
 
-var gws = {};
 var current_gateway = "192.168.1.39";
 
 function setCurrentGateway(obj, cb) {
@@ -152,7 +157,6 @@ function setCurrentGateway(obj, cb) {
 function clearStorage() {
   chrome.storage.sync.set({
     'current_gateway': '',
-    'gws': {}
   });
 }
 
@@ -176,6 +180,7 @@ function startJqm() {
     connectTcp($(this).prop('checked'), function(res) {
       if (!res) {
         disableOnConnect(true);
+        readData();
       } else {
         disableOnConnect(false);
       }
@@ -201,19 +206,14 @@ function startJqm() {
   /*clearStorage();*/
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
-    gws = items.gws; // comment out to clear storage
-    if (!gws) {
-      gws = {};
-    }
     if (!current_gateway) {
       current_gateway = "192.168.1.39";
     }
 
-    $("#ip").val(current_gateway);
-    disableOnConnect(false);
     clearDevice();
     console.log('chrome.storage.sync.get: ' + current_gateway);
-    console.log('gws:', gws);
+    $("#ip").val(current_gateway);
+    $('#chkConnect').trigger('click');
   });
 }
 

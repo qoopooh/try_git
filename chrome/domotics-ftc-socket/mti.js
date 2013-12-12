@@ -102,6 +102,91 @@ var TEMP_DEC = {
   'E0':'9'
 }
 
+// ftc init
+FTC_STATE = {
+  kInit: {value:0, name:"Initial", code:"I"},
+  kMessageSize: {value:1, name:"Message Size", code:"S"},
+  kMessageReceive: {value:2, name:"Message Receive", code:"R"},
+  kMessageVerify: {value:3, name:"Message Verify", code:"V"},
+  kEnd: {value:127, name:"End", code:"E"}
+};
+
+var recvBuffer = new Uint8Array(32 + 1); // 32 byte the maximum length allowed in FTC
+var recvBufferIndex = 0;
+var ftcRcvState = FTC_STATE.kInit;
+var ftcMessageSize = 0;
+
+function getFtcMessage(data, cb) {
+  var index=0;
+
+  for (index=0; index<data.length; index++) {
+    var dat = data[index];
+    if (ftcRcvState.value === FTC_STATE.kInit.value) {
+      if (dat !== 0x7D) {
+        log("ftc message error: ", ftcRcvState.name, dat);
+        return cb();
+      }
+      ftcRcvState = FTC_STATE.kMessageSize;
+    } else if (ftcRcvState.value === FTC_STATE.kMessageSize.value) {
+      if (dat >= 32) {
+        log("ftc message error: ", ftcRcvState.name, dat);
+        recvBufferIndex = 0;
+        return cb();
+      }
+      ftcMessageSize = dat;
+      ftcRcvState = FTC_STATE.kMessageReceive;
+    } else if (ftcRcvState.value === FTC_STATE.kMessageReceive.value) {
+      if (dat === 0x7E) {
+        ftcRcvState = FTC_STATE.kMessageVerify;
+        continue;
+      }
+      recvBuffer[recvBufferIndex] = dat;
+      ++recvBufferIndex;
+      if (recvBufferIndex >= ftcMessageSize)
+        ftcRcvState = FTC_STATE.kEnd;
+    } else if (ftcRcvState.value === FTC_STATE.kMessageVerify.value) {
+      if ((dat !== 0x5D) && (dat !== 0x5E) && (dat !== 0x5F)) {
+        log("ftc message error: ", ftcRcvState.name, dat);
+        recvBufferIndex = 0;
+        return cb();
+      }
+      recvBuffer[recvBufferIndex] = dat + 32;
+      ++recvBufferIndex;
+      if (recvBufferIndex >= ftcMessageSize)
+        ftcRcvState = FTC_STATE.kEnd;
+      else
+        ftcRcvState = FTC_STATE.kMessageReceive;
+    } else if (ftcRcvState.value === FTC_STATE.kEnd.value) {
+      if (dat !== 0x7F) {
+        log("ftc message error: ", ftcRcvState.name, dat);
+        recvBufferIndex = 0;
+        return cb();
+      }
+      //TODO: crc check
+
+      var buf = new Uint8Array(recvBufferIndex);
+      buf[0] = recvBuffer[0] >> 5; // can use >>>
+      buf[1] = (recvBuffer[0] & 0x1C) >> 2;
+      buf[2] = recvBuffer[0] & 0x03;
+      for (i=1; i<recvBufferIndex-2; i++) {
+        buf[i+2] = recvBuffer[i];
+      }
+      var bufString = hexString(buf[0]);
+      for (i=1; i<ftcMessageSize; i++) {
+        bufString += ' ' + hexString(buf[i]);
+      }
+
+      console.log(new Date(), ': ', bufString);
+      recvBufferIndex = 0;
+      ftcRcvState = FTC_STATE.kInit;
+      return cb(bufString);
+    } else {
+    ftcRcvState = FTC_STATE.kInit;
+    }
+  }
+  return cb();
+}
+
 function translate(words, cb) {
   var cmd = commandCode[words[3]];
   var text = "";
@@ -314,7 +399,6 @@ function addCommandDevices(words) {
   $("#selectCommandDevices option").each(function() {
     ++commandCount;
     if (uid == $(this).val()) {
-    /*$("#currenttime").text($(this).val());*/
       exist = true;
     }
   });
@@ -323,12 +407,13 @@ function addCommandDevices(words) {
     $("#selectCommandDevices").append("<option>" + uid + "</option>");
   }
   ++commandCount;
-  $("#txtCommandCount").html(commandCount + " Device(s):");
+  $("#txtCommandCount").val(commandCount + " Device(s)");
 }
 
 function clearDevice() {
-  $("#txtCommandCount").html("0 Device:");
+  $("#txtCommandCount").val("0 Device");
   $("#selectCommandDevices").html("");
 }
+
 
 
