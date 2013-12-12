@@ -5,6 +5,7 @@ var f_manualConnect = false;
 var f_translate = true;
 var f_oneline = true;
 var f_receive = true;
+var f_reading = false;
 
 
 /**
@@ -19,7 +20,11 @@ function writeData(data, cb) {
   uint8View.set(data);
   chrome.socket.write(sockId, buffer, function(writeInfo) {
     var i = writeInfo.bytesWritten;
+    if (i != data.length)
+      console.log("writte failed:", i);
     console.log("written length:", i);
+    if (!f_reading)
+      readData();
     if (cb)
       cb();
   });
@@ -45,10 +50,11 @@ function readData() {
           log(msg);
         }
       });
-      /*msg = ab2hexstr(readInfo.data);*/
-      /*console.log(readInfo.data.byteLength, msg);*/
+      f_reading = true;
     } else {
       console.log("read failed");
+      f_reading = false;
+      return;
     }
     readData();
   });
@@ -102,7 +108,7 @@ function connectTcp(connecting, callback) {
     chrome.socket.create('tcp', {}, function(createInfo) {
       sockId = createInfo.socketId;
       chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
-        log("Firsly open connection: " + sockId);
+        log("Open connection: " + sockId);
         callback(res);
       });
     });
@@ -110,15 +116,11 @@ function connectTcp(connecting, callback) {
     chrome.socket.getInfo(sockId, function(socketInfo) {
       if (socketInfo.connected === connecting)
         return callback(0);
-      if (connecting) {
-        chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
-          log("Open connection: " + sockId);
-          callback(res);
-        });
-      } else {
+      if (!connecting) {
         chrome.socket.disconnect(sockId);
         log("Close connection: " + sockId);
-        return callback(-1);
+        sockId = -1;
+        return callback(sockId);
       }
     });
   }

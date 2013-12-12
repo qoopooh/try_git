@@ -122,7 +122,7 @@ var ftcMessageSize = 0;
 function getFtcMessage(data, cb) {
   var index=0;
 
-  console.log('getFtcMessage', data.length);
+  /*console.log('getFtcMessage', data.length);*/
   for (index=0; index<data.length; index++) {
     var dat = data[index];
     if (ftcRcvState.value === FTC_STATE.kInit.value) {
