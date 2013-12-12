@@ -1,8 +1,8 @@
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('main.html', {
     bounds: {
-      width: 480,
-      height: 375
+      width: 800,
+      height: 480
     }
   });
   console.log('launched');

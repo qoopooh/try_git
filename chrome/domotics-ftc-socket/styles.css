@@ -64,6 +64,7 @@ label {
   overflow:auto;
   top:0;
   bottom:1em;
+  background-color: #999;
 }
 
 #inputcontainer{
@@ -75,5 +76,10 @@ label {
 
 #inputcontainer > p{
   margin:0;
+}
+
+#txtCommandCount {
+  width: 80px;
+  text-align: center;
 }
 

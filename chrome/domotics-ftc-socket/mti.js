@@ -102,6 +102,9 @@ var TEMP_DEC = {
   'E0':'9'
 }
 
+/************************************************************/
+/*                        FTC layer                         */
+/************************************************************/
 // ftc init
 FTC_STATE = {
   kInit: {value:0, name:"Initial", code:"I"},
@@ -119,6 +122,7 @@ var ftcMessageSize = 0;
 function getFtcMessage(data, cb) {
   var index=0;
 
+  console.log('getFtcMessage', data.length);
   for (index=0; index<data.length; index++) {
     var dat = data[index];
     if (ftcRcvState.value === FTC_STATE.kInit.value) {
@@ -176,7 +180,7 @@ function getFtcMessage(data, cb) {
         bufString += ' ' + hexString(buf[i]);
       }
 
-      console.log(new Date(), ': ', bufString);
+      console.log(recvBufferIndex, bufString);
       recvBufferIndex = 0;
       ftcRcvState = FTC_STATE.kInit;
       return cb(bufString);
@@ -186,6 +190,78 @@ function getFtcMessage(data, cb) {
   }
   return cb();
 }
+
+
+function calculateCheckSum(data) {
+  var sum = data.length + 1; // data length + itself;
+
+  for (var i=0; i<data.length; i++) {
+    sum += data[i];
+  }
+  sum &= 0xFF;
+  sum ^= 0xFF;
+  return sum;
+}
+
+function isReservedCode(c) {
+  if ((c == 0x7D)
+      || (c == 0x7E)
+      || (c == 0x7F)) {
+    return true;
+  }
+  return false;
+}
+
+var msg_nr = 0;
+function buildFtc(data, cb) {
+  var input = new Uint8Array(data.length + 1);
+  
+  input.set(data);
+  input[input.length - 1] = (++msg_nr) & 0xFF;
+  var sum = calculateCheckSum(input);
+  var special = 0;
+
+  if (isReservedCode(sum))
+    ++special;
+
+  for (var i=0; i<input.length; i++) {
+    if (isReservedCode(input[i])) {
+      ++special;
+    }
+  }
+
+  var buf = new Uint8Array(data.length + 5 + special);
+  var j = 2;
+  buf[0] = 0x7D; //start
+  buf[1] = data.length + j;
+
+  /*buf.set(input, 2);*/
+  for (var i=0; i<input.length; i++) {
+    var c = input[i];
+    if (isReservedCode(c)) {
+      buf[j++] = 0x7E;
+      buf[j++] = (c & 0xDF);
+    } else {
+      buf[j++] = c;
+    }
+  }
+  if (isReservedCode(sum)) {
+    buf[j++] = 0x7E;
+    buf[j++] = sum & 0xDF;
+  } else {
+    buf[j++] = sum;
+  }
+  buf[j++] = 0x7F; //stop
+  cb(buf);
+}
+
+/************************************************************/
+/*                        FTC layer                         */
+/************************************************************/
+
+
+
+
 
 function translate(words, cb) {
   var cmd = commandCode[words[3]];
@@ -386,7 +462,7 @@ function getStatus(words, text, cb) {
 
 function addCommandDevices(words) {
   var cmd = commandCode[words[3]];
-  if (cmd != 'CMD_ADDRESS')
+  if ((cmd != 'CMD_ADDRESS') && (words.length < 8))
     return;
   var uid = words[4] + words[5] + words[6] + words[7];
   var exist = false;
@@ -397,17 +473,16 @@ function addCommandDevices(words) {
     return;
 
   $("#selectCommandDevices option").each(function() {
-    ++commandCount;
+    $("#txtCommandCount").val(++commandCount + " Device(s)");
     if (uid == $(this).val()) {
       exist = true;
     }
   });
 
   if (!exist) {
+    $("#txtCommandCount").val(++commandCount + " Device(s)");
     $("#selectCommandDevices").append("<option>" + uid + "</option>");
   }
-  ++commandCount;
-  $("#txtCommandCount").val(commandCount + " Device(s)");
 }
 
 function clearDevice() {

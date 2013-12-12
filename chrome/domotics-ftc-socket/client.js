@@ -16,14 +16,12 @@ function writeData(data, cb) {
   var buffer = new ArrayBuffer(data.length);
   var uint8View = new Uint8Array(buffer);
   var i=0;
-  for (; i<data.length; i++) {
-    uint8View[i] = data.charCodeAt(i);
-  }
-
+  uint8View.set(data);
   chrome.socket.write(sockId, buffer, function(writeInfo) {
     var i = writeInfo.bytesWritten;
     console.log("written length:", i);
-    cb();
+    if (cb)
+      cb();
   });
 }
 
@@ -31,11 +29,21 @@ function readData() {
   chrome.socket.read(sockId, function(readInfo) {
     if (readInfo.resultCode > 0) {
       getFtcMessage(new Uint8Array(readInfo.data), function(msg) {
-        if (!msg)
+        if (!msg || !f_receive)
           return;
-        translate(msg.split(' '), function(text) {
-          log(text);
-        });
+        addCommandDevices(msg.split(' '));
+        if (f_translate) {
+          translate(msg.split(' '), function(text) {
+            if (f_oneline) {
+              log(msg + ' -> ' + text);
+            } else {
+              log(msg);
+              log(text);
+            }
+          });
+        } else {
+          log(msg);
+        }
       });
       /*msg = ab2hexstr(readInfo.data);*/
       /*console.log(readInfo.data.byteLength, msg);*/
@@ -160,8 +168,7 @@ function clearStorage() {
   });
 }
 
-function startJqm() {
-  $("#currenttime").text(new Date());
+function startJqm() { $("#currenttime").text(new Date());
   $("#ip").keypress(function(e) {
     if (e.which === 13) {
       e.preventDefault();
@@ -188,6 +195,25 @@ function startJqm() {
   });
   $("#btnClear").click(function() {
     $("#messagewindow").text("");
+  });
+  $("#btnAddress").click(function() {
+    var cmd =  new Uint8Array(3);
+    cmd[0] = 0x4C;
+    cmd[1] = 0x61;
+    cmd[2] = 0xAA;
+    buildFtc(cmd, function (buf) {
+      writeData(buf);
+    });
+    clearDevice();
+  });
+  $("#btnVersion").click(function() {
+    var cmd =  new Uint8Array(3);
+    cmd[0] = 0x4C;
+    cmd[1] = 0x77;
+    cmd[2] = 0xAA;
+    buildFtc(cmd, function (buf) {
+      writeData(buf);
+    });
   });
   $("#chkTranslate").click(function() {
     f_translate = $(this).prop('checked');
