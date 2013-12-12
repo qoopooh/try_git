@@ -108,9 +108,10 @@ function connectTcp(connecting, callback) {
     chrome.socket.create('tcp', {}, function(createInfo) {
       sockId = createInfo.socketId;
       chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
-        log("Open connection: " + sockId);
+        log("Open connection: " + sockId + " " + res);
         callback(res);
       });
+      chrome.runtime.sendMessage({type:'report_sockid', val:sockId});
     });
   } else {
     chrome.socket.getInfo(sockId, function(socketInfo) {
@@ -137,8 +138,7 @@ function zeroPad(number) {
 }
 
 function log(msg) {
-  var currentdate = new Date(); 
-  var time = zeroPad(currentdate.getHours()) + ":"  
+  var currentdate = new Date(); var time = zeroPad(currentdate.getHours()) + ":"  
       + zeroPad(currentdate.getMinutes()) + ":" 
       + zeroPad(currentdate.getSeconds());
   $("#messagewindow").prepend(time + '-> ' + msg + '<br/>');
@@ -186,8 +186,10 @@ function startJqm() { $("#currenttime").text(new Date());
     setCurrentGateway(this);
   });
   $("#chkConnect").change(function (e) {
-    connectTcp($(this).prop('checked'), function(res) {
-      if (!res) {
+    var checked = $(this).prop('checked');
+    connectTcp(checked, function(res) {
+      console.log('connectTcp', checked, res);
+      if (!res && checked) {
         disableOnConnect(true);
         readData();
       } else {
@@ -246,4 +248,5 @@ function startJqm() { $("#currenttime").text(new Date());
 }
 
 $(document).ready(startJqm());
+
 
