@@ -109,6 +109,8 @@ function connectTcp(connecting, callback) {
       sockId = createInfo.socketId;
       chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
         log("Open connection: " + sockId + " " + res);
+        if (res < 0)
+          toggleLostConnect();
         callback(res);
       });
       chrome.runtime.sendMessage({type:'report_sockid', val:sockId});
@@ -138,10 +140,20 @@ function zeroPad(number) {
 }
 
 function log(msg) {
-  var currentdate = new Date(); var time = zeroPad(currentdate.getHours()) + ":"  
-      + zeroPad(currentdate.getMinutes()) + ":" 
+  var currentdate = new Date(); var time = zeroPad(currentdate.getHours()) + ":"
+      + zeroPad(currentdate.getMinutes()) + ":"
       + zeroPad(currentdate.getSeconds());
   $("#messagewindow").prepend(time + '-> ' + msg + '<br/>');
+}
+
+function toggleClearLogDialog() {
+  var el = document.getElementById("overlay_log");
+  el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+}
+
+function toggleLostConnect() {
+  var el = document.getElementById("overlay_lost");
+  el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
 }
 
 //////////////////////////
@@ -167,6 +179,7 @@ function setCurrentGateway(obj, cb) {
 function clearStorage() {
   chrome.storage.sync.set({
     'current_gateway': '',
+    'f_failed_last_connect': '',
   });
 }
 
@@ -197,8 +210,17 @@ function startJqm() { $("#currenttime").text(new Date());
       }
     });
   });
-  $("#btnClear").click(function() {
+  $("#btnClear").click(toggleClearLogDialog);
+  $("#btnClearLog").click(function() {
     $("#messagewindow").text("");
+    toggleClearLogDialog();
+  });
+  $("#btnNotClearLog").click(toggleClearLogDialog);
+  $("#btnLostConfirm").click(function() {
+    chrome.storage.sync.set({ 'f_failed_last_connect': true });
+    chrome.app.window.current().close();
+      /*$('#chkConnect').trigger('click');*/
+      /*toggleLostConnect();*/
   });
   $("#btnAddress").click(function() {
     var cmd =  new Uint8Array(3);
@@ -210,12 +232,12 @@ function startJqm() { $("#currenttime").text(new Date());
     });
     clearDevice();
     setTimeout(function() {
-      function NASort(a, b) {    
+      function NASort(a, b) {
         if (a.innerHTML == '-') {
-          return 1;   
+          return 1;
         } else if (b.innerHTML == '-') {
-          return -1;   
-        }       
+          return -1;
+        }
         return (a.innerHTML > b.innerHTML) ? 1 : -1;
       };
 
@@ -251,11 +273,14 @@ function startJqm() { $("#currenttime").text(new Date());
     if (!current_gateway) {
       current_gateway = "192.168.1.39";
     }
-
-    clearDevice();
-    console.log('chrome.storage.sync.get: ' + current_gateway);
     $("#ip").val(current_gateway);
-    $('#chkConnect').trigger('click');
+    if (!items.f_failed_last_connect) {
+      $('#chkConnect').trigger('click');
+    } else {
+      chrome.storage.sync.set({ 'f_failed_last_connect': false });
+    }
+
+    console.log('chrome.storage.sync.get: ' + current_gateway);
   });
 }
 

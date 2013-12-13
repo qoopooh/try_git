@@ -215,7 +215,7 @@ function isReservedCode(c) {
 var msg_nr = 0;
 function buildFtc(data, cb) {
   var input = new Uint8Array(data.length + 1);
-  
+
   input.set(data);
   input[input.length - 1] = (++msg_nr) & 0xFF;
   var sum = calculateCheckSum(input);
@@ -281,7 +281,7 @@ function translate(words, cb) {
       if (tz > 12)
         tz -= 256;
       text = product + ',' + sn + ',' + cmd + ',' + SRC[words[0]] + ',' + DST[words[1]]
-        + ',' + MSG_TYPE[words[2]] + ', ' + words[4] + ':' + words[5] 
+        + ',' + MSG_TYPE[words[2]] + ', ' + words[4] + ':' + words[5]
         + ' ' + words[6] + words[7] + '-' + words[8] + '-' + words[9]
         + ' (' + weekDay[words[10]] + ') timezone ' + tz;
       cb(text);
@@ -343,7 +343,7 @@ function translate(words, cb) {
 
 function hexStringToAscii(w, offset, len) {
   var str = '';
-  
+
   if (!offset)
     offset = 0;
   if (!len)

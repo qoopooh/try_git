@@ -10,7 +10,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
 chrome.runtime.onInstalled.addListener(function() {
   console.log('installed');
 });
-chrome.runtime.onSuspend.addListener(function() { 
+chrome.runtime.onSuspend.addListener(function() {
   console.log('suspend');
 });
 chrome.runtime.onMessage.addListener(function(request) {
