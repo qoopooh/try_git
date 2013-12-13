@@ -209,6 +209,18 @@ function startJqm() { $("#currenttime").text(new Date());
       writeData(buf);
     });
     clearDevice();
+    setTimeout(function() {
+      function NASort(a, b) {    
+        if (a.innerHTML == '-') {
+          return 1;   
+        } else if (b.innerHTML == '-') {
+          return -1;   
+        }       
+        return (a.innerHTML > b.innerHTML) ? 1 : -1;
+      };
+
+      $('select option').sort(NASort).appendTo('select');
+    }, 3000);
   });
   $("#btnVersion").click(function() {
     var cmd =  new Uint8Array(3);
