@@ -120,10 +120,10 @@ var ftcRcvState = FTC_STATE.kInit;
 var ftcMessageSize = 0;
 
 function getFtcMessage(data, cb) {
-  var index=0;
+  var conv = new Converter();
 
   /*console.log('getFtcMessage', data.length);*/
-  for (index=0; index<data.length; index++) {
+  for (var index=0; index<data.length; index++) {
     var dat = data[index];
     if (ftcRcvState.value === FTC_STATE.kInit.value) {
       if (dat !== 0x7D) {
@@ -175,11 +175,7 @@ function getFtcMessage(data, cb) {
       for (i=1; i<recvBufferIndex-2; i++) {
         buf[i+2] = recvBuffer[i];
       }
-      var bufString = hexString(buf[0]);
-      for (i=1; i<ftcMessageSize; i++) {
-        bufString += ' ' + hexString(buf[i]);
-      }
-
+      var bufString = conv.abv2hexstr(buf);
       console.log(recvBufferIndex, bufString);
       recvBufferIndex = 0;
       ftcRcvState = FTC_STATE.kInit;

@@ -60,47 +60,6 @@ function readData() {
   });
 }
 
-function extractReadMessage(data, callback) {
-  var str = ab2str(data);
-  console.log("read:", str);
-  return callback(str);
-}
-
-
-function hexString(uint8) {
-  var text = uint8.toString(16).toUpperCase();
-  if (text.length === 1)
-    text = '0' + text;
-  return text;
-}
-
-function ab2hexstr(buf) {
-  var bufView = new Uint8Array(buf);
-  var msg = "";
-
-  if (bufView.length < 1)
-    return msg;
-
-  msg = hexString(bufView[0]);
-  for (var i=1; i<bufView.length; i++) {
-    msg += " " + hexString(bufView[i]);
-  }
-  return msg;
-}
-
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint8Array(buf));
-}
-
-function str2ab(str) {
-  var buf = new ArrayBuffer(str.length);
-  var bufView = new Uint8Array(buf);
-  for (var i=0, strLen=str.length; i<strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
-
 function connectTcp(connecting, callback) {
   if (sockId === -1) {
     if (!connecting)
