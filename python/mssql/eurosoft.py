@@ -4,7 +4,7 @@
 __version__ = '1.0.2'
 
 #HOST='127.0.0.1'
-HOST='192.168.1.152'
+HOST='192.168.0.57'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -152,8 +152,8 @@ ORDER BY ProdTrans_Create_Date DESC
 """
 
 RCV_STO = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Sup_Name,
-    ProdTransDetail_IsConfirm as isconf,Sup_ID
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Sup_Name as Comp_Name,
+    ProdTransDetail_IsConfirm as isconf,Sup_ID as Comp_ID
 FROM tblProductionTransactionDetail,tblCasing,tblSupplier,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
