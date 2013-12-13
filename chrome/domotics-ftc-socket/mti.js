@@ -268,6 +268,7 @@ function translate(words, cb) {
   var text = "";
   var product = "";
   var sn = "";
+  var conv = new Converter();
 
   if (!cmd)
     cmd = words[3];
@@ -329,7 +330,7 @@ function translate(words, cb) {
     case 'CMD_NAME':
     case 'CMD_SOFT_VERSION':
       translateProductCommand(cmd, words, function(text) {
-        text += ', ' + hexStringToAscii(words, 8);
+        text += ', ' + conv.hexStringToAscii(words, 8);
         cb(text);
       });
       break;
@@ -339,20 +340,6 @@ function translate(words, cb) {
       });
       break;
   }
-}
-
-function hexStringToAscii(w, offset, len) {
-  var str = '';
-
-  if (!offset)
-    offset = 0;
-  if (!len)
-    len = w.length;
-  for (var i = offset; i < len; ++i) {
-    str += String.fromCharCode(parseInt(w[i], 16));
-  }
-
-  return str;
 }
 
 function translateProductCommand(cmd, words, cb) {
