@@ -111,6 +111,8 @@ function connectTcp(connecting, callback) {
         log("Open connection: " + sockId + " " + res);
         if (res < 0)
           toggleLostConnect();
+        else
+          chrome.storage.sync.set({ 'f_failed_last_connect': false });
         callback(res);
       });
       chrome.runtime.sendMessage({type:'report_sockid', val:sockId});
@@ -270,17 +272,13 @@ function startJqm() { $("#currenttime").text(new Date());
   /*clearStorage();*/
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
-    if (!current_gateway) {
+    if (!current_gateway)
       current_gateway = "192.168.1.39";
-    }
     $("#ip").val(current_gateway);
-    if (!items.f_failed_last_connect) {
+    if (!items.f_failed_last_connect)
       $('#chkConnect').trigger('click');
-    } else {
-      chrome.storage.sync.set({ 'f_failed_last_connect': false });
-    }
 
-    console.log('chrome.storage.sync.get: ' + current_gateway);
+    console.log('chrome.storage.sync.get', items);
   });
 }
 
