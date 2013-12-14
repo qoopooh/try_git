@@ -4,7 +4,7 @@ __version__ = '0.0.3'
 
 ############### Default Values ####################
 #GATEWAY = '188.82.100.29'
-GATEWAY = '192.168.1.31'
+GATEWAY = '192.168.1.32'
 HOST = '192.168.1.44'
 TCP_PORT = 1470
 #UUID = "bb8342aed2ab395f1512604d55b35027d7ea99bf" # chrome
@@ -104,7 +104,7 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
             print "[RECV %s]" % (strftime("%H:%M:%S", localtime())), len(data), \
                     remove_newline(data[:2] + dec)
             conn.sendall(data[:2])
-            tm.sleep(0.5)
+            #tm.sleep(0.5)
             conn.sendall(data[2:])
             if f_hex:
                 print_hex(data, True)

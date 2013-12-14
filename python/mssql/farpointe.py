@@ -7,16 +7,17 @@ import sys
 from time import strftime, localtime
 from date import gmt
 import pymssql
-from flask import Flask
+from flask import Flask, request, render_template
 
 
 SQL_NONCOMPLIANT = """
 SELECT Number, TxPower, TxModDepth, WrID, wr_name, DateTime
 FROM Logger, Workorder
 WHERE WrID = wr_id
-AND TxPower >= 88
-AND DateTime > '2013-12-01 16:30:00.000'
-AND Number!='6E310104'
+    AND TxPower >= 88
+    --AND DateTime > '2013-12-01 16:30:00.000'
+    AND DateTime > {date}
+    AND Number!='6E310104'
 ORDER BY [DateTime] DESC
 """
 
@@ -70,39 +71,19 @@ def gen_report(dt=0,department=None,startdate=0,enddate=0):
 
     return rowarray_list
 
-class index:
-
-    def GET(self):
-        i = web.input(name=None)
-        return render.index(i.name)
-
-class TimeReport:
-
-    def GET(self):
-        i = web.input(date=None, department='production')
-        return self.create_table(i.date, i.department)
-
-    def create_table(self, date, department):
-        report = gen_report(dt=gmt(date), department=department)
-        return render.time_report(report)
-
-
-class MonthlyReport:
-
-    def GET(self):
-        i = web.input(startdate=None, enddate=None)
-        return self.create_table(i.startdate, i.enddate)
-
-    def create_table(self, startdate, enddate):
-        report = gen_report(startdate=gmt(startdate), enddate=gmt(enddate))
-        return render.time_report(report)
-
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 def main():
-    return 'Farpointe'
+    if request.method == 'GET':
+        return render_template('far_remove.html')
+
+@app.route('/remove', methods=['GET','POST'])
+def remove():
+    if request.method == 'POST':
+        return render_template('far_remove.html')
 
 if __name__ == '__main__':
+    app.debug = True
     app.run(host='0.0.0.0')
 
