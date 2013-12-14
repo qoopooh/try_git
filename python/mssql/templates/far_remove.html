@@ -1,16 +1,17 @@
 {%  extends  "far_layout.html"  %}
 {%  block  body  %}
 <h2>Remote Deletion</h2>
-{%  if  error  %}<p  class=error><strong>Error:</strong>  {{  error  }}{%  endif  %}
-<form  action="{{  url_for('remove')  }}"  method=post>
-    <dl>
-        <dt>Number:
-        <dd><input id="number" type=text>
-        <dt>Since:
-        <dd><input id="date" type=text>
-        <dd><input id="remove" type=submit value=remove>
-    </dl>
-</form>
+{%  if error %}<p class=error><strong>Error:</strong> {{ error }}
+{% endif %}
+Number:
+<input id="number" type=text>
+<br/>
+Since:
+<input id="date" type=text>
+<br/>
+<button id="remove">Remove</button>
 <h2>Noncompliant Records</h2>
+<div id="table">
+</div>
 {%  endblock  %}
 

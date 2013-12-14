@@ -7,7 +7,7 @@ import sys
 from time import strftime, localtime
 from date import gmt
 import pymssql
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for
 
 
 SQL_NONCOMPLIANT = """
