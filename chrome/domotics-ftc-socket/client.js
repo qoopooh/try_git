@@ -96,14 +96,20 @@ function disableOnConnect(connected) {
   $("#btnVersion").prop('disabled', !connected);
 }
 
-function zeroPad(number) {
-  return (number < 10) ? '0' + number : number;
+function zeroFill( number, width )
+{
+  width -= number.toString().length;
+  if ( width > 0 ) {
+    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+  }
+  return number + ""; // always return a string
 }
 
 function log(msg) {
-  var currentdate = new Date(); var time = zeroPad(currentdate.getHours()) + ":"
-      + zeroPad(currentdate.getMinutes()) + ":"
-      + zeroPad(currentdate.getSeconds());
+  var currentdate = new Date(); var time = zeroFill(currentdate.getHours(), 2) + ":"
+      + zeroFill(currentdate.getMinutes(), 2) + ":"
+      + zeroFill(currentdate.getSeconds(), 2) + "."
+      + zeroFill(currentdate.getMilliseconds(), 3);
   $("#messagewindow").prepend(time + '-> ' + msg + '<br/>');
 }
 
