@@ -122,18 +122,17 @@ var ftcMessageSize = 0;
 function getFtcMessage(data, cb) {
   var conv = new Converter();
 
-  /*console.log('getFtcMessage', data.length);*/
   for (var index=0; index<data.length; index++) {
     var dat = data[index];
     if (ftcRcvState.value === FTC_STATE.kInit.value) {
       if (dat !== 0x7D) {
-        log("ftc message error: ", ftcRcvState.name, dat);
+        log("ftc message error: " + ftcRcvState.name + dat);
         return cb();
       }
       ftcRcvState = FTC_STATE.kMessageSize;
     } else if (ftcRcvState.value === FTC_STATE.kMessageSize.value) {
       if (dat >= 32) {
-        log("ftc message error: ", ftcRcvState.name, dat);
+        log("ftc message error: " + ftcRcvState.name + dat);
         recvBufferIndex = 0;
         return cb();
       }
@@ -150,7 +149,7 @@ function getFtcMessage(data, cb) {
         ftcRcvState = FTC_STATE.kEnd;
     } else if (ftcRcvState.value === FTC_STATE.kMessageVerify.value) {
       if ((dat !== 0x5D) && (dat !== 0x5E) && (dat !== 0x5F)) {
-        log("ftc message error: ", ftcRcvState.name, dat);
+        log("ftc message error: " + ftcRcvState.name + dat);
         recvBufferIndex = 0;
         return cb();
       }
@@ -162,7 +161,7 @@ function getFtcMessage(data, cb) {
         ftcRcvState = FTC_STATE.kMessageReceive;
     } else if (ftcRcvState.value === FTC_STATE.kEnd.value) {
       if (dat !== 0x7F) {
-        log("ftc message error: ", ftcRcvState.name, dat);
+        log("ftc message error: " + ftcRcvState.name + dat);
         recvBufferIndex = 0;
         return cb();
       }

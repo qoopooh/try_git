@@ -20,9 +20,7 @@ function writeData(data, cb) {
   uint8View.set(data);
   chrome.socket.write(sockId, buffer, function(writeInfo) {
     var i = writeInfo.bytesWritten;
-    if (i != data.length)
-      console.log("writte failed:", i);
-    console.log("written length:", i);
+    console.log("writeInfo: ", writeInfo);
     if (!f_reading)
       readData();
     if (cb)
@@ -52,7 +50,7 @@ function readData() {
       });
       f_reading = true;
     } else {
-      console.log("read failed");
+      console.log("read failed", readInfo);
       f_reading = false;
       return;
     }
@@ -65,6 +63,7 @@ function connectTcp(connecting, callback) {
     if (!connecting)
       return callback(0);
     chrome.socket.create('tcp', {}, function(createInfo) {
+      console.log('create', createInfo);
       sockId = createInfo.socketId;
       chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
         log("Open connection: " + sockId + " " + res);
@@ -78,6 +77,7 @@ function connectTcp(connecting, callback) {
     });
   } else {
     chrome.socket.getInfo(sockId, function(socketInfo) {
+      console.log('getInfo', socketInfo);
       if (socketInfo.connected === connecting)
         return callback(0);
       if (!connecting) {
@@ -105,12 +105,23 @@ function zeroFill( number, width )
   return number + ""; // always return a string
 }
 
+var bright_dark = true;
 function log(msg) {
-  var currentdate = new Date(); var time = zeroFill(currentdate.getHours(), 2) + ":"
+  var currentdate = new Date();
+  var time = zeroFill(currentdate.getHours(), 2) + ":"
       + zeroFill(currentdate.getMinutes(), 2) + ":"
       + zeroFill(currentdate.getSeconds(), 2) + "."
       + zeroFill(currentdate.getMilliseconds(), 3);
-  $("#messagewindow").prepend(time + '-> ' + msg + '<br/>');
+  /*$("#messagewindow").prepend(time + '-> ' + msg + '<br/>');*/
+  var list = $("#messagewindow").find('ul');
+  /*list.append('<li>something</li>');*/
+  if (bright_dark) {
+    bright_dark = false;
+    list.prepend('<li class="bright">' + time + '-> ' + msg + '</li>');
+  } else {
+    bright_dark = true;
+    list.prepend('<li class="dark">' + time + '-> ' + msg + '</li>');
+  }
 }
 
 function toggleClearLogDialog() {
@@ -179,7 +190,8 @@ function startJqm() { $("#currenttime").text(new Date());
   });
   $("#btnClear").click(toggleClearLogDialog);
   $("#btnClearLog").click(function() {
-    $("#messagewindow").text("");
+      /*$("#messagewindow").text("");*/
+      $("#messagewindow").html("<ul></ul>");
     toggleClearLogDialog();
   });
   $("#btnNotClearLog").click(toggleClearLogDialog);
@@ -242,8 +254,6 @@ function startJqm() { $("#currenttime").text(new Date());
     $("#ip").val(current_gateway);
     if (!items.f_failed_last_connect)
       $('#chkConnect').trigger('click');
-
-    console.log('chrome.storage.sync.get', items);
   });
 }
 

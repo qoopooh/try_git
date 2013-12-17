@@ -22,6 +22,20 @@ label {
   color: #000;
 }
 
+ul {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+li {
+  list-style-type: none;
+}
+.bright {
+background-color: #aabbcc;
+}
+.dark {
+}
+
 #position-input {
   display: block;
    -webkit-appearance:none !important;
