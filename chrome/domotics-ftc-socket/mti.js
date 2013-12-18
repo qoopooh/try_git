@@ -118,6 +118,7 @@ var recvBuffer = new Uint8Array(32 + 1); // 32 byte the maximum length allowed i
 var recvBufferIndex = 0;
 var ftcRcvState = FTC_STATE.kInit;
 var ftcMessageSize = 0;
+var ftc_msg_count = 0;
 
 function getFtcMessage(data, cb) {
   var conv = new Converter();
@@ -175,9 +176,10 @@ function getFtcMessage(data, cb) {
         buf[i+2] = recvBuffer[i];
       }
       var bufString = conv.abv2hexstr(buf);
-      console.log(recvBufferIndex, bufString);
+      console.log(ftc_msg_count, recvBufferIndex, bufString);
       recvBufferIndex = 0;
       ftcRcvState = FTC_STATE.kInit;
+      ++ftc_msg_count;
       return cb(bufString);
     } else {
     ftcRcvState = FTC_STATE.kInit;

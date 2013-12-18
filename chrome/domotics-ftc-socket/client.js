@@ -51,6 +51,8 @@ function readData() {
       f_reading = true;
     } else {
       console.log("read failed", readInfo);
+      if (readInfo.resultCode != -1)
+        toggleLostConnect("Connection Failed on reading " + readInfo.resultCode);
       f_reading = false;
       return;
     }
@@ -68,7 +70,7 @@ function connectTcp(connecting, callback) {
       chrome.socket.connect(sockId, current_gateway, PORT, function(res) {
         log("Open connection: " + sockId + " " + res);
         if (res < 0)
-          toggleLostConnect();
+          toggleLostConnect("Connection Failed " + res);
         else
           chrome.storage.sync.set({ 'f_failed_last_connect': false });
         callback(res);
@@ -129,7 +131,8 @@ function toggleClearLogDialog() {
   el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
 }
 
-function toggleLostConnect() {
+function toggleLostConnect(msg) {
+  $("#lostMsg").text(msg);
   var el = document.getElementById("overlay_lost");
   el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
 }
