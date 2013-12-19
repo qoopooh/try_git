@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="tomcat-demo" default="compile" basedir=".">
+  <property name="tomcat-home" value="/usr/share/tomcat7" />
+
+  <!--<path id="compile.classpath">-->
+  <!--<fileset dir="${web.home}/WEB-INF/lib">-->
+  <!--<include name="*.jar"/>-->
+  <!--</fileset>-->
+  <!--<fileset dir="${env.CATALINA_HOME}/lib">-->
+  <!--<include name="*.jar"/>-->
+  <!--</fileset>-->
+  <!--</path>-->
+
+
+  <path id="project-classpath">
+    <fileset dir="web/WEB-INF/lib" includes="*.jar" />
+    <fileset dir="${tomcat-home}/bin" includes="*.jar" />
+    <fileset dir="${tomcat-home}/lib" includes="*.jar" />
+  </path>
+
+  <target name="clean">
+  <delete dir="bin" />
+  <mkdir dir="bin" />
+  </target>
+
+  <target name="copy-non-java-files">
+  <copy todir="bin" includeemptydirs="false">
+  <fileset dir="src" excludes="**/*.java" />
+  </copy>
+  </target>
+
+  <target name="compile" depends="clean,copy-non-java-files">
+  <javac srcdir="src" destdir="bin" classpathref="project-classpath" />
+  </target>
+
+</project>
+
