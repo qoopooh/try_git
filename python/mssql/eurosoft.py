@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
-#HOST='127.0.0.1'
-HOST='192.168.0.57'
+HOST='127.0.0.1'
+#HOST='192.168.0.57'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -51,13 +51,12 @@ WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
 
 WIT_NT_ID = """
 SELECT Tyre_SerialNo,Size_Name,Model_Name
-FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel,tblCompany
+FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel
 WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND NewTransDetail_Tyre_Code=Tyre_Code
     AND Tyre_Size_ID=Size_ID
     AND Tyre_Model_ID=Model_ID
     AND NewTransDetail_NewTrans_ID='{tid}'
-    AND Comp_ID='{cid}'
 """
 
 RCV_NT_ID = """
@@ -225,7 +224,7 @@ GROUP BY Size_Name
 """
 
 INV_NT_ID = """
-SELECT NewStock_Tyre_Serial,Model_Name
+SELECT Tyre_SerialNo,Model_Name
 FROM tblNewTyreStock,tblTyre,tblSize,tblModel
 WHERE NewStock_Tyre_Serial=Tyre_SerialNo
     AND NewStock_Tyre_Code=Tyre_Code
@@ -246,7 +245,7 @@ GROUP BY Size_Name
 """
 
 INV_CUS_ID = """
-SELECT Casing_Tyre_Serial,Model_Name
+SELECT Tyre_SerialNo,Model_Name
 FROM tblProductionStock,tblCasing,tblTyre,tblSize,tblModel
 WHERE ProdStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -269,7 +268,7 @@ GROUP BY Size_Name
 """
 
 INV_STO_ID = """
-SELECT Casing_Tyre_Serial,Model_Name
+SELECT Tyre_SerialNo,Model_Name
 FROM tblProductionStock,tblCasing,tblTyre,tblSize,tblModel
 WHERE ProdStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -291,7 +290,7 @@ GROUP BY Size_Name
 """
 
 INV_REJ_ID = """
-SELECT Casing_Tyre_Serial,Model_Name
+SELECT Tyre_SerialNo,Model_Name
 FROM tblRejectStock,tblCasing,tblTyre,tblSize,tblModel
 WHERE RejectStock_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -357,7 +356,7 @@ class Table():
         self._input = i
         act = i['action']
         if act=='WIT_NT': q=WIT_NT
-        elif act=='WIT_NT_ID': q=WIT_NT_ID.format(tid=i['tid'],cid=i['cid'])
+        elif act=='WIT_NT_ID': q=WIT_NT_ID.format(tid=i['tid'])
         elif act=='WIT_CUS': q=WIT_CUS
         elif act=='WIT_CUS_ID':
             if i['cid'] is not None:
