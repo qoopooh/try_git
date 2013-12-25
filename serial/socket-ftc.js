@@ -84,8 +84,8 @@ FTC_COMMANDS = {
 }
 
 var SerialPort = require('serialport').SerialPort;
-/*var serial = new SerialPort(config.serial_port, { baudrate: 38400 });*/
-var serial = new SerialPort("/dev/ttyS0", { baudrate: 38400 });
+var serial = new SerialPort(config.serial_port, { baudrate: 38400 });
+//var serial = new SerialPort("/dev/ttyS0", { baudrate: 38400 });
 serial.on('open', function() {
   log('Open serial port', serial.path);
   serial.on('data', getFtcMessage);
