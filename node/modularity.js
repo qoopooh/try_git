@@ -1,3 +1,5 @@
+#!/usr/bin/env nodejs
+
 (function(){
   var local = "this is local, thanks to var";
   

@@ -1,3 +1,5 @@
+#!/usr/bin/env nodejs
+
 var myObject = function(name) {
   this.name = name;
   return this;

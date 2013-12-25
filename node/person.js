@@ -1,3 +1,5 @@
+#!/usr/bin/env nodejs
+
 function makePerson(first, last) {
   return {
       first: first,
