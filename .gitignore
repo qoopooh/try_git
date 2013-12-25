@@ -10,6 +10,7 @@ lib-cov
 *.swp
 *.swo
 *.dia~
+*.user
 benchmarks/graphs
 testing
 node_modules/
@@ -19,4 +20,5 @@ cover_html
 test.js
 .idea
 obj
-
+build-*
+qtquick2*

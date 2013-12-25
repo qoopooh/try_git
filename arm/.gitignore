@@ -5,4 +5,5 @@
 *.hex
 *.elf
 *.bin
-
+*.hzs
+THUMB*
