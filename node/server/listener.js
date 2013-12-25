@@ -5,7 +5,7 @@ var PORT = 8001;
 var count = 0;
 var http = require('http');
 var server = http.createServer(function(req, resp) {
-  console.log(req.method, ++count, req.headers['user-agent']);
+  console.log(++count, req.headers['user-agent']);
 
   resp.writeHead(200, {'Content-Type':'text/plain'});
   for (var i=0; i<100; i++) {
@@ -27,5 +27,5 @@ var server = http.createServer(function(req, resp) {
 });
 
 server.listen(PORT);
-console.log('Server on:', PORT);
+console.log('Server is running on', PORT);
 
