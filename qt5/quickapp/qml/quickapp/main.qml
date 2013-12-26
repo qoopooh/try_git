@@ -4,7 +4,7 @@ Rectangle {
     width: 360
     height: 360
     Text {
-        text: qsTr("Hello World")
+        text: qsTr("Hello โลก 3")
         anchors.centerIn: parent
     }
     MouseArea {
