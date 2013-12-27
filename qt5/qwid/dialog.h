@@ -20,6 +20,8 @@ private slots:
 
     void on_pushButtonVersion_clicked();
 
+    void on_pushButtonClear_clicked();
+
 private:
     Ui::Dialog *ui;
 };

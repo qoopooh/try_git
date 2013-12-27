@@ -26,3 +26,8 @@ void Dialog::on_pushButtonVersion_clicked()
 {
     ui->lineEditIp->setText("Button");
 }
+
+void Dialog::on_pushButtonClear_clicked()
+{
+    ui->lineEditIp->setText("");
+}
