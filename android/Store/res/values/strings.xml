@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">StoreActivity</string>
+    <string name="description">Save or retrive a value from the store:</string>
+    <string name="label_key">Key:</string>
+    <string name="label_val">Value:</string>
+    <string name="label_type">Type:</string>
+    <string name="get_val">Get Value</string>
+    <string name="set_val">Set Value</string>
 </resources>
