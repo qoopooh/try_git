@@ -14,11 +14,11 @@ typedef enum {
 
 typedef union {
   int32_t mInteger;
-  char* mString;
+  char *mString;
 } StoreValue;
 
 typedef struct {
-  char* mKey;
+  char *mKey;
   StoreType mType;
   StoreValue mValue;
 } StoreEntry;
@@ -28,9 +28,9 @@ typedef struct {
   int32_t mLength;
 } Store;
 
-int32_t isEntryValid(JNIEnv* pEnv, StoreEntry* pEntry, StoreType pType);
-StoreEntry* allocateEntry(JNIEnv* pEnv, Store* pStore, jstring pKey);
-StoreEntry* findEntry(JNIEnv* pEnv, Store* pStore, jstring pKey, int32_t* pError);
-void releaseEntryValue(JNIEnv* pEnv, StoreEntry* pEntry);
+int32_t isEntryValid(JNIEnv *pEnv, StoreEntry *pEntry, StoreType pType);
+StoreEntry* allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey);
+StoreEntry* findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t* pError);
+void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry);
 #endif /* _STORE_H_ */
 

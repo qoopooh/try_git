@@ -1,13 +1,13 @@
 #include "store.h"
 
-int32_t isEntryValid(JNIEnv* pEnv, StoreEntry* pEntry, StoreType pType)
+int32_t isEntryValid(JNIEnv *pEnv, StoreEntry *pEntry, StoreType pType)
 {
   if ((pEntry != NULL) && (pEntry->mType == pType))
     return 1;
   return 0;
 }
 
-StoreEntry* allocateEntry(JNIEnv* pEnv, Store* pStore, jstring pKey) {
+StoreEntry* allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
   int32_t lError = 0;
   StoreEntry* lEntry = findEntry(pEnv, pStore, pKey, &lError);
   
@@ -28,7 +28,7 @@ StoreEntry* allocateEntry(JNIEnv* pEnv, Store* pStore, jstring pKey) {
   return lEntry;
 }
 
-StoreEntry* findEntry(JNIEnv* pEnv, Store* pStore, jstring pKey, int32_t* pError)
+StoreEntry* findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t* pError)
 {
   StoreEntry* lEntry = pStore->mEntries;
   StoreEntry* lEntryEnd = lEntry + pStore->mLength;
@@ -47,7 +47,7 @@ StoreEntry* findEntry(JNIEnv* pEnv, Store* pStore, jstring pKey, int32_t* pError
   return (lEntry == lEntryEnd) ? NULL:lEntry;
 }
 
-void releaseEntryValue(JNIEnv* pEnv, StoreEntry* pEntry)
+void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry)
 {
   int i;
 

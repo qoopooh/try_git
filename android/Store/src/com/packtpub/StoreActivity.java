@@ -45,7 +45,7 @@ public class StoreActivity extends Activity
             }
         });
         mUISetButton = (Button) findViewById(R.id.uiSetValueButton);
-        mUIGetButton.setOnClickListener(new View.OnClickListener() {
+        mUISetButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 onSetValue();
             }
@@ -64,6 +64,7 @@ public class StoreActivity extends Activity
             break;
         case String:
             mUIValueEdit.setText(mStore.getString(lKey));
+            displayError("mStore.getString: " + mUIValueEdit.getText());
             break;
         }
     }
@@ -80,6 +81,7 @@ public class StoreActivity extends Activity
                 break;
             case String:
                 mStore.setString(lKey, lValue);
+                displayError("mStore.setString");
                 break;
             }
         } catch (NumberFormatException e) {
