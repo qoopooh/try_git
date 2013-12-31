@@ -1,8 +1,16 @@
 package com.packtpub;
 
+import java.lang.NumberFormatException;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import android.widget.Spinner;
 
 public class StoreActivity extends Activity
 {
@@ -25,13 +33,30 @@ public class StoreActivity extends Activity
             e.printStackTrace();
         }
 
+        mUIKeyEdit = (EditText) findViewById(R.id.uiKeyEdit);
+        mUIValueEdit = (EditText) findViewById(R.id.uiValueEdit);
+        mUITypeSpinner = (Spinner) findViewById(R.id.uiTypeSpinner);
+        mUITypeSpinner.setAdapter(new ArrayAdapter<StoreType>(this,
+            android.R.layout.simple_spinner_item, StoreType.values()));
+        mUIGetButton = (Button) findViewById(R.id.uiGetValueButton);
+        mUIGetButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                onGetValue();
+            }
+        });
+        mUISetButton = (Button) findViewById(R.id.uiSetValueButton);
+        mUIGetButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                onSetValue();
+            }
+        });
+
         mStore = new Store();
     }
 
     private void onGetValue() {
         String lKey = mUIKeyEdit.getText().toString();
-        StoreType lType = (StoreType) mUITypeSpinner
-                .getSelectedItem();
+        StoreType lType = (StoreType) mUITypeSpinner.getSelectedItem();
         switch (lType) {
         case Integer:
             mUIValueEdit.setText(Integer.toString(mStore
@@ -41,6 +66,29 @@ public class StoreActivity extends Activity
             mUIValueEdit.setText(mStore.getString(lKey));
             break;
         }
+    }
+
+    private void onSetValue() {
+        String lKey = mUIKeyEdit.getText().toString();
+        String lValue = mUIValueEdit.getText().toString();
+        StoreType lType = (StoreType) mUITypeSpinner.getSelectedItem();
+
+        try {
+            switch (lType) {
+            case Integer:
+                mStore.setInteger(lKey, Integer.parseInt(lValue));
+                break;
+            case String:
+                mStore.setString(lKey, lValue);
+                break;
+            }
+        } catch (NumberFormatException e) {
+            displayError("Incorrect value.");
+        }
+    }
+
+    private void displayError(String pError) {
+        Toast.makeText(getApplicationContext(), pError, Toast.LENGTH_LONG).show();
     }
 }
 

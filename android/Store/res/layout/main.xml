@@ -73,13 +73,13 @@
         android:layout_height="wrap_content" >
 
         <Button
-            android:id="@+id/buttonGetValue"
+            android:id="@+id/uiGetValueButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/get_val" />
 
         <Button
-            android:id="@+id/buttonSetValue"
+            android:id="@+id/uiSetValueButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/set_val" />
