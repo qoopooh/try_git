@@ -1,6 +1,6 @@
 package com.packtpub;
 
 public enum StoreType {
-    Integer, String
+    Integer, String, Color
 }
 

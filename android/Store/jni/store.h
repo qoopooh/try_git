@@ -9,12 +9,13 @@
 #define STORE_MAX_CAPACITY 16
 
 typedef enum {
-  StoreType_Integer, StoreType_String
+  StoreType_Integer, StoreType_String, StoreType_Color
 } StoreType;
 
 typedef union {
   int32_t mInteger;
   char *mString;
+  jobject mColor;
 } StoreValue;
 
 typedef struct {

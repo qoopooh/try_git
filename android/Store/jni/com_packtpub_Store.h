@@ -39,6 +39,22 @@ JNIEXPORT jstring JNICALL Java_com_packtpub_Store_getString
 JNIEXPORT void JNICALL Java_com_packtpub_Store_setString
   (JNIEnv *, jobject, jstring, jstring);
 
+/*
+ * Class:     com_packtpub_Store
+ * Method:    getColor
+ * Signature: (Ljava/lang/String;)Lcom/packtpub/Color;
+ */
+JNIEXPORT jobject JNICALL Java_com_packtpub_Store_getColor
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_packtpub_Store
+ * Method:    setColor
+ * Signature: (Ljava/lang/String;Lcom/packtpub/Color;)V
+ */
+JNIEXPORT void JNICALL Java_com_packtpub_Store_setColor
+  (JNIEnv *, jobject, jstring, jobject);
+
 #ifdef __cplusplus
 }
 #endif

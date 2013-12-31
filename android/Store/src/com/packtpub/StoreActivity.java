@@ -1,6 +1,7 @@
 package com.packtpub;
 
 import java.lang.NumberFormatException;
+import java.lang.IllegalArgumentException;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -57,16 +58,23 @@ public class StoreActivity extends Activity
     private void onGetValue() {
         String lKey = mUIKeyEdit.getText().toString();
         StoreType lType = (StoreType) mUITypeSpinner.getSelectedItem();
+        String lValue = "";
+
         switch (lType) {
         case Integer:
-            mUIValueEdit.setText(Integer.toString(mStore
-                    .getInteger(lKey)));
+            lValue = Integer.toString(mStore
+                    .getInteger(lKey));
             break;
         case String:
-            mUIValueEdit.setText(mStore.getString(lKey));
-            displayError("mStore.getString: " + mUIValueEdit.getText());
+            lValue = mStore.getString(lKey);
+            break;
+        case Color:
+            Color c = mStore.getColor(lKey);
+            if (c != null)
+                lValue = c.toString();
             break;
         }
+        mUIValueEdit.setText(lValue);
     }
 
     private void onSetValue() {
@@ -81,11 +89,15 @@ public class StoreActivity extends Activity
                 break;
             case String:
                 mStore.setString(lKey, lValue);
-                displayError("mStore.setString");
+                break;
+            case Color:
+                mStore.setColor(lKey, new Color(lValue));
                 break;
             }
         } catch (NumberFormatException e) {
-            displayError("Incorrect value.");
+            displayError("Incorrect value (Number Format).");
+        } catch (IllegalArgumentException e) {
+            displayError("Incorrect value (Illegal Argument).");
         }
     }
 

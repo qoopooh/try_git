@@ -7,9 +7,9 @@ int32_t isEntryValid(JNIEnv *pEnv, StoreEntry *pEntry, StoreType pType)
   return 0;
 }
 
-StoreEntry* allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
+StoreEntry *allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
   int32_t lError = 0;
-  StoreEntry* lEntry = findEntry(pEnv, pStore, pKey, &lError);
+  StoreEntry *lEntry = findEntry(pEnv, pStore, pKey, &lError);
   
   if (lEntry != NULL) {
     releaseEntryValue(pEnv, lEntry);
@@ -17,7 +17,7 @@ StoreEntry* allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
     if (pStore->mLength >= STORE_MAX_CAPACITY)
       return NULL;
     lEntry = pStore->mEntries + pStore->mLength;
-    const char* lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
+    const char *lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
     if (lKeyTmp == NULL)
       return NULL;
     lEntry->mKey = (char*) malloc(strlen(lKeyTmp));
@@ -28,12 +28,12 @@ StoreEntry* allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
   return lEntry;
 }
 
-StoreEntry* findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t* pError)
+StoreEntry *findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t *pError)
 {
-  StoreEntry* lEntry = pStore->mEntries;
-  StoreEntry* lEntryEnd = lEntry + pStore->mLength;
+  StoreEntry *lEntry = pStore->mEntries;
+  StoreEntry *lEntryEnd = lEntry + pStore->mLength;
 
-  const char* lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
+  const char *lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
   
   if (lKeyTmp == NULL) {
     if (pError != NULL) {
@@ -54,6 +54,9 @@ void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry)
   switch (pEntry->mType) {
     case StoreType_String:
       free(pEntry->mValue.mString);
+      break;
+    case StoreType_Color:
+      (*pEnv)->DeleteGlobalRef(pEnv, pEntry->mValue.mColor);
       break;
   }
 }

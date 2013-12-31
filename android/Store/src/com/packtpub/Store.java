@@ -9,5 +9,7 @@ public class Store {
     public native void setInteger(String pKey, int pInt);
     public native String getString(String pKey);
     public native void setString(String pKey, String pString);
+    public native Color getColor(String pKey);
+    public native void setColor(String pKey, Color pColor);
 }
 
