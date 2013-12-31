@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Spinner;
 
+import com.packtpub.exception.*;
+
 public class StoreActivity extends Activity
 {
     private EditText mUIKeyEdit, mUIValueEdit;
@@ -58,23 +60,29 @@ public class StoreActivity extends Activity
     private void onGetValue() {
         String lKey = mUIKeyEdit.getText().toString();
         StoreType lType = (StoreType) mUITypeSpinner.getSelectedItem();
-        String lValue = "";
 
-        switch (lType) {
-        case Integer:
-            lValue = Integer.toString(mStore
-                    .getInteger(lKey));
-            break;
-        case String:
-            lValue = mStore.getString(lKey);
-            break;
-        case Color:
-            Color c = mStore.getColor(lKey);
-            if (c != null)
-                lValue = c.toString();
-            break;
+        try {
+            String lValue = "";
+            switch (lType) {
+            case Integer:
+                lValue = Integer.toString(mStore
+                        .getInteger(lKey));
+                break;
+            case String:
+                lValue = mStore.getString(lKey);
+                break;
+            case Color:
+                Color c = mStore.getColor(lKey);
+                if (c != null)
+                    lValue = c.toString();
+                break;
+            }
+            mUIValueEdit.setText(lValue);
+        } catch (NotExistingKeyException e) {
+            displayError("Key does not exist in store");
+        } catch (InvalidTypeException e) {
+            displayError("Incorrect type.");
         }
-        mUIValueEdit.setText(lValue);
     }
 
     private void onSetValue() {
@@ -98,6 +106,8 @@ public class StoreActivity extends Activity
             displayError("Incorrect value (Number Format).");
         } catch (IllegalArgumentException e) {
             displayError("Incorrect value (Illegal Argument).");
+        } catch (StoreFullException e) {
+            displayError("Store is full.");
         }
     }
 

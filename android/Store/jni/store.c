@@ -2,7 +2,11 @@
 
 int32_t isEntryValid(JNIEnv *pEnv, StoreEntry *pEntry, StoreType pType)
 {
-  if ((pEntry != NULL) && (pEntry->mType == pType))
+  if (pEntry == NULL)
+    throwNotExistingKeyException(pEnv);
+  else if (pEntry->mType != pType)
+    throwInvalidTypeException(pEnv);
+  else
     return 1;
   return 0;
 }
@@ -14,8 +18,10 @@ StoreEntry *allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
   if (lEntry != NULL) {
     releaseEntryValue(pEnv, lEntry);
   } else if (!lError) {
-    if (pStore->mLength >= STORE_MAX_CAPACITY)
+    if (pStore->mLength >= STORE_MAX_CAPACITY) {
+      throwStoreFullException(pEnv);
       return NULL;
+    }
     lEntry = pStore->mEntries + pStore->mLength;
     const char *lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
     if (lKeyTmp == NULL)
@@ -59,5 +65,29 @@ void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry)
       (*pEnv)->DeleteGlobalRef(pEnv, pEntry->mValue.mColor);
       break;
   }
+}
+
+void throwInvalidTypeException(JNIEnv *pEnv)
+{
+  jclass cls = (*pEnv)->FindClass(pEnv, "com/packtpub/exception/InvalidTypeException");
+  if (cls != NULL)
+    (*pEnv)->ThrowNew(pEnv, cls, "Key does not exist.");
+  (*pEnv)->DeleteLocalRef(pEnv, cls);
+}
+
+void throwNotExistingKeyException(JNIEnv *pEnv)
+{
+  jclass cls = (*pEnv)->FindClass(pEnv, "com/packtpub/exception/NotExistingKeyException");
+  if (cls != NULL)
+    (*pEnv)->ThrowNew(pEnv, cls, "There is no key");
+  (*pEnv)->DeleteLocalRef(pEnv, cls);
+}
+
+void throwStoreFullException(JNIEnv *pEnv)
+{
+  jclass cls = (*pEnv)->FindClass(pEnv, "com/packtpub/exception/StoreFullException");
+  if (cls != NULL)
+    (*pEnv)->ThrowNew(pEnv, cls, "FULL storage");
+  (*pEnv)->DeleteLocalRef(pEnv, cls);
 }
 
