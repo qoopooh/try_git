@@ -8,20 +8,27 @@
 
 #define STORE_MAX_CAPACITY 4
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef enum {
-  StoreType_Integer, StoreType_String, StoreType_Color
+  StoreType_Integer, StoreType_String, StoreType_Color,
+  StoreType_IntegerArray, StoreType_ColorArray
 } StoreType;
 
 typedef union {
   int32_t mInteger;
   char *mString;
   jobject mColor;
+  int32_t *mIntegerArray;
+  jobject *mColorArray;
 } StoreValue;
 
 typedef struct {
   char *mKey;
   StoreType mType;
   StoreValue mValue;
+  int32_t mLength;
 } StoreEntry;
 
 typedef struct {
@@ -37,5 +44,8 @@ void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry);
 void throwInvalidTypeException(JNIEnv *pEnv);
 void throwNotExistingKeyException(JNIEnv *pEnv);
 void throwStoreFullException(JNIEnv *pEnv);
+#ifdef __cplusplus
+}
+#endif
 #endif /* _STORE_H_ */
 

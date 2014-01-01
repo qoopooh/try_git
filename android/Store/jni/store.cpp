@@ -23,12 +23,12 @@ StoreEntry *allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
       return NULL;
     }
     lEntry = pStore->mEntries + pStore->mLength;
-    const char *lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
+    const char *lKeyTmp = pEnv->GetStringUTFChars(pKey, NULL);
     if (lKeyTmp == NULL)
       return NULL;
     lEntry->mKey = (char*) malloc(strlen(lKeyTmp));
     strcpy(lEntry->mKey, lKeyTmp);
-    (*pEnv)->ReleaseStringUTFChars(pEnv, pKey, lKeyTmp);
+    pEnv->ReleaseStringUTFChars(pKey, lKeyTmp);
     ++pStore->mLength;
   }
   return lEntry;
@@ -39,55 +39,66 @@ StoreEntry *findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t *pError
   StoreEntry *lEntry = pStore->mEntries;
   StoreEntry *lEntryEnd = lEntry + pStore->mLength;
 
-  const char *lKeyTmp = (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
+  const char *lKeyTmp = pEnv->GetStringUTFChars(pKey, NULL);
   
   if (lKeyTmp == NULL) {
     if (pError != NULL) {
       *pError = 1;
     }
-    return;
+    return NULL;
   }
   while ((lEntry < lEntryEnd) && (strcmp(lEntry->mKey, lKeyTmp) != 0))
     ++lEntry;
-  (*pEnv)->ReleaseStringUTFChars(pEnv, pKey, lKeyTmp);
+  pEnv->ReleaseStringUTFChars(pKey, lKeyTmp);
   return (lEntry == lEntryEnd) ? NULL:lEntry;
 }
 
 void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry)
 {
-  int i;
+  int32_t i;
 
   switch (pEntry->mType) {
     case StoreType_String:
       free(pEntry->mValue.mString);
       break;
     case StoreType_Color:
-      (*pEnv)->DeleteGlobalRef(pEnv, pEntry->mValue.mColor);
+      pEnv->DeleteGlobalRef(pEntry->mValue.mColor);
+      break;
+    case StoreType_IntegerArray:
+      free(pEntry->mValue.mIntegerArray);
+      break;
+    case StoreType_ColorArray:
+      for (i=0; i<pEntry->mLength; i++) {
+        pEnv->DeleteGlobalRef(pEntry->mValue.mColorArray[i]);
+      }
+      free(pEntry->mValue.mColorArray);
+      break;
+    default:
       break;
   }
 }
 
 void throwInvalidTypeException(JNIEnv *pEnv)
 {
-  jclass cls = (*pEnv)->FindClass(pEnv, "com/packtpub/exception/InvalidTypeException");
+  jclass cls = pEnv->FindClass("com/packtpub/exception/InvalidTypeException");
   if (cls != NULL)
-    (*pEnv)->ThrowNew(pEnv, cls, "Key does not exist.");
-  (*pEnv)->DeleteLocalRef(pEnv, cls);
+    pEnv->ThrowNew(cls, "Key does not exist.");
+  pEnv->DeleteLocalRef(cls);
 }
 
 void throwNotExistingKeyException(JNIEnv *pEnv)
 {
-  jclass cls = (*pEnv)->FindClass(pEnv, "com/packtpub/exception/NotExistingKeyException");
+  jclass cls = pEnv->FindClass("com/packtpub/exception/NotExistingKeyException");
   if (cls != NULL)
-    (*pEnv)->ThrowNew(pEnv, cls, "There is no key");
-  (*pEnv)->DeleteLocalRef(pEnv, cls);
+    pEnv->ThrowNew(cls, "There is no key");
+  pEnv->DeleteLocalRef(cls);
 }
 
 void throwStoreFullException(JNIEnv *pEnv)
 {
-  jclass cls = (*pEnv)->FindClass(pEnv, "com/packtpub/exception/StoreFullException");
+  jclass cls = pEnv->FindClass("com/packtpub/exception/StoreFullException");
   if (cls != NULL)
-    (*pEnv)->ThrowNew(pEnv, cls, "FULL storage");
-  (*pEnv)->DeleteLocalRef(pEnv, cls);
+    pEnv->ThrowNew(cls, "FULL storage");
+  pEnv->DeleteLocalRef(cls);
 }
 

@@ -1,8 +1,9 @@
 package com.packtpub;
 
-import java.lang.NumberFormatException;
 import java.lang.IllegalArgumentException;
-
+import java.lang.NumberFormatException;
+import java.util.Arrays;
+import java.util.List;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -12,6 +13,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Spinner;
+
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 
 import com.packtpub.exception.*;
 
@@ -76,6 +82,14 @@ public class StoreActivity extends Activity
                 if (c != null)
                     lValue = c.toString();
                 break;
+            case IntegerArray:
+                lValue = Ints.join(";", mStore.getIntegerArray(lKey));
+                break;
+            case ColorArray:
+                lValue = Joiner.on(";").join(mStore.getColorArray(lKey));
+                break;
+			default:
+				break;
             }
             mUIValueEdit.setText(lValue);
         } catch (NotExistingKeyException e) {
@@ -101,6 +115,26 @@ public class StoreActivity extends Activity
             case Color:
                 mStore.setColor(lKey, new Color(lValue));
                 break;
+            case IntegerArray:
+                mStore.setIntegerArray(lKey, Ints.toArray(stringToList(
+                    new Function<String, Integer>() {
+                        public Integer apply(String pSubValue) {
+                            return Integer.parseInt(pSubValue);
+                        }
+                    }, lValue)));
+                break;
+            case ColorArray:
+                List<Color> lIdList = stringToList(
+                    new Function<String, Color>() {
+                        public Color apply(String pSubValue) {
+                            return new Color(pSubValue);
+                        }
+                    }, lValue);
+                Color[] lIdArray = lIdList.toArray(new Color[lIdList.size()]);
+                mStore.setColorArray(lKey, lIdArray);
+                break;
+			default:
+				break;
             }
         } catch (NumberFormatException e) {
             displayError("Incorrect value (Number Format).");
@@ -109,6 +143,13 @@ public class StoreActivity extends Activity
         } catch (StoreFullException e) {
             displayError("Store is full.");
         }
+    }
+
+    private <TType> List<TType> stringToList(
+            Function<String, TType> pConversion, String pValue) {
+        String[] lSplitArray = pValue.split(";");
+        List<String> lSplitList = Arrays.asList(lSplitArray);
+        return Lists.transform(lSplitList, pConversion);
     }
 
     private void displayError(String pError) {

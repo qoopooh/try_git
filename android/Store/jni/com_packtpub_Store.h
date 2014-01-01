@@ -55,6 +55,38 @@ JNIEXPORT jobject JNICALL Java_com_packtpub_Store_getColor
 JNIEXPORT void JNICALL Java_com_packtpub_Store_setColor
   (JNIEnv *, jobject, jstring, jobject);
 
+/*
+ * Class:     com_packtpub_Store
+ * Method:    getIntegerArray
+ * Signature: (Ljava/lang/String;)[I
+ */
+JNIEXPORT jintArray JNICALL Java_com_packtpub_Store_getIntegerArray
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_packtpub_Store
+ * Method:    setIntegerArray
+ * Signature: (Ljava/lang/String;[I)V
+ */
+JNIEXPORT void JNICALL Java_com_packtpub_Store_setIntegerArray
+  (JNIEnv *, jobject, jstring, jintArray);
+
+/*
+ * Class:     com_packtpub_Store
+ * Method:    getColorArray
+ * Signature: (Ljava/lang/String;)[Lcom/packtpub/Color;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_packtpub_Store_getColorArray
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_packtpub_Store
+ * Method:    setColorArray
+ * Signature: (Ljava/lang/String;[Lcom/packtpub/Color;)V
+ */
+JNIEXPORT void JNICALL Java_com_packtpub_Store_setColorArray
+  (JNIEnv *, jobject, jstring, jobjectArray);
+
 #ifdef __cplusplus
 }
 #endif
