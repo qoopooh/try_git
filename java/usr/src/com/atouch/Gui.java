@@ -22,7 +22,7 @@ import javax.swing.event.ListSelectionListener;
 
 public class Gui extends javax.swing.JFrame {
 
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.2";
     public static final String PASSKEY = "A-touch";
 
     private static final long serialVersionUID = 1L;
@@ -37,6 +37,10 @@ public class Gui extends javax.swing.JFrame {
     private Usr mSelectedUsr;
 
     private boolean pass;
+	private JLabel modeLabel;
+	private JLabel modeValue;
+	private JLabel baudLabel;
+	private JLabel baudValue;
 
     public Gui() {
         initComponents();
@@ -50,6 +54,10 @@ public class Gui extends javax.swing.JFrame {
         ipTextField = new javax.swing.JTextField();
         portLabel = new javax.swing.JLabel();
         portTextField = new javax.swing.JTextField();
+        modeLabel = new javax.swing.JLabel();
+        modeValue = new javax.swing.JLabel();
+        baudLabel = new javax.swing.JLabel();
+        baudValue = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Domotics Gateway Setting V." + VERSION);
@@ -73,6 +81,11 @@ public class Gui extends javax.swing.JFrame {
                 updateButtonActionPerformed(evt);
             }
         });
+
+        modeLabel.setText("Work Mode:");
+        modeValue.setText("-");
+        baudLabel.setText("Baud Rate:");
+        baudValue.setText("-");
 
         listModel = new DefaultListModel();
         listModel.addElement("0057C7294D62 192.168.1.254");
@@ -141,6 +154,28 @@ public class Gui extends javax.swing.JFrame {
                                                 .addGroup(
                                                         layout.createSequentialGroup()
                                                                 .addComponent(
+                                                                        modeLabel,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        modeValue))
+                                                .addGroup(
+                                                        layout.createSequentialGroup()
+                                                                .addComponent(
+                                                                        baudLabel,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        baudValue))
+                                                .addGroup(
+                                                        layout.createSequentialGroup()
+                                                                .addComponent(
                                                                         updateButton)
                                                                 .addPreferredGap(
                                                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -178,6 +213,28 @@ public class Gui extends javax.swing.JFrame {
                                                         javax.swing.GroupLayout.DEFAULT_SIZE,
                                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addComponent(portTextField))
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(
+                                        layout.createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(
+                                                        modeLabel,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(modeValue))
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(
+                                        layout.createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(
+                                                        baudLabel,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(baudValue))
                                 .addPreferredGap(
                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(
