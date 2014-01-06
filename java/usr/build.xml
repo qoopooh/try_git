@@ -54,7 +54,6 @@
         </java>
     </target>
     <target depends="build" name="jar">
-        <mkdir dir="bin/jar"/>
         <jar destfile="bin/${ant.project.name}.jar" basedir="bin">
         <manifest>
             <attribute name="Main-Class" value="com.atouch.Gui"/>
