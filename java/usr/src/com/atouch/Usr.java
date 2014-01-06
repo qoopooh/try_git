@@ -17,12 +17,15 @@ public class Usr {
     static final String SETTING_MSG = "110415";
     static final String ALL_IP = "192.168.1.255";
     static final int UDP_PORT = 1500;
+    static final Mode GATEWAY_MODE = Mode.TcpServer;
+    static final int GATEWAY_BAUD = 38400;
+    static final int SOCKET_TIMEOUT = 1500;
     static final boolean DEBUG = false;
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     public enum Mode {
-        TcpClient,
         Udp,
+        TcpClient,
         UdpServer,
         TcpServer,
         Unknown
@@ -34,8 +37,8 @@ public class Usr {
     private String mHostIp = "192.168.1.31";
     private int mHostPort = 1470;
     private String mGatewayIp = "192.168.1.254";
-    private Mode mMode = Mode.TcpServer;
-    private int mBaud = 38401;
+    private Mode mMode = GATEWAY_MODE;
+    private int mBaud = GATEWAY_BAUD;
 
     public Usr(byte[] data) {
         mMac = extractMac(Arrays.copyOfRange(data, 0, 6));
@@ -80,11 +83,11 @@ public class Usr {
         String mode = "";
 
         switch (mMode) {
-        case TcpClient:
-            mode = "TCP Client";
-            break;
         case Udp:
             mode = "UDP Client";
+            break;
+        case TcpClient:
+            mode = "TCP Client";
             break;
         case UdpServer:
             mode = "UDP Server";
@@ -142,7 +145,7 @@ public class Usr {
         DatagramPacket packet = new DatagramPacket(buf, buf.length,
                 address, UDP_PORT);
         serverSocket.send(packet);
-        serverSocket.setSoTimeout(1000); // set the timeout in millisecounds.
+        serverSocket.setSoTimeout(SOCKET_TIMEOUT); // set the timeout in millisecounds.
 
         ArrayList<Usr> out = new ArrayList<Usr>();
         while (true) {
@@ -167,6 +170,8 @@ public class Usr {
     public static void update(Usr u, String ip, String port) throws IOException {
         u.mHostIp = ip;
         u.mHostPort = Integer.valueOf(port);
+        u.mMode = GATEWAY_MODE;
+        u.mBaud = GATEWAY_BAUD;
 
         byte[] buf = u.getBytes();
         InetAddress address = InetAddress.getByName(ALL_IP);

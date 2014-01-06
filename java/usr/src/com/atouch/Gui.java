@@ -16,15 +16,17 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 public class Gui extends javax.swing.JFrame {
 
-	public static final String VERSION = "1.2";
+	public static final String VERSION = "1.3";
 	public static final String PASSKEY = "A-touch";
 
 	private static final long serialVersionUID = 1L;
+  private static int TIMER_CYCLE = 3000;
 	private JButton updateButton;
 	private JLabel ipLabel;
 	private JTextField ipTextField;
@@ -34,6 +36,7 @@ public class Gui extends javax.swing.JFrame {
 	private JList list;
 	private List<Usr> mUsrList;
 	private Usr mSelectedUsr;
+	private Timer mTimer;
 
 	private boolean pass;
 	private JLabel modeLabel;
@@ -43,7 +46,12 @@ public class Gui extends javax.swing.JFrame {
 
 	public Gui() {
 		initComponents();
-		refreshList();
+    mTimer = new Timer(TIMER_CYCLE, new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        refreshList();
+      }
+    });
+    refreshList();
 		pass = false;
 	}
 
@@ -87,8 +95,6 @@ public class Gui extends javax.swing.JFrame {
 		baudValue.setText("-");
 
 		listModel = new DefaultListModel();
-		listModel.addElement("0057C7294D62 192.168.1.254");
-		listModel.addElement("0069C92A4D5C 255.255.255.255");
 		// Create the list and put it in a scroll pane.
 		list = new JList(listModel);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -233,7 +239,7 @@ public class Gui extends javax.swing.JFrame {
 			pass = true;
 		}
 		setUsr();
-		refreshList();
+    mTimer.start();
 	}
 
 	private void setUsr() {
@@ -249,14 +255,20 @@ public class Gui extends javax.swing.JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
+    modeValue.setText("?");
+    baudValue.setText("?");
+		//try {
+			//Thread.sleep(3000);
+		//} catch (InterruptedException ex) {
+			//Thread.currentThread().interrupt();
+		//}
+    listModel.clear();
+    listModel.addElement("Please wait for 4-5 seconds");
 	}
 
 	private void refreshList() {
+    modeValue.setText("-");
+    baudValue.setText("-");
 		try {
 			listModel.clear();
 			mSelectedUsr = null;
@@ -270,6 +282,7 @@ public class Gui extends javax.swing.JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+    mTimer.stop();
 	}
 
 	private ListSelectionListener mLsl = new ListSelectionListener() {
@@ -286,6 +299,8 @@ public class Gui extends javax.swing.JFrame {
 				System.out.println("[SELECT] " + val);
 				String mac = val.split(" ")[0];
 
+        if ((mac == null) || (mac.length() != 12))
+          return;
 				for (Usr u : mUsrList) {
 					if (!u.getMac().equals(mac))
 						continue;
