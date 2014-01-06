@@ -321,6 +321,8 @@ public class Gui extends javax.swing.JFrame {
                         continue;
                     ipTextField.setText(u.getIp());
                     portTextField.setText(u.getPort());
+                    modeValue.setText(u.getMode());
+                    baudValue.setText(String.valueOf(u.getBaud()));
                     mSelectedUsr = u;
                     break;
                 }
