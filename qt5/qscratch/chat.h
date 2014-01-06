@@ -28,7 +28,7 @@ private slots:
   void onSend();
 
 private:
-  void createMenu();
+  void createHorizontalGroupBox();
   void createGridGroupBox();
 
   enum { NumGridRows = 3, NumButtons = 4 };
@@ -46,6 +46,10 @@ private:
 
   QMenu *fileMenu;
   QAction *exitAction;
+
+  QLineEdit *lineEditCmd;
+  QPushButton *btnSend;
+  QPushButton *btnClear;
 };
 
 #endif // CHAT_H
