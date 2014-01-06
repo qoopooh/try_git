@@ -4,16 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core
+QT       += core gui
 
-QT       -= gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = qscratch
-CONFIG   += console
-CONFIG   -= app_bundle
-
 TEMPLATE = app
-
 
 SOURCES += main.cpp \
     chat.cpp
