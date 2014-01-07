@@ -3,4 +3,5 @@ target
 bin
 gen
 dist
+cscope.*
 
