@@ -5,30 +5,50 @@ Chat::Chat(QWidget *parent) :
     QDialog(parent)
 {
   createHorizontalGroupBox();
-  createGridGroupBox();
+//  createGridGroupBox();
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
 
   mainLayout->addWidget(horizontalGroupBox, 1);
-  mainLayout->addWidget(gridGroupBox, 10);
+//  mainLayout->addWidget(gridGroupBox, 10);
+  textEditLog = new QTextEdit();
+  mainLayout->addWidget(textEditLog, 10);
   setLayout(mainLayout);
 
   setWindowTitle(tr("Basic Layouts"));
+//  showFullScreen();
+  socket = new QTcpSocket();
+  socket->connectToHost("192.168.1.39", 1470);
+  stream = new QTextStream(socket);
+
+  connect(btnSend, SIGNAL(clicked()), this, SLOT(onSend()));
+  connect(socket, SIGNAL(readyRead()), this, SLOT(onRead()));
 }
 
 Chat::~Chat()
 {
-
+  delete socket;
 }
 
 void Chat::onSend()
 {
+  QString data(lineEditCmd->text());
 
+  data += "\r\n";
+  socket->write(data.toStdString().c_str(), data.length());
+//  *stream << lineEditCmd->text() << "\r\n";
+}
+
+void Chat::onRead()
+{
+  QString resp(stream->readLine());
+
+  textEditLog->append(resp);
 }
 
 void Chat::createHorizontalGroupBox()
 {
-  horizontalGroupBox = new QGroupBox(tr("Horizontal layout"));
+  horizontalGroupBox = new QGroupBox(tr("Message"));
   QHBoxLayout *layout = new QHBoxLayout;
   lineEditCmd = new QLineEdit(tr("0,E,V"));
   btnSend = new QPushButton(tr("Send"));

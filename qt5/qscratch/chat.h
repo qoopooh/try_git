@@ -2,6 +2,7 @@
 #define CHAT_H
 
 #include <QDialog>
+#include <QTcpSocket>
 
 class QAction;
 class QDialogButtonBox;
@@ -26,6 +27,7 @@ public slots:
 
 private slots:
   void onSend();
+  void onRead();
 
 private:
   void createHorizontalGroupBox();
@@ -50,6 +52,10 @@ private:
   QLineEdit *lineEditCmd;
   QPushButton *btnSend;
   QPushButton *btnClear;
+  QTextEdit *textEditLog;
+
+  QTcpSocket *socket;
+  QTextStream *stream;
 };
 
 #endif // CHAT_H

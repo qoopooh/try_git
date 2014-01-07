@@ -5,14 +5,18 @@
 #-------------------------------------------------
 
 QT       += core gui
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += network
 
 TARGET = qscratch
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    chat.cpp
+    chat.cpp \
+    gatewaymessage.cpp \
+    encrypt.cpp
 
 HEADERS += \
-    chat.h
+    chat.h \
+    gatewaymessage.h \
+    encrypt.h
