@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //   Advanced Domotics                        Copyright 2012
 //-----------------------------------------------------------------------------
 //
@@ -18,6 +18,8 @@
 // GLOBAL VARIABLES
 
 
+const char *unit_id = "11111111112222222222333333333344444444441111111111222222222233333333334444444444";
+unsigned char encr_decr_message[MAX_TX_BUFF_LEN + 2];      // encrypted message
 //-------------------------------------
 //  Encrypt routine (draft)
 //    - only charaters and numbers are encrypted, symbols remain unchanged
@@ -52,6 +54,7 @@ void Encrypt(unsigned char *msg, char phone_id)
     i++;
     }
   encr_decr_message[i] = LINE_FEED;
+  encr_decr_message[i+1] = '\0';
 }
 
 
