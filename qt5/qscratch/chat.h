@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QTcpSocket>
+#include "gatewaymessage.h"
 
 class QAction;
 class QDialogButtonBox;
@@ -27,11 +28,14 @@ public slots:
 
 private slots:
   void onSend();
+  void onClear();
   void onRead();
 
 private:
   void createHorizontalGroupBox();
   void createGridGroupBox();
+  void log(QString);
+  void handleMessage(QStringList list);
 
   enum { NumGridRows = 3, NumButtons = 4 };
 
@@ -56,6 +60,8 @@ private:
 
   QTcpSocket *socket;
   QTextStream *stream;
+  bool f_show_tx;
+  int phoneid;
 };
 
 #endif // CHAT_H

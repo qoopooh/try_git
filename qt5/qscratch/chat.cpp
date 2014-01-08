@@ -1,8 +1,12 @@
 ﻿#include <QtWidgets>
 #include "chat.h"
 
+const QString APP("Domotics Gateway");
+const QString VERSION("V0.1");
+const QString UUID("0123456789012345678901234567890123456789");
+
 Chat::Chat(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent), f_show_tx(true), phoneid(0)
 {
   createHorizontalGroupBox();
 //  createGridGroupBox();
@@ -16,12 +20,15 @@ Chat::Chat(QWidget *parent) :
   setLayout(mainLayout);
 
   setWindowTitle(tr("Basic Layouts"));
-//  showFullScreen();
+#ifdef Q_OS_ANDROID
+  showFullScreen();
+#endif
   socket = new QTcpSocket();
-  socket->connectToHost("192.168.1.39", 1470);
+  socket->connectToHost("192.168.1.32", 1470);
   stream = new QTextStream(socket);
 
   connect(btnSend, SIGNAL(clicked()), this, SLOT(onSend()));
+  connect(btnClear, SIGNAL(clicked()), this, SLOT(onClear()));
   connect(socket, SIGNAL(readyRead()), this, SLOT(onRead()));
 }
 
@@ -33,24 +40,43 @@ Chat::~Chat()
 void Chat::onSend()
 {
   QString data(lineEditCmd->text());
+  GatewayMessage gMsg(UUID);
 
-  data += "\r\n";
+  if (f_show_tx) {
+    QTime local(QTime::currentTime());
+    QString str = local.toString("m:ss.zzz: ") + data + "\n";
+    log(str);
+  }
+
+  data = gMsg.encrypt(data, phoneid);
   socket->write(data.toStdString().c_str(), data.length());
-//  *stream << lineEditCmd->text() << "\r\n";
+//  *stream << data.toStdString().c_str(); /* does not work */
+}
+
+void Chat::onClear()
+{
+  QString msg = GatewayMessage(UUID).registerMessage();
+  socket->write(msg.toStdString().c_str(), msg.length());
+
+  textEditLog->clear();
 }
 
 void Chat::onRead()
 {
-  QString resp(stream->readLine());
+  GatewayMessage gMsg(UUID, stream->readLine());
+  QString msg = gMsg.getDecryption();
 
-  textEditLog->append(resp);
+  handleMessage(msg.split(','));
+  QTime local(QTime::currentTime());
+  QString str = local.toString("m:ss.zzz") + "-> " + msg;
+  log(str);
 }
 
 void Chat::createHorizontalGroupBox()
 {
-  horizontalGroupBox = new QGroupBox(tr("Message"));
+  horizontalGroupBox = new QGroupBox(APP + " " + VERSION);
   QHBoxLayout *layout = new QHBoxLayout;
-  lineEditCmd = new QLineEdit(tr("0,E,V"));
+  lineEditCmd = new QLineEdit(tr("E,L,1"));
   btnSend = new QPushButton(tr("Send"));
   btnClear = new QPushButton(tr("Clear"));
 
@@ -75,3 +101,28 @@ void Chat::createGridGroupBox()
   gridGroupBox->setLayout(layout);
 }
 
+
+void Chat::log(QString msg)
+{
+  QTextCursor tmpCursor = textEditLog->textCursor();
+
+  tmpCursor.setPosition(0);
+  textEditLog->setTextCursor(tmpCursor);
+  textEditLog->insertPlainText(msg);
+}
+
+void Chat::handleMessage(QStringList list)
+{
+  char msg_type = list[1].at(0).toLatin1();
+  char cmd = list[2].at(0).toLatin1();
+
+  switch (msg_type) {
+  case 'C':
+    if (cmd == 'U') {
+      phoneid = list[3].toInt();
+    }
+    break;
+  default:
+    break;
+  }
+}

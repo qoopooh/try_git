@@ -4,15 +4,14 @@
 #include <QObject>
 #include "encrypt.h"
 
-class GatewayMessage : public QObject
+class GatewayMessage
 {
-  Q_OBJECT
 public:
-  explicit GatewayMessage(QObject *parent = 0, QString raw="",
-                          QString uuid="11111111112222222222333333333344444444441111111111222222222233333333334444444444");
+  explicit GatewayMessage(QString uuid="1111111111222222222233333333334444444444", QString raw="");
   QString getRaw();
   int getPhoneId();
   QString getUUID();
+  QString registerMessage();
 
   /**
    * @brief getDecryption convert raw message to be decrypted message
@@ -35,10 +34,11 @@ signals:
 public slots:
 
 private:
-  QString m_raw;
   QString m_uuid;
+  QString m_raw;
   int m_phoneid;
   bool m_enc_msg;
+  Encryption m_e;
 };
 
 #endif // GATEWAYMESSAGE_H

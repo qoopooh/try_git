@@ -13,20 +13,25 @@
 //  Contents:       encryption and decryption routines
 //
 //-----------------------------------------------------------------------------
+
+#include <string>
 #include "encrypt.h"
 
 // GLOBAL VARIABLES
 
 
-const char *unit_id = "11111111112222222222333333333344444444441111111111222222222233333333334444444444";
-unsigned char encr_decr_message[MAX_TX_BUFF_LEN + 2];      // encrypted message
+Encryption::Encryption()
+{
+  setUnitId("1111111111222222222233333333334444444444", 40);
+}
+
 //-------------------------------------
 //  Encrypt routine (draft)
 //    - only charaters and numbers are encrypted, symbols remain unchanged
 //    - result of encrypted char is always another char
 //    - routine uses a sequence of pw[] characters as password
 //-------------------------------------
-void Encrypt(unsigned char *msg, char phone_id)
+void Encryption::Encrypt(unsigned char *msg, char phone_id)
 {
   unsigned char i,shift;
 
@@ -61,7 +66,7 @@ void Encrypt(unsigned char *msg, char phone_id)
 //-------------------------------------
 //
 //-------------------------------------
-void Decrypt(unsigned char *encrypted_msg)
+void Encryption::Decrypt(unsigned char *encrypted_msg)
 {
   unsigned char i,shift;
   
@@ -91,5 +96,12 @@ void Decrypt(unsigned char *encrypted_msg)
 }
 
 
+void Encryption::setUnitId(const char *id, int len)
+{
+  if (len == 40) {
+    memcpy((void *) unit_id, id, len);
+    memcpy((void *) (unit_id + len), id, len);
+  }
+}
 
 
