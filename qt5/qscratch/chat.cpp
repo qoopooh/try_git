@@ -1,12 +1,10 @@
 ﻿#include <QtWidgets>
 #include "chat.h"
 
-const QString APP("Domotics Gateway");
-const QString VERSION("V0.1");
-const QString UUID("0123456789012345678901234567890123456789");
+const int WAIT_FOR_READY(3000);
 
-Chat::Chat(QWidget *parent) :
-    QDialog(parent), f_show_tx(true), phoneid(0)
+Chat::Chat(QWidget *parent, QString url, int port, QString id) :
+    QDialog(parent), f_show_tx(true), uuid(id), phoneid(0)
 {
   createHorizontalGroupBox();
 //  createGridGroupBox();
@@ -16,20 +14,27 @@ Chat::Chat(QWidget *parent) :
   mainLayout->addWidget(horizontalGroupBox, 1);
 //  mainLayout->addWidget(gridGroupBox, 10);
   textEditLog = new QTextEdit();
+  textEditLog->setReadOnly(true);
   mainLayout->addWidget(textEditLog, 10);
   setLayout(mainLayout);
 
-  setWindowTitle(tr("Basic Layouts"));
+  setWindowTitle(APP_TITLE + " " + VERSION);
 #ifdef Q_OS_ANDROID
   showFullScreen();
 #endif
   socket = new QTcpSocket();
-  socket->connectToHost("192.168.1.32", 1470);
+  socket->connectToHost(url, port);
   stream = new QTextStream(socket);
 
+  connect(socket, SIGNAL(connected()), this, SLOT(onStart()));
   connect(btnSend, SIGNAL(clicked()), this, SLOT(onSend()));
   connect(btnClear, SIGNAL(clicked()), this, SLOT(onClear()));
   connect(socket, SIGNAL(readyRead()), this, SLOT(onRead()));
+  connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
+          this, SLOT(onEror(QAbstractSocket::SocketError)));
+
+  if ((uuid == NULL) || (uuid.length() != 40))
+    uuid = UUID;
 }
 
 Chat::~Chat()
@@ -37,54 +42,20 @@ Chat::~Chat()
   delete socket;
 }
 
-void Chat::onSend()
-{
-  QString data(lineEditCmd->text());
-  GatewayMessage gMsg(UUID);
-
-  if (f_show_tx) {
-    QTime local(QTime::currentTime());
-    QString str = local.toString("m:ss.zzz: ") + data + "\n";
-    log(str);
-  }
-
-  data = gMsg.encrypt(data, phoneid);
-  socket->write(data.toStdString().c_str(), data.length());
-//  *stream << data.toStdString().c_str(); /* does not work */
-}
-
-void Chat::onClear()
-{
-  QString msg = GatewayMessage(UUID).registerMessage();
-  socket->write(msg.toStdString().c_str(), msg.length());
-
-  textEditLog->clear();
-}
-
-void Chat::onRead()
-{
-  GatewayMessage gMsg(UUID, stream->readLine());
-  QString msg = gMsg.getDecryption();
-
-  handleMessage(msg.split(','));
-  QTime local(QTime::currentTime());
-  QString str = local.toString("m:ss.zzz") + "-> " + msg;
-  log(str);
-}
-
 void Chat::createHorizontalGroupBox()
 {
   horizontalGroupBox = new QGroupBox(APP + " " + VERSION);
   QHBoxLayout *layout = new QHBoxLayout;
   lineEditCmd = new QLineEdit(tr("E,L,1"));
-  btnSend = new QPushButton(tr("Send"));
-  btnClear = new QPushButton(tr("Clear"));
+  btnSend = new QPushButton(tr("&Send"));
+  btnClear = new QPushButton(tr("&Clear"));
 
   layout->addWidget(lineEditCmd, 4);
   layout->addWidget(btnSend, 1);
   layout->addWidget(btnClear, 1);
 
   horizontalGroupBox->setLayout(layout);
+  horizontalGroupBox->setDisabled(true);
 }
 
 void Chat::createGridGroupBox()
@@ -101,6 +72,54 @@ void Chat::createGridGroupBox()
   gridGroupBox->setLayout(layout);
 }
 
+void Chat::onStart()
+{
+  horizontalGroupBox->setDisabled(false);
+  btnClear->click();
+}
+
+void Chat::onSend()
+{
+  QString data(lineEditCmd->text());
+  GatewayMessage gMsg(uuid);
+
+  if (f_show_tx) {
+    QTime local(QTime::currentTime());
+    QString str = local.toString("m:ss.zzz: ") + data + "\n";
+    log(str);
+  }
+
+  data = gMsg.encrypt(data, phoneid);
+  socket->write(data.toStdString().c_str(), data.length());
+//  *stream << data.toStdString().c_str(); /* does not work */
+}
+
+void Chat::onClear()
+{
+  QString msg = GatewayMessage(uuid).registerMessage();
+  socket->write(msg.toStdString().c_str(), msg.length());
+
+  textEditLog->clear();
+}
+
+void Chat::onRead()
+{
+  GatewayMessage gMsg(uuid, stream->readLine());
+  QString msg = gMsg.getDecryption();
+
+  handleMessage(msg.split(','));
+  QTime local(QTime::currentTime());
+  QString str = local.toString("m:ss.zzz") + "-> " + msg;
+  log(str);
+}
+
+void Chat::onEror(QAbstractSocket::SocketError e)
+{
+  QMessageBox::critical(this, APP,
+                        QString("Connection Error: %1").arg(e),
+                        QMessageBox::Yes);
+  this->close();
+}
 
 void Chat::log(QString msg)
 {

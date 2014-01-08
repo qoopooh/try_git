@@ -14,9 +14,12 @@ TEMPLATE = app
 SOURCES += main.cpp \
     chat.cpp \
     gatewaymessage.cpp \
-    encrypt.cpp
+    encrypt.cpp \
+    register.cpp
 
 HEADERS += \
     chat.h \
     gatewaymessage.h \
-    encrypt.h
+    encrypt.h \
+    register.h \
+    def.h

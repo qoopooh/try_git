@@ -3,15 +3,15 @@
 
 #include <QDialog>
 #include <QTcpSocket>
+#include <QMessageBox>
+#include <QSettings>
+
+#include "def.h"
 #include "gatewaymessage.h"
 
-class QAction;
-class QDialogButtonBox;
 class QGroupBox;
 class QLabel;
 class QLineEdit;
-class QMenu;
-class QMenuBar;
 class QPushButton;
 class QTextEdit;
 
@@ -19,7 +19,8 @@ class Chat : public QDialog
 {
   Q_OBJECT
 public:
-  explicit Chat(QWidget *parent = 0);
+  explicit Chat(QWidget *parent = 0, QString url="192.168.1.33", int port=1470,
+                QString id="");
   ~Chat();
 
 signals:
@@ -27,9 +28,11 @@ signals:
 public slots:
 
 private slots:
+  void onStart();
   void onSend();
   void onClear();
   void onRead();
+  void onEror(QAbstractSocket::SocketError);
 
 private:
   void createHorizontalGroupBox();
@@ -39,7 +42,6 @@ private:
 
   enum { NumGridRows = 3, NumButtons = 4 };
 
-  QMenuBar *menuBar;
   QGroupBox *horizontalGroupBox;
   QGroupBox *gridGroupBox;
   QGroupBox *formGroupBox;
@@ -48,10 +50,6 @@ private:
   QLabel *labels[NumGridRows];
   QLineEdit *lineEdits[NumGridRows];
   QPushButton *buttons[NumButtons];
-  QDialogButtonBox *buttonBox;
-
-  QMenu *fileMenu;
-  QAction *exitAction;
 
   QLineEdit *lineEditCmd;
   QPushButton *btnSend;
@@ -61,6 +59,7 @@ private:
   QTcpSocket *socket;
   QTextStream *stream;
   bool f_show_tx;
+  QString uuid;
   int phoneid;
 };
 
