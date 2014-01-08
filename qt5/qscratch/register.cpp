@@ -13,7 +13,7 @@ Register::Register(QWidget *parent) :
   setLayout(mainLayout);
 
   connect(btnConnect, SIGNAL(clicked()), this, SLOT(onConnect()));
-  connect(btnClear, SIGNAL(clicked()), this, SLOT(onClear()));
+
   QSettings settings;
   QString url = settings.value("url").toString();
   if (url.length() < 1)
@@ -21,6 +21,7 @@ Register::Register(QWidget *parent) :
   lineEditUrl->setText(url);
   lineEditPort->setText(settings.value("port").toString());
   textEditId->setText(settings.value("id").toString());
+  setWindowTitle(APP_TITLE + " " + VERSION);
 }
 
 void Register::createVerticalGroupBox()
@@ -38,9 +39,8 @@ void Register::createVerticalGroupBox()
   lineEditPort = new QLineEdit(tr("1470"));
   labelId = new QLabel(tr("UUID:"));
   textEditId = new QTextEdit(tr("0123456789ABCDEF212a7c75af448aa012345678"));
+  textEditId->setMaximumHeight(125);
   btnConnect = new QPushButton(tr("&Connect"));
-  btnClear = new QPushButton(tr("C&lear"));
-
   layoutUrl->addWidget(labelUrl);
   layoutUrl->addWidget(lineEditUrl);
   layoutPort->addWidget(labelPort);
@@ -48,7 +48,6 @@ void Register::createVerticalGroupBox()
   layoutId->addWidget(labelId);
   layoutId->addWidget(textEditId);
   layoutButton->addWidget(btnConnect);
-  layoutButton->addWidget(btnClear);
 
   layout->addLayout(layoutUrl);
   layout->addLayout(layoutPort);
@@ -100,11 +99,4 @@ void Register::onConnect()
   settings.setValue("url", url);
   settings.setValue("port", port);
   settings.setValue("id", id);
-}
-
-void Register::onClear()
-{
-  lineEditUrl->clear();
-  lineEditPort->clear();
-  textEditId->clear();
 }

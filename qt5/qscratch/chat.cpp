@@ -7,24 +7,22 @@ Chat::Chat(QWidget *parent, QString url, int port, QString id) :
     QDialog(parent), f_show_tx(true), uuid(id), phoneid(0)
 {
   createHorizontalGroupBox();
-//  createGridGroupBox();
 
-  QVBoxLayout *mainLayout = new QVBoxLayout;
-
-  mainLayout->addWidget(horizontalGroupBox, 1);
-//  mainLayout->addWidget(gridGroupBox, 10);
   textEditLog = new QTextEdit();
   textEditLog->setReadOnly(true);
+
+  QVBoxLayout *mainLayout = new QVBoxLayout;
+  mainLayout->addWidget(horizontalGroupBox, 1);
   mainLayout->addWidget(textEditLog, 10);
   setLayout(mainLayout);
-
   setWindowTitle(APP_TITLE + " " + VERSION);
+
 #ifdef Q_OS_ANDROID
   showFullScreen();
 #endif
+
   socket = new QTcpSocket();
   socket->connectToHost(url, port);
-  stream = new QTextStream(socket);
 
   connect(socket, SIGNAL(connected()), this, SLOT(onStart()));
   connect(btnSend, SIGNAL(clicked()), this, SLOT(onSend()));
@@ -50,9 +48,17 @@ void Chat::createHorizontalGroupBox()
   btnSend = new QPushButton(tr("&Send"));
   btnClear = new QPushButton(tr("&Clear"));
 
-  layout->addWidget(lineEditCmd, 4);
-  layout->addWidget(btnSend, 1);
-  layout->addWidget(btnClear, 1);
+#ifdef Q_OS_IOS
+  btnBack = new QPushButton(tr("<-"));
+  btnBack->setFlat(true);
+  btnBack->setMaximumWidth(20);
+  layout->addWidget(btnBack);
+  connect(btnBack, SIGNAL(clicked()), this, SLOT(onBack()));
+#endif
+
+  layout->addWidget(lineEditCmd, 8);
+  layout->addWidget(btnSend, 2);
+  layout->addWidget(btnClear, 2);
 
   horizontalGroupBox->setLayout(layout);
   horizontalGroupBox->setDisabled(true);
@@ -91,7 +97,6 @@ void Chat::onSend()
 
   data = gMsg.encrypt(data, phoneid);
   socket->write(data.toStdString().c_str(), data.length());
-//  *stream << data.toStdString().c_str(); /* does not work */
 }
 
 void Chat::onClear()
@@ -104,13 +109,20 @@ void Chat::onClear()
 
 void Chat::onRead()
 {
-  GatewayMessage gMsg(uuid, stream->readLine());
-  QString msg = gMsg.getDecryption();
+  while (socket->canReadLine()) {
+    GatewayMessage gMsg(uuid, socket->readLine());
+    QString msg = gMsg.getDecryption();
 
-  handleMessage(msg.split(','));
-  QTime local(QTime::currentTime());
-  QString str = local.toString("m:ss.zzz") + "-> " + msg;
-  log(str);
+    handleMessage(msg.split(','));
+    QTime local(QTime::currentTime());
+    QString str = local.toString("m:ss.zzz") + "-> " + msg;
+    log(str);
+  }
+}
+
+void Chat::onBack()
+{
+  this->close();
 }
 
 void Chat::onEror(QAbstractSocket::SocketError e)

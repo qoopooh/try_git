@@ -32,6 +32,7 @@ private slots:
   void onSend();
   void onClear();
   void onRead();
+  void onBack();
   void onEror(QAbstractSocket::SocketError);
 
 private:
@@ -54,10 +55,10 @@ private:
   QLineEdit *lineEditCmd;
   QPushButton *btnSend;
   QPushButton *btnClear;
+  QPushButton *btnBack;
   QTextEdit *textEditLog;
 
   QTcpSocket *socket;
-  QTextStream *stream;
   bool f_show_tx;
   QString uuid;
   int phoneid;

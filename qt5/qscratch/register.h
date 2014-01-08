@@ -22,7 +22,6 @@ signals:
 
 private slots:
   void onConnect();
-  void onClear();
 
 private:
   void createVerticalGroupBox();
@@ -36,7 +35,7 @@ private:
   QLineEdit *lineEditPort;
   QTextEdit *textEditId;
   QPushButton *btnConnect;
-  QPushButton *btnClear;
+  QPushButton *btnBack;
 };
 
 #endif // REGISTER_H
