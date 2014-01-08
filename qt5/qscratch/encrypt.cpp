@@ -14,7 +14,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <string>
+#include <string.h>
 #include "encrypt.h"
 
 // GLOBAL VARIABLES
