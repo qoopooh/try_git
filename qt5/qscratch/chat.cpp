@@ -1,4 +1,4 @@
-﻿#include <QtWidgets>
+#include <QtWidgets>
 #include "chat.h"
 
 const int WAIT_FOR_READY(3000);
@@ -32,7 +32,7 @@ Chat::Chat(QWidget *parent, QString url, int port, QString id) :
           this, SLOT(onEror(QAbstractSocket::SocketError)));
 
   if ((uuid == NULL) || (uuid.length() != 40))
-    uuid = UUID;
+    uuid = UNIT_ID;
 }
 
 Chat::~Chat()
