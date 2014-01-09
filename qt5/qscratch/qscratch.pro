@@ -26,13 +26,14 @@ HEADERS += \
 
 macx {
     ICON = icon-mac.icns
-} win {
-  RC_FILE = win.rc
 }
+#  RC_FILE = win.rc
 
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 OTHER_FILES += \
-    android/AndroidManifest.xml \
-    blue.png
+    android/AndroidManifest.xml
+
+RESOURCES += \
+    resource.qrc

@@ -1,4 +1,4 @@
-﻿#include <QtWidgets>
+#include <QtWidgets>
 #include "register.h"
 
 Register::Register(QWidget *parent) :
@@ -12,7 +12,9 @@ Register::Register(QWidget *parent) :
   mainLayout->addWidget(verticalGroupBox);
   setLayout(mainLayout);
   setWindowTitle(APP_TITLE + " " + VERSION);
-  setWindowIcon(QIcon("blue.png"));
+//  setWindowIcon(QIcon("blue.png"));
+  QIcon icon(":/images/blue.png");
+  setWindowIcon(icon);
 
   connect(btnConnect, SIGNAL(clicked()), this, SLOT(onConnect()));
 
