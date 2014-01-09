@@ -12,10 +12,7 @@ Register::Register(QWidget *parent) :
   mainLayout->addWidget(verticalGroupBox);
   setLayout(mainLayout);
   setWindowTitle(APP_TITLE + " " + VERSION);
-#ifdef Q_WS_MAC
-#else
-#endif
-//  setWindowIcon(QIcon("blue.png"));
+  setWindowIcon(QIcon("blue.png"));
 
   connect(btnConnect, SIGNAL(clicked()), this, SLOT(onConnect()));
 

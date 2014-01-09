@@ -26,8 +26,6 @@ HEADERS += \
 
 macx {
     ICON = icon-mac.icns
-#} else {
-#    ICON = blue.png
 }
 
 
