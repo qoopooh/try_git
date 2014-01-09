@@ -26,9 +26,9 @@ HEADERS += \
 
 macx {
     ICON = icon-mac.icns
+} win32 {
+    RC_FILE = win.rc
 }
-#  RC_FILE = win.rc
-
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
