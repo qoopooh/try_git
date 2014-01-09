@@ -1,15 +1,15 @@
-#include <QtWidgets>
+﻿#include <QtWidgets>
 #include "chat.h"
 
 const int WAIT_FOR_READY(3000);
 
 Chat::Chat(QWidget *parent, QString url, int port, QString id) :
-    QDialog(parent), f_show_tx(true), uuid(id), phoneid(0)
+    QDialog(parent), f_show_tx(true), f_send_cmd(false), uuid(id), phoneid(0)
 {
   createHorizontalGroupBox();
 
   textEditLog = new QTextEdit();
-  textEditLog->setReadOnly(true);
+//  textEditLog->setReadOnly(true);
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(horizontalGroupBox, 1);
@@ -33,6 +33,12 @@ Chat::Chat(QWidget *parent, QString url, int port, QString id) :
 
   if ((uuid == NULL) || (uuid.length() != 40))
     uuid = UNIT_ID;
+
+  QSettings settings;
+  QString cmd = settings.value("cmd").toString();
+  if (cmd.length() < 1)
+    return;
+  lineEditCmd->setText(cmd);
 }
 
 Chat::~Chat()
@@ -80,8 +86,10 @@ void Chat::createGridGroupBox()
 
 void Chat::onStart()
 {
+  QString msg = GatewayMessage(uuid).registerMessage();
+  socket->write(msg.toStdString().c_str(), msg.length());
+
   horizontalGroupBox->setDisabled(false);
-  btnClear->click();
 }
 
 void Chat::onSend()
@@ -97,13 +105,11 @@ void Chat::onSend()
 
   data = gMsg.encrypt(data, phoneid);
   socket->write(data.toStdString().c_str(), data.length());
+  f_send_cmd = true;
 }
 
 void Chat::onClear()
 {
-  QString msg = GatewayMessage(uuid).registerMessage();
-  socket->write(msg.toStdString().c_str(), msg.length());
-
   textEditLog->clear();
 }
 
@@ -117,6 +123,12 @@ void Chat::onRead()
     QTime local(QTime::currentTime());
     QString str = local.toString("m:ss.zzz") + "-> " + msg;
     log(str);
+  }
+
+  if (f_send_cmd) {
+    QSettings settings;
+    settings.setValue("cmd", lineEditCmd->text());
+    f_send_cmd = false;
   }
 }
 

@@ -60,6 +60,7 @@ private:
 
   QTcpSocket *socket;
   bool f_show_tx;
+  bool f_send_cmd;
   QString uuid;
   int phoneid;
 };

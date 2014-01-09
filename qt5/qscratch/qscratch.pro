@@ -24,7 +24,15 @@ HEADERS += \
     register.h \
     def.h
 
+macx {
+    ICON = icon-mac.icns
+#} else {
+#    ICON = blue.png
+}
+
+
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 OTHER_FILES += \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    blue.png

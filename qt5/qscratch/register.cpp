@@ -11,6 +11,11 @@ Register::Register(QWidget *parent) :
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(verticalGroupBox);
   setLayout(mainLayout);
+  setWindowTitle(APP_TITLE + " " + VERSION);
+#ifdef Q_WS_MAC
+#else
+#endif
+//  setWindowIcon(QIcon("blue.png"));
 
   connect(btnConnect, SIGNAL(clicked()), this, SLOT(onConnect()));
 
@@ -21,7 +26,6 @@ Register::Register(QWidget *parent) :
   lineEditUrl->setText(url);
   lineEditPort->setText(settings.value("port").toString());
   textEditId->setText(settings.value("id").toString());
-  setWindowTitle(APP_TITLE + " " + VERSION);
 }
 
 void Register::createVerticalGroupBox()
