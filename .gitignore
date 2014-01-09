@@ -11,6 +11,8 @@ lib-cov
 *.swo
 *.dia~
 *.user
+*.o
+moc_*
 benchmarks/graphs
 testing
 node_modules/
