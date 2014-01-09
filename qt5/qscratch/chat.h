@@ -37,20 +37,12 @@ private slots:
 
 private:
   void createHorizontalGroupBox();
-  void createGridGroupBox();
   void log(QString);
   void handleMessage(QStringList list);
 
   enum { NumGridRows = 3, NumButtons = 4 };
 
   QGroupBox *horizontalGroupBox;
-  QGroupBox *gridGroupBox;
-  QGroupBox *formGroupBox;
-  QTextEdit *smallEditor;
-  QTextEdit *bigEditor;
-  QLabel *labels[NumGridRows];
-  QLineEdit *lineEdits[NumGridRows];
-  QPushButton *buttons[NumButtons];
 
   QLineEdit *lineEditCmd;
   QPushButton *btnSend;
