@@ -26,6 +26,8 @@ HEADERS += \
 
 macx {
     ICON = icon-mac.icns
+} win {
+  RC_FILE = win.rc
 }
 
 
