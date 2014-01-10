@@ -1,4 +1,7 @@
+var conv = new Converter();
+var conn_id = -1;
 
+(function() {
 function buildPortPicker(ports) {
   var eligiblePorts = ports.filter(function(port) {
     if (port.match(/[Bb]luetooth/))
@@ -18,13 +21,12 @@ function buildPortPicker(ports) {
   });
   portPicker.selectedIndex = portcount;
   sPortPicker.selectmenu('refresh', true);
-  setStatus('Refresh ' + portcount + ' port(s)');
+  log('Refresh ' + portcount + ' port(s)');
 }
 
 function onOpen(openInfo) {
   conn_id = openInfo.connectionId;
   if (conn_id < 1) {
-    setStatus('Could not open');
     return;
   }
   console.log('Connected', conn_id);
@@ -49,17 +51,14 @@ function openSelectedPort() {
   var selectedPort = sPortPicker.val();
   console.log("selectedPort", selectedPort);
 
-  chrome.serial.open(selectedPort, { bitrate: 115200 }, onOpen);
-  setStatus('Connected ' + selectedPort);
+  chrome.serial.open(selectedPort, { bitrate: 9600 }, onOpen);
 }
 
 function closePort(cb) {
   f_openport = false;
   process = '';
-  setStatus('Disconnected');
   log('Closed');
   if (conn_id < 1) {
-    console.log("closePort", conn_id);
     disableButton(f_openport);
     if (cb) return cb();
     return;
@@ -75,64 +74,12 @@ function closePort(cb) {
   });
 }
 
-function ab2str(buf) {
-  return u82str(new Uint8Array(buf));
-}
-
-function u82str(uint) {
-  return String.fromCharCode.apply(null, uint);
-}
-
-function ab2hex(buf) {
-  return u82hex(new Uint8Array(buf));
-}
-
-function u82hex(arr) {
-  var hex = "";
-  
-  for (var i = 0, len = arr.length; i < len; ++i) {
-    if (arr[i] < 16) {
-      hex += '0' + arr[i].toString(16).toUpperCase();
-    } else {
-      hex += arr[i].toString(16).toUpperCase();
-    }
-  }
-
-  return hex;
-}
-
-function zeroPad(number, d) {
-  if (!d)
-    d = 2;
-  if (d === 2) {
-    return (number < 10) ? '0' + number : number;
-  } else if (d === 3) {
-    if (number < 10)
-      return '00' + number;
-    else if (number < 100)
-      return '0' + number;
-    else
-      return number;
-  } else if (d === 4) {
-    if (number < 10)
-      return '000' + number;
-    else if (number < 100)
-      return '00' + number;
-    else if (number < 1000)
-      return '0' + number;
-    else
-      return number;
-  }
-  
-  return number;
-}
-
 function timeToString(d) {
   var dt = (d) ? d : new Date();
 
-  var hour   = zeroPad(dt.getHours());
-  var minute = zeroPad(dt.getMinutes());
-  var second = zeroPad(dt.getSeconds());
+  var hour   = conv.zeroFill(dt.getHours());
+  var minute = conv.zeroFill(dt.getMinutes());
+  var second = conv.zeroFill(dt.getSeconds());
 
   return hour + ':' + minute + ':' + second;
 }
@@ -141,8 +88,8 @@ function dateToString(d) {
   var dt = (d) ? d : new Date();
 
   var year   = dt.getFullYear();
-  var month  = zeroPad(dt.getMonth() + 1);
-  var day    = zeroPad(dt.getDate());
+  var month  = conv.zeroFill(dt.getMonth() + 1);
+  var day    = conv.zeroFill(dt.getDate());
 
   return year + '-' + month + '-' + day + ' ' + timeToString();
 }
@@ -162,15 +109,15 @@ function aaelog(msg) {
   * Disable open button when the port is open
   */
 function disableButton(open) {
-  console.log('Elements disableButton', document.getElementsByTagName('*').length );
+  console.log('Elements disableButton', document.getElementsByTagName('*').length);
   if (open) {
-    /*$('#btnRefresh').button('disable');*/
     sBtnOpen.button('disable');
     sBtnClose.button('enable');
+    sBtnBootloader.button('enable');
   } else {
-    /*$('#btnRefresh').button('enable');*/
     sBtnOpen.button('enable');
     sBtnClose.button('disable');
+    sBtnBootloader.button('disable');
   }
 }
 
@@ -190,23 +137,6 @@ function restoreData() {
         cabinetname: ''
       };
     }
-    $("#productcode").val(baginfo.productcode);
-    $('input[id=batchnumber]').val(baginfo.batchnumber);
-    $("#mandate").val(baginfo.mandate);
-    $("#expdate").val(baginfo.expdate);
-    $("#quantity").val(baginfo.quantity);
-    console.log('baginfo:', baginfo);
-    cabinetinfo = items.cabinetinfo;
-    if (!cabinetinfo) {
-      cabinetinfo = {
-        type: 'cabinet',
-        cabinetcode: '00.000.000',
-        cabinetname: 'AB0001'
-      };
-    }
-    $("#cabinetcode").val(cabinetinfo.cabinetcode);
-    $("#cabinetname").val(cabinetinfo.cabinetname);
-    console.log('cabinetinfo:', cabinetinfo);
   });
 }
 
@@ -301,11 +231,21 @@ function onLoad() {
 };
 
 function init() {
+  sBtnOpen = $("#btnOpen");
+  sBtnClose = $("#btnClose");
+  sBtnBootloader = $("#btnBootloader");
+  sBtnClear = $("#btnClear");
+  sPortPicker = $("#port-picker");
   onLoad();
 
+  sBtnOpen.click(openSelectedPort);
+  sBtnClose.click(closePort);
+  sBtnClear.click(function() {
+    $("#messagewindow").text("");
+  });
   restoreData();
   /*clearData(); // To clear all sync data*/
 }
-
 $(document).ready(init()); // for only jQuery
+})();
 
