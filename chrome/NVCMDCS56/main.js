@@ -1,8 +1,6 @@
 var conv = new Converter();
 var conn_id = -1;
-var addr = [125, 5, 76, 97, 170, 8, 155, 127];
 var BL_MODE = [0x42, 0x43, 0x3A, 0x46, 0x55, 0x0D, 0x0A];
-var arr = new ArrayBuffer(addr.length);
 
 (function() {
 
@@ -90,7 +88,7 @@ function openSelectedPort() {
   var selectedPort = sPortPicker.val();
   console.log("selectedPort", selectedPort);
 
-  chrome.serial.open(selectedPort, { bitrate: 38400 }, onOpen);
+  chrome.serial.open(selectedPort, { bitrate: 9600 }, onOpen);
 }
 
 function closePort(cb) {
