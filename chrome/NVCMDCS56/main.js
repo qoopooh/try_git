@@ -1,7 +1,46 @@
 var conv = new Converter();
 var conn_id = -1;
+var addr = [125, 5, 76, 97, 170, 8, 155, 127];
+var BL_MODE = [0x42, 0x43, 0x3A, 0x46, 0x55, 0x0D, 0x0A];
+var arr = new ArrayBuffer(addr.length);
 
 (function() {
+
+/**
+  * write data(string)
+  */
+function writeData(data) {
+  console.log("write:", data);
+
+  var buffer = new ArrayBuffer(data.length);
+  var uint8View = new Uint8Array(buffer);
+  var i=0;
+  uint8View.set(data);
+  chrome.serial.write(conn_id, buffer, function(sendInfo) {
+    var i = sendInfo.bytesWritten;
+    console.log("sendInfo: ", sendInfo);
+  });
+}
+
+function onRead(readInfo) {
+  if (conn_id < 1 || !f_openport) {
+    return;
+  }
+  var uint8View = new Uint8Array(readInfo.data);
+  var len = uint8View.length;
+
+  if (len) {
+    log(conv.u82str(uint8View));
+  } else {
+    setTimeout(function() {
+      chrome.serial.read(conn_id, 1, onRead);
+    }, 200);
+    return;
+  }
+  // Keep on reading.
+  chrome.serial.read(conn_id, 64, onRead);
+};
+
 function buildPortPicker(ports) {
   var eligiblePorts = ports.filter(function(port) {
     if (port.match(/[Bb]luetooth/))
@@ -51,7 +90,7 @@ function openSelectedPort() {
   var selectedPort = sPortPicker.val();
   console.log("selectedPort", selectedPort);
 
-  chrome.serial.open(selectedPort, { bitrate: 9600 }, onOpen);
+  chrome.serial.open(selectedPort, { bitrate: 38400 }, onOpen);
 }
 
 function closePort(cb) {
@@ -243,6 +282,13 @@ function init() {
   sBtnClear.click(function() {
     $("#messagewindow").text("");
   });
+  sBtnBootloader.click(function() {
+    writeData(BL_MODE);
+  });
+  /* Prepare for Chrome 33
+  chrome.serial.onReceive.addListener(onRead);
+  chrome.serial.onReceiveError.addListener(onReceiveError);
+  */
   restoreData();
   /*clearData(); // To clear all sync data*/
 }
