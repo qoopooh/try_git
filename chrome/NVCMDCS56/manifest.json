@@ -1,6 +1,6 @@
 {
   "name": "NVCMDCS56",
-  "version": "0.1",
+  "version": "0.2",
   "manifest_version": 2,
   "minimum_chrome_version": "23",
   "description": "Set bluetooth module NVCMDCS56 to bootloader mode",
