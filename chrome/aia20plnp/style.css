@@ -34,4 +34,11 @@ body, table, tr, th, p { font-family: "Tahoma"; font-size: 12px; }
 .tblHeader { font-family: "Tahoma"; font-size: 13px; color:#FFFFFF; font-weight: bold; background-color:"#808080";}
 .header { font-family: "Tahoma"; font-size: 13px; color:#ffffff; font-weight: bold;}
 
+
+body {
+  min-width: 350px; /* your desired width */
+  max-width: 100%;
+  position: relative;
+  vertical-align:middle;
+}
 </style>
