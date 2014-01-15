@@ -2,6 +2,7 @@
   "name": "AIA 20PLNP",
   "version": "0.1",
   "manifest_version": 2,
+  "short_name": "aia20plp",
 
   "description": "Calculate AIA Life Insurance",
   "icons": { "16": "aia16.png",
