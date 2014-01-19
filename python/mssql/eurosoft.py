@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
-HOST='127.0.0.1'
-#HOST='192.168.0.57'
+#HOST='127.0.0.1'
+HOST='192.168.0.62'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
 
+CONN='DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
+    USER + ';PWD=' + PASSWORD
 ###############################################################################
 __all__ = (
         'WIT_NT', 'WIT_NT_ID',
@@ -23,7 +25,7 @@ __all__ = (
         'INV_CUS', 'INV_CUS_ID',
         'INV_STO', 'INV_STO_ID',
         'INV_REJ', 'INV_REJ_ID',
-        'IDENTIFY'
+        'IDENTIFY', 'LOGIN',
         )
 
 import sys, json
@@ -309,10 +311,15 @@ WHERE Tyre_Size_ID=Size_ID
     AND Tyre_SerialNo='{sn}'
 """
 
-def ask(query):
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' +
-            DATABASE + ';UID=' + USER + ';PWD=' + PASSWORD)
+LOGIN = """
+SELECT Usr_Emp_ID
+FROM tblUser
+WHERE Usr_UserName='{usr}'
+    AND Usr_Password='{passwd}'
+"""
 
+def ask(query):
+    conn = pyodbc.connect(CONN)
     cur = conn.cursor()
     cur.execute(query)
     rows = cur.fetchall()
@@ -323,11 +330,8 @@ def ask(query):
         out_rows.append(tuple(r))
     return tuple(out_rows)
 
-
 def ask_json(query):
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' +
-            DATABASE + ';UID=' + USER + ';PWD=' + PASSWORD)
-
+    conn = pyodbc.connect(CONN)
     cur = conn.cursor()
     cur.execute(query)
     cols = [col[0] for col in cur.description]
@@ -339,10 +343,19 @@ def ask_json(query):
         out_rows.append(dict(zip(cols, row)))
     return tuple(out_rows)
 
-
 class index():
     def GET(self):
-        return render.idx()
+        inp = web.input(usr=None, passwd=None)
+        if inp['usr'] == None:
+            return render.idx()
+        q = LOGIN.format(usr=inp['usr'],passwd=inp['passwd'])
+        return self.show_resp(q)
+
+    def show_resp(self, query):
+        resp = ask_json(query)
+        web.header('Content-Type', 'application/json;charset=utf8')
+        j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
+        return j
 
 class Table():
 
