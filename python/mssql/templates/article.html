@@ -1,7 +1,7 @@
-$def with(name)
+$def with(search, group)
 <!DOCTYPE html>
 <head>
-    <title>Farpointe</title>
+    <title>Unikware Article Number</title>
     <link rel="shortcut icon" href="http://aae014/favicon.ico"/>
     <link  rel=stylesheet type=text/css href="static/js/jquery-ui.css">
     <link  rel=stylesheet type=text/css href="static/css/style.css">
@@ -10,11 +10,23 @@ $def with(name)
 </head>
 <body>
 <div  class=page>
-$if name:
-    I just want to say <em>hellow</em> $name.
-$else:
-    <h3>Article Search Engine</h3>
+  <h3>Article Search Engine</h3>
+  <form>
+    <fieldset>
+      <label for="search">Search:</label>
+      <input id="search" type="text" name="search">
+      <button type="button" id="btnSearch">search</button>
+    </fieldset>
+    <div id="group">
+      <input type="radio" name="group" value="article" checked>Article<br>
+      <input type="radio" name="group" value="all">All
+    </div>
+  </form>
+</div>
 
+<div  class=page>
+<h3>heading</h3>
+<h3>you're searching $search on $group</h3>
 </div>
 
 <script type="text/javascript" src="static/js/article.js"></script>

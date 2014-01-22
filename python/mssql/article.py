@@ -76,8 +76,8 @@ def gen_report(dt=0,department=None,startdate=0,enddate=0):
 class index:
 
     def GET(self):
-        i = web.input(s=None)
-        return render.article(i.s)
+        i = web.input(search=None,group=None)
+        return render.article(i.search, i.group)
 
 urls = (
     '/', 'index',
@@ -89,6 +89,7 @@ template_globals = {
 render = web.template.render('templates/', globals=template_globals)
 
 if __name__ == '__main__':
+    web.config.debug = True
     app = web.application(urls, globals())
     app.run()
 
