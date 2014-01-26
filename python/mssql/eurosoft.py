@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 
 #HOST='127.0.0.1'
 HOST='192.168.0.62'
@@ -450,8 +450,10 @@ template_globals = {
 }
 render = web.template.render('templates/', globals=template_globals)
 
+import socket
 if __name__ == '__main__':
     print "Eurosoft Web Application", __version__
+    print "Web Host:", socket.gethostbyname(socket.gethostname())
     app = web.application(urls, globals())
     app.run()
 
