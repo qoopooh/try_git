@@ -26,6 +26,10 @@ __all__ = (
         'INV_STO', 'INV_STO_ID',
         'INV_REJ', 'INV_REJ_ID',
         'IDENTIFY', 'LOGIN',
+        'CHK_NT', 'CHK_REJ',
+        'CHK_STO', 'CHK_CUS',
+        'CHK_NT0', 'CHK_REJ0',
+        'CHK_STO0', 'CHK_CUS0',
         )
 
 import sys, json
@@ -318,6 +322,52 @@ WHERE Usr_UserName='{usr}'
     AND Usr_Password='{passwd}'
 """
 
+CHK_NT = """
+UPDATE tblNewTyreTransactionDetail
+SET NewTrans_Confirm_By='{eid}',
+    NewTrans_Confirm_Date'{date}'
+WHERE NewTrans_ID='{tid}'
+"""
+
+CHK_CUS = """
+UPDATE tblProductionTransaction
+SET ProdTrans_Confirm_By='{eid}',
+    ProdTrans_Confirm_Date'{date}'
+WHERE ProdTrans_ID='{tid}'
+"""
+
+CHK_REJ = """
+UPDATE tblRejectTransaction
+SET RejectTrans_Confirm_By='{eid}',
+    RejectTrans_Confirm_Date'{date}'
+WHERE RejectTrans_ID='{tid}'
+"""
+
+CHK_STO = CHK_CUS
+
+CHK_NT0 = """
+UPDATE tblNewTyreTransactionDetail
+SET NewTrans_Confirm_By='',
+    NewTrans_Confirm_Date''
+WHERE NewTrans_ID='{tid}'
+"""
+
+CHK_CUS0 = """
+UPDATE tblProductionTransaction
+SET ProdTrans_Confirm_By='',
+    ProdTrans_Confirm_Date''
+WHERE ProdTrans_ID='{tid}'
+"""
+
+CHK_REJ0 = """
+UPDATE tblRejectTransaction
+SET RejectTrans_Confirm_By='',
+    RejectTrans_Confirm_Date''
+WHERE RejectTrans_ID='{tid}'
+"""
+
+CHK_STO0 = CHK_CUS0
+
 def ask(query):
     conn = pyodbc.connect(CONN)
     cur = conn.cursor()
@@ -396,6 +446,14 @@ class Table():
         elif act=='INV_STO_ID': q=INV_STO_ID.format(sz=i['sz'])
         elif act=='INV_REJ': q=INV_REJ
         elif act=='INV_REJ_ID': q=INV_REJ_ID.format(sz=i['sz'])
+        elif act=='CHK_NT': q=CHK_NT.format(tid=i['tid'],eid=i['eid'],date=i['date'])
+        elif act=='CHK_CUS': q=CHK_CUS.format(tid=i['tid'],eid=i['eid'],date=i['date'])
+        elif act=='CHK_REJ': q=CHK_REJ.format(tid=i['tid'],eid=i['eid'],date=i['date'])
+        elif act=='CHK_STO': q=CHK_STO.format(tid=i['tid'],eid=i['eid'],date=i['date'])
+        elif act=='CHK_NT0': q=CHK_NT0.format(tid=i['tid'])
+        elif act=='CHK_CUS0': q=CHK_CUS0.format(tid=i['tid'])
+        elif act=='CHK_REJ0': q=CHK_REJ0.format(tid=i['tid'])
+        elif act=='CHK_STO0': q=CHK_STO0.format(tid=i['tid'])
         else: q=IDENTIFY.format(sn=i['sn'])
         return q
 
