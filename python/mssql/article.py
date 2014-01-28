@@ -4,19 +4,15 @@
 __version__ = '0.1'
 
 import sys
+import re
 from time import strftime, localtime
 import pymssql, web
 from date import gmt
 
-SQL_SERVER = "ERPRAID\\SQLEXPRESS"
-#SQL_SERVER = "ERPTEST\\ERP"
-#SQL_SERVER = "aaebio\\bsserver"
-#USER = "cis"
-USER = "sa"
+SQL_SERVER = "erpraid\\sqlexpress"
+USER = "cis"
 PASSWD = USER
 DATABASE = "unikwareData"
-#DATABASE = "UNIKWAREData"
-#DATABASE = "BioStar"
 
 UNIK_ARTIKEL = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
@@ -95,7 +91,8 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
     if article == None:
         return rowarray_list
 
-    conn = pymssql.connect(host=SQL_SERVER, user=USER, password=PASSWD, database=DATABASE, as_dict=True)
+    conn = pymssql.connect(host=SQL_SERVER, user=USER, password=PASSWD,
+            database=DATABASE, as_dict=True)
     cur = conn.cursor()
     query = UNIK_QUERY.format(article=article)
     cur.execute(query)
@@ -104,9 +101,12 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
 
     for row in rows:
         t = []
-        t.extend(row)
+        result = row['Artikelnummer'], row['ArtMatchcode'], \
+                 row['ArtBezeichnung1'], row['ArtBezeichnung2']
+        t.extend(result)
         rowarray_list.append(t)
         count += 1
+        print row
 
     return rowarray_list
 
@@ -122,6 +122,7 @@ urls = (
 
 template_globals = {
     'app_path': lambda p: web.ctx.homepath + p,
+    're': re,
 }
 render = web.template.render('templates/', globals=template_globals)
 

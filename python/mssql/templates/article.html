@@ -2,9 +2,9 @@ $def with(search, group, report)
 <!DOCTYPE html>
 <head>
     <title>Unikware Article Number</title>
-    <link rel="shortcut icon" href="http://aae014/favicon.ico"/>
-    <link  rel=stylesheet type=text/css href="static/js/jquery-ui.css">
-    <link  rel=stylesheet type=text/css href="static/css/style.css">
+    <lnk rel="shortcut icon" href="http://aae014/favicon.ico"/>
+    <lnk  rel=stylesheet type=text/css href="static/js/jquery-ui.css">
+    <lnk  rel=stylesheet type=text/css href="static/css/style.css">
     <script type="text/javascript" src="static/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="static/js/jquery-ui.js"></script>
 </head>
@@ -14,7 +14,7 @@ $def with(search, group, report)
   <form>
     <fieldset>
       <label for="search">Search:</label>
-      <input id="search" type="text" name="search">
+      <input id="search" type="text" name="search" value="$search">
       <button type="button" id="btnSearch">search</button>
     </fieldset>
     <div id="group">
@@ -31,8 +31,25 @@ $if report != None:
         </div>
     $else:
         <div  class=page>
-        <h3>heading</h3>
         <h3>you're searching $search on $group</h3>
+        <table border="2" cellspacing="0" cellpadding="7">
+        <tr>Total: $len(report) records</tr>
+        <tr>
+            <th>Article</th>
+            <th>Match Code</th>
+            <th>Description 1</th>
+            <th>Description 2</th>
+        </tr>
+        $for row in report:
+            <tr>
+            $for col in row:
+                $ s = re.compile('^\d{3}').search(col)
+                $if s:
+                    <td><a href="info/?i=$col">$col</a></td>
+                $else:
+                    <td>$col</td>
+            </tr>
+        </table>
         </div>
 
 <script type="text/javascript" src="static/js/article.js"></script>
