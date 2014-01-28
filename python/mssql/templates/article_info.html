@@ -10,7 +10,7 @@ $def with(a, detail=None, used=None, sub=None)
 </head>
 <body>
 <div  class=page>
-<h3>Article Information</h3>
+<h3>Article Information $version</h3>
 $if detail == None or len(detail) == 0:
     <p>There is no detail of $a</p>
 $else:
@@ -33,7 +33,7 @@ $if used == None or len(used) == 0:
     <p>There is no one use $a</p>
 $else:
     <table border="2" cellspacing="0" cellpadding="7">
-    <tr>Used:</tr>
+    <tr>Used: $len(used) item(s)</tr>
     <tr>
         <th>No.</th>
         <th>Article</th>
@@ -57,7 +57,7 @@ $if sub == None or len(sub) == 0:
     <p>There is no sub BOM of $a</p>
 $else:
     <table border="2" cellspacing="0" cellpadding="7">
-    <tr>Sub BOM:</tr>
+    <tr>Sub BOM: $len(sub) item(s)</tr>
     <tr>
         <th>No.</th>
         <th>Article</th>

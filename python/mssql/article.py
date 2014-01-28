@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 import sys
-import re
-from time import strftime, localtime
 import pymssql, web
-from date import gmt
 
 SQL_SERVER = "erpraid\\sqlexpress"
 USER = "cis"
@@ -70,20 +67,6 @@ WHERE a1.Artikelnummer = '{article}'
 ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
-OUTPUT_JS = 'output.js'
-
-def work_time(s, e):
-    if e < 0:
-        return 0
-    if s < 480:
-        s = 480
-    elif 12*60 < s < 13*60:
-        s = 12*60
-    w = e-s
-    if w < 1:
-        return 0
-    return w-60
-
 def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
 
     count = 0
@@ -143,8 +126,7 @@ urls = (
 )
 
 template_globals = {
-    'app_path': lambda p: web.ctx.homepath + p,
-    're': re,
+    'version': __version__,
 }
 render = web.template.render('templates/', globals=template_globals)
 
