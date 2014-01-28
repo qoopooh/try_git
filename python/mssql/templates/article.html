@@ -15,7 +15,7 @@ $def with(search, group, report)
     <fieldset>
       <label for="search">Search:</label>
       <input id="search" type="text" name="search" value="$search">
-      <button type="button" id="btnSearch">search</button>
+      <!--<button type="button" id="btnSearch">search</button>-->
     </fieldset>
     <div id="group">
       <input type="radio" name="group" value="article" checked>Article<br>
@@ -24,33 +24,34 @@ $def with(search, group, report)
   </form>
 </div>
 
-$if report != None:
-    $if len(report) == 0:
-        <div  class=page>
-        <h3>NO Result!</h3>
-        </div>
-    $else:
-        <div  class=page>
-        <h3>you're searching $search on $group</h3>
-        <table border="2" cellspacing="0" cellpadding="7">
-        <tr>Total: $len(report) records</tr>
+$if report == None or len(report) == 0:
+    <div  class=page>
+    <h3>NO Result!</h3>
+    </div>
+$else:
+    <div  class=page>
+    <h3>you're searching $search on $group</h3>
+    <table border="2" cellspacing="0" cellpadding="7">
+    <tr>Total: $len(report) records</tr>
+    <tr>
+        <th>No</th>
+        <th>Article</th>
+        <th>Match Code</th>
+        <th>Description 1</th>
+        <th>Description 2</th>
+    </tr>
+    $for row in report:
+        $ nr = 0
         <tr>
-            <th>Article</th>
-            <th>Match Code</th>
-            <th>Description 1</th>
-            <th>Description 2</th>
+        $for col in row:
+            $ nr += 1
+            $if nr == 2:
+                <td><a href="info?a=$col">$col</a></td>
+            $else:
+                <td>$col</td>
         </tr>
-        $for row in report:
-            <tr>
-            $for col in row:
-                $ s = re.compile('^\d{3}').search(col)
-                $if s:
-                    <td><a href="info/?i=$col">$col</a></td>
-                $else:
-                    <td>$col</td>
-            </tr>
-        </table>
-        </div>
+    </table>
+    </div>
 
 <script type="text/javascript" src="static/js/article.js"></script>
 </body>

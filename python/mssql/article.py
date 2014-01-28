@@ -100,12 +100,24 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
     conn.close()
 
     for row in rows:
+        count += 1
         t = []
-        result = row['Artikelnummer'], row['ArtMatchcode'], \
-                 row['ArtBezeichnung1'], row['ArtBezeichnung2']
+        if UNIK_QUERY == UNIK_DETAIL:
+            result = row['Matchcode'], row['Description1'], \
+                     row['Description2'], row['InStock'], row['Available']
+        elif UNIK_QUERY == UNIK_USED:
+            result = count, row['ItemNumber'], row['Matchcode'], \
+                     row['Description1'], row['Description2']
+        elif UNIK_QUERY == UNIK_SUB:
+            result = count, row['ItemNumber'], row['Matchcode'], \
+                     row['Description1'], row['Description2'], \
+                     row['Quantity'], row['Multiplier'], \
+                     row['PositionOnBoard']
+        else:
+            result = count, row['Artikelnummer'], row['ArtMatchcode'], \
+                     row['ArtBezeichnung1'], row['ArtBezeichnung2']
         t.extend(result)
         rowarray_list.append(t)
-        count += 1
         print row
 
     return rowarray_list
@@ -113,11 +125,21 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
 class index:
 
     def GET(self):
-        i = web.input(search=None,group=None)
+        i = web.input(search='880-00',group=None)
         return render.article(i.search, i.group, gen_report(i.search))
+
+class Info:
+
+    def GET(self):
+        i = web.input(a=None)
+        return render.article_info(i.a, \
+                gen_report(i.a, UNIK_DETAIL),
+                gen_report(i.a, UNIK_USED),
+                gen_report(i.a, UNIK_SUB))
 
 urls = (
     '/', 'index',
+    '/info', 'Info',
 )
 
 template_globals = {
