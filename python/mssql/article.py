@@ -8,10 +8,15 @@ from time import strftime, localtime
 import pymssql, web
 from date import gmt
 
-SQL_SERVER = "aaeraid\\sqlexpress"
-USER = "cis"
+SQL_SERVER = "ERPRAID\\SQLEXPRESS"
+#SQL_SERVER = "ERPTEST\\ERP"
+#SQL_SERVER = "aaebio\\bsserver"
+#USER = "cis"
+USER = "sa"
 PASSWD = USER
 DATABASE = "unikwareData"
+#DATABASE = "UNIKWAREData"
+#DATABASE = "BioStar"
 
 UNIK_ARTIKEL = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
@@ -83,37 +88,23 @@ def work_time(s, e):
         return 0
     return w-60
 
-def gen_report(dt=0,department=None,startdate=0,enddate=0):
+def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
 
     count = 0
     rowarray_list = []
+    if article == None:
+        return rowarray_list
 
-    conn = pymssql.connect(host=HOST, user=USER, password=PASSWORD,
-            database=DATABASE, as_dict=True)
+    conn = pymssql.connect(host=SQL_SERVER, user=USER, password=PASSWD, database=DATABASE, as_dict=True)
     cur = conn.cursor()
-    if dt == 0:
-        query = MONTHLY_REPORT.format(startdate=startdate, enddate=enddate)
-    elif department == 'production':
-        query = PRODUCTION_REPORT.format(date=dt)
-    else:
-        query = ADMIN_REPORT.format(date=dt)
+    query = UNIK_QUERY.format(article=article)
     cur.execute(query)
     rows=cur.fetchall()
     conn.close()
 
     for row in rows:
-        if dt > 0:
-            date = strftime("%Y-%m-%d", localtime(dt))
-        else:
-            date = strftime("%Y-%m-%d", localtime(row['nDateTime']))
-        start_time = strftime("%M:%S", localtime(row['nStartTime']))
-        end_time = strftime("%M:%S", localtime(row['nEndTime']))
-        work = strftime("%M:%S", \
-                localtime(work_time(row['nStartTime'],row['nEndTime'])))
-        result = row['sUserID'], date, row['sUserName'], row['sDepartment'], \
-            start_time, end_time, work
         t = []
-        t.extend(result)
+        t.extend(row)
         rowarray_list.append(t)
         count += 1
 
@@ -123,7 +114,7 @@ class index:
 
     def GET(self):
         i = web.input(search=None,group=None)
-        return render.article(i.search, i.group)
+        return render.article(i.search, i.group, gen_report(i.search))
 
 urls = (
     '/', 'index',

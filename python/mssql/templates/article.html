@@ -1,4 +1,4 @@
-$def with(search, group)
+$def with(search, group, report)
 <!DOCTYPE html>
 <head>
     <title>Unikware Article Number</title>
@@ -24,10 +24,16 @@ $def with(search, group)
   </form>
 </div>
 
-<div  class=page>
-<h3>heading</h3>
-<h3>you're searching $search on $group</h3>
-</div>
+$if report != None:
+    $if len(report) == 0:
+        <div  class=page>
+        <h3>NO Result!</h3>
+        </div>
+    $else:
+        <div  class=page>
+        <h3>heading</h3>
+        <h3>you're searching $search on $group</h3>
+        </div>
 
 <script type="text/javascript" src="static/js/article.js"></script>
 </body>
