@@ -1,0 +1,87 @@
+$def with(a, detail=None, used=None, sub=None)
+<!DOCTYPE html>
+<head>
+    <title>Unikware Article Number</title>
+    <lnk rel="shortcut icon" href="http://aae014/favicon.ico"/>
+    <lnk  rel=stylesheet type=text/css href="static/js/jquery-ui.css">
+    <lnk  rel=stylesheet type=text/css href="static/css/style.css">
+    <script type="text/javascript" src="static/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery-ui.js"></script>
+</head>
+<body>
+<div  class=page>
+<h3>Article Information</h3>
+$if detail == None or len(detail) == 0:
+    <p>There is no detail of $a</p>
+$else:
+    <table border="2" cellspacing="0" cellpadding="7">
+    <tr>Details:</tr>
+    <tr>
+        <th>Match Code</th>
+        <th>Description 1</th>
+        <th>Description 2</th>
+        <th>In Stock</th>
+        <th>Available</th>
+    </tr>
+    $for row in detail:
+        <tr>
+        $for col in row:
+            <td>$col</td>
+        </tr>
+    </table>
+$if used == None or len(used) == 0:
+    <p>There is no one use $a</p>
+$else:
+    <table border="2" cellspacing="0" cellpadding="7">
+    <tr>Used:</tr>
+    <tr>
+        <th>No.</th>
+        <th>Article</th>
+        <th>Match Code</th>
+        <th>Description 1</th>
+        <th>Description 2</th>
+    </tr>
+    $for row in used:
+        $ nr = 0
+        <tr>
+        $for col in row:
+            $ nr += 1
+            $if nr == 2:
+                <td><a href="info?a=$col">$col</a></td>
+            $else:
+                <td>$col</td>
+        </tr>
+    </table>
+</div>
+$if sub == None or len(sub) == 0:
+    <p>There is no sub BOM of $a</p>
+$else:
+    <table border="2" cellspacing="0" cellpadding="7">
+    <tr>Sub BOM:</tr>
+    <tr>
+        <th>No.</th>
+        <th>Article</th>
+        <th>Match Code</th>
+        <th>Description 1</th>
+        <th>Description 2</th>
+        <th>Quantity</th>
+        <th>Multiplier</th>
+        <th>Position on Board</th>
+    </tr>
+    $for row in sub:
+        $ nr = 0
+        <tr>
+        $for col in row:
+            $ nr += 1
+            $if nr == 2:
+                <td><a href="info?a=$col">$col</a></td>
+            $else:
+                <td>$col</td>
+        </tr>
+    </table>
+</div>
+
+<script type="text/javascript" src="static/js/article.js"></script>
+</body>
+</html>
+
