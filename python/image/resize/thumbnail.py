@@ -1,11 +1,11 @@
 import os, sys
 import Image
 
-#size = 128, 128
 size = 1024, 768
 
 for infile in sys.argv[1:]:
-    outfile = os.path.splitext(infile)[0] + ".thumbnail.jpg"
+    outfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.path.basename(infile))
+    print outfile
     if infile != outfile:
         try:
             im = Image.open(infile)
