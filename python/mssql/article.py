@@ -13,14 +13,60 @@ USER = "cis"
 PASSWD = USER
 DATABASE = "unikwareData"
 
-MONTHLY_REPORT = """
-SELECT TB_TA_RESULT.nStartTime, TB_TA_RESULT.nEndTime, TB_USER.sUserName, TB_USER.sUserID, TB_USER_DEPT.sDepartment,TB_TA_RESULT.nDateTime
-FROM TB_USER INNER JOIN
-        TB_USER_DEPT ON TB_USER.nDepartmentIdn = TB_USER_DEPT.nDepartmentIdn INNER JOIN
-        TB_TA_RESULT ON TB_USER.nUserIdn = TB_TA_RESULT.nUserIdn
-WHERE TB_TA_RESULT.nDateTime >= {startdate}
-    AND TB_TA_RESULT.nDateTime <= {enddate}
-ORDER BY TB_USER_DEPT.sDepartment,CONVERT(INT, TB_USER.sUserID),TB_TA_RESULT.nDateTime
+UNIK_ARTIKEL = """
+SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
+FROM Artikel
+WHERE artikelnummer LIKE '{article}%'
+"""
+
+UNIK_DETAIL = """
+SELECT Artikelnummer AS ItemNumber,
+    ArtMatchcode AS Matchcode,
+    ISNULL(ArtBezeichnung1, '-') AS Description1,
+    ISNULL(ArtBezeichnung2,'-') AS Description2,  
+    ISNULL(AlaPhysikalischeMenge1,0) AS InStock,
+    ISNULL(AlaVerfuegbar1Menge1,0) AS Available
+FROM Artikel   
+    LEFT OUTER JOIN ArtikelLager
+    ON (ArtikelLager.InterneArtikelnummer = Artikel.InterneArtikelnummer)  
+WHERE AlaLagerGruppe IS NULL AND AlaLagerortnummer IS NULL
+    AND Artikelnummer = '{article}'
+"""
+
+UNIK_USED = """
+SELECT a1.Artikelnummer,
+    a2.Artikelnummer AS ItemNumber,
+    a2.ArtMatchcode AS Matchcode,
+    ISNULL(a2.ArtBezeichnung1, '-') AS Description1,
+    ISNULL(a2.ArtBezeichnung2,'-') AS Description2
+FROM ((Artikel a1
+    LEFT OUTER JOIN Stueckliste
+    ON (a1.InterneArtikelnummer = StkUnterArtikelnummer))
+    INNER JOIN Artikel a2
+    ON (a2.InterneArtikelnummer = Stueckliste.InterneArtikelnummer))
+WHERE a1.Artikelnummer = '{article}'
+ORDER BY a1.Artikelnummer, StkPositionsnummer
+"""
+
+UNIK_SUB = """
+SELECT a1.Artikelnummer,
+    StkPositionsnummer,
+    a2.Artikelnummer AS ItemNumber,
+    a2.ArtMatchcode AS Matchcode,
+    ISNULL(a2.ArtBezeichnung1, '-') AS Description1,
+    ISNULL(a2.ArtBezeichnung2,'-') AS Description2,  
+    StkMenge1 AS Quantity,
+    CASE when(StkMultiplikatorJN = 1) THEN StkMultiplikatorMenge1
+    ELSE 1
+    END AS Multiplier,
+    ISNULL(StkNotiz, '-') AS PositionOnBoard
+FROM ((Artikel a1
+    LEFT OUTER JOIN Stueckliste
+    ON (a1.InterneArtikelnummer = Stueckliste.InterneArtikelnummer))
+    INNER JOIN Artikel a2
+    ON (a2.InterneArtikelnummer = StkUnterArtikelnummer))
+WHERE a1.Artikelnummer = '{article}'
+ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
 OUTPUT_JS = 'output.js'
