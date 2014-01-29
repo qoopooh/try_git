@@ -14,7 +14,7 @@ DATABASE = "unikwareData"
 UNIK_ARTIKEL = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
 FROM Artikel
-WHERE artikelnummer LIKE '{article}%'
+WHERE artikelnummer LIKE %s
 """
 
 UNIK_DETAIL = """
@@ -28,7 +28,7 @@ FROM Artikel
     LEFT OUTER JOIN ArtikelLager
     ON (ArtikelLager.InterneArtikelnummer = Artikel.InterneArtikelnummer)  
 WHERE AlaLagerGruppe IS NULL AND AlaLagerortnummer IS NULL
-    AND Artikelnummer = '{article}'
+    AND Artikelnummer = %s
 """
 
 UNIK_USED = """
@@ -42,29 +42,34 @@ FROM ((Artikel a1
     ON (a1.InterneArtikelnummer = StkUnterArtikelnummer))
     INNER JOIN Artikel a2
     ON (a2.InterneArtikelnummer = Stueckliste.InterneArtikelnummer))
-WHERE a1.Artikelnummer = '{article}'
+WHERE a1.Artikelnummer = %s
 ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
 UNIK_SUB = """
-SELECT a1.Artikelnummer,
-    StkPositionsnummer,
-    a2.Artikelnummer AS ItemNumber,
-    a2.ArtMatchcode AS Matchcode,
-    ISNULL(a2.ArtBezeichnung1, '-') AS Description1,
-    ISNULL(a2.ArtBezeichnung2,'-') AS Description2,  
-    StkMenge1 AS Quantity,
-    CASE when(StkMultiplikatorJN = 1) THEN StkMultiplikatorMenge1
-    ELSE 1
-    END AS Multiplier,
-    ISNULL(StkNotiz, '-') AS PositionOnBoard
-FROM ((Artikel a1
-    LEFT OUTER JOIN Stueckliste
-    ON (a1.InterneArtikelnummer = Stueckliste.InterneArtikelnummer))
-    INNER JOIN Artikel a2
-    ON (a2.InterneArtikelnummer = StkUnterArtikelnummer))
-WHERE a1.Artikelnummer = '{article}'
-ORDER BY a1.Artikelnummer, StkPositionsnummer
+SELECT a1.Artikelnummer,                                                        
+    StkPositionsnummer,                                                         
+    a2.Artikelnummer AS ItemNumber,                                             
+    a2.ArtMatchcode AS Matchcode,                                               
+    ISNULL(a2.ArtBezeichnung1, '-') AS Description1,                            
+    ISNULL(a2.ArtBezeichnung2,'-') AS Description2,                             
+    StkMenge1 AS Quantity,                                                      
+    CASE WHEN (StkMultiplikatorJN = 1)
+        THEN StkMultiplikatorMenge1               
+        ELSE 1                                                                      
+        END AS Multiplier,                                                          
+    ISNULL(StkNotiz, '-') AS PositionOnBoard,
+    ISNULL(AlaPhysikalischeMenge1,0) AS InStock,
+    ISNULL(AlaVerfuegbar1Menge1,0) AS Available
+    FROM ((Artikel a1                                                               
+        LEFT OUTER JOIN Stueckliste                                                 
+        ON (a1.InterneArtikelnummer = Stueckliste.InterneArtikelnummer))            
+        INNER JOIN Artikel a2                                                       
+        ON (a2.InterneArtikelnummer = StkUnterArtikelnummer))                       
+        LEFT OUTER JOIN ArtikelLager ON (ArtikelLager.InterneArtikelnummer = a2.InterneArtikelnummer) 
+    WHERE AlaLagerGruppe IS NULL AND AlaLagerortnummer IS NULL
+        AND a1.Artikelnummer = %s
+    ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
 def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
@@ -77,8 +82,10 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
     conn = pymssql.connect(host=SQL_SERVER, user=USER, password=PASSWD,
             database=DATABASE, as_dict=True)
     cur = conn.cursor()
-    query = UNIK_QUERY.format(article=article)
-    cur.execute(query)
+    if UNIK_QUERY == UNIK_ARTIKEL:
+        cur.execute(UNIK_QUERY, (article + '%'))
+    else:
+        cur.execute(UNIK_QUERY, (article))
     rows=cur.fetchall()
     conn.close()
 
@@ -95,6 +102,7 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
             result = count, row['ItemNumber'], row['Matchcode'], \
                      row['Description1'], row['Description2'], \
                      row['Quantity'], row['Multiplier'], \
+                     row['InStock'], row['Available'], \
                      row['PositionOnBoard']
         else:
             result = count, row['Artikelnummer'], row['ArtMatchcode'], \
