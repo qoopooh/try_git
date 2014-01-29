@@ -3,7 +3,7 @@
 
 __version__ = '1.0'
 
-import sys
+import sys, re
 import pymssql, web
 
 SQL_SERVER = "erpraid\\sqlexpress"
@@ -15,6 +15,21 @@ UNIK_ARTIKEL = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
 FROM Artikel
 WHERE artikelnummer LIKE %s
+"""
+
+UNIK_ALLSEARCH = """
+SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
+FROM Artikel
+WHERE Artikelnummer LIKE %s
+    OR ArtMatchcode LIKE %s
+    OR ArtBezeichnung1 LIKE %s
+    OR ArtBezeichnung2 LIKE %s
+"""
+
+UNIK_MATCHCODE = """
+SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
+FROM Artikel
+WHERE ArtMatchcode LIKE %s
 """
 
 UNIK_DETAIL = """
@@ -84,6 +99,9 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
     cur = conn.cursor()
     if UNIK_QUERY == UNIK_ARTIKEL:
         cur.execute(UNIK_QUERY, (article + '%'))
+    elif UNIK_QUERY == UNIK_ALLSEARCH:
+        s = '%' + article + '%'
+        cur.execute(UNIK_QUERY, (s,s,s,s))
     else:
         cur.execute(UNIK_QUERY, (article))
     rows=cur.fetchall()
@@ -116,8 +134,22 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
 class index:
 
     def GET(self):
-        i = web.input(search='880-00',group=None)
-        return render.article(i.search, i.group, gen_report(i.search))
+        i = web.input(search='900-', group='article')
+        length = len(i.search)
+        a = '-'
+        if i.group == 'article':
+            if length > 3 and i.search[3] != '-':
+                a = i.search[:3] + '-' + i.search[3:]
+            elif length > 1:
+                a = i.search
+            report = gen_report(a)
+        else:
+            if length > 2:
+                a = i.search
+            else:
+                a = 'at_least_two_chars'
+            report = gen_report(a, UNIK_ALLSEARCH)
+        return render.article(a, i.group, report)
 
 class Info:
 

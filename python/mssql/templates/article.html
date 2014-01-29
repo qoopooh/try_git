@@ -18,8 +18,12 @@ $def with(search, group, report)
       <!--<button type="button" id="btnSearch">search</button>-->
     </fieldset>
     <div id="group">
+$if group == 'article':
       <input type="radio" name="group" value="article" checked>Article<br>
       <input type="radio" name="group" value="all">All
+$else:
+      <input type="radio" name="group" value="article">Article<br>
+      <input type="radio" name="group" value="all" checked>All
     </div>
   </form>
 </div>
