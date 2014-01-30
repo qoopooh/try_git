@@ -2,16 +2,17 @@
 #include "chat.h"
 
 const int WAIT_FOR_READY(3000);
+const QString UNIT_ID("0123456789012345678901234567890123456789");
 
 Chat::Chat(QWidget *parent, QString url, int port, QString id) :
     QDialog(parent), f_show_tx(true), f_send_cmd(false), uuid(id), phoneid(0)
 {
   createHorizontalGroupBox();
 
-  textEditLog = new QTextEdit();
+  textEditLog = new QTextEdit(this);
 //  textEditLog->setReadOnly(true);
 
-  QVBoxLayout *mainLayout = new QVBoxLayout;
+  QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->addWidget(horizontalGroupBox, 1);
   mainLayout->addWidget(textEditLog, 10);
   setLayout(mainLayout);
@@ -21,7 +22,7 @@ Chat::Chat(QWidget *parent, QString url, int port, QString id) :
   showFullScreen();
 #endif
 
-  socket = new QTcpSocket();
+  socket = new QTcpSocket(this);
   socket->connectToHost(url, port);
 
   connect(socket, SIGNAL(connected()), this, SLOT(onStart()));
@@ -48,14 +49,14 @@ Chat::~Chat()
 
 void Chat::createHorizontalGroupBox()
 {
-  horizontalGroupBox = new QGroupBox(APP + " " + VERSION);
-  QHBoxLayout *layout = new QHBoxLayout;
-  lineEditCmd = new QLineEdit(tr("E,L,1"));
-  btnSend = new QPushButton(tr("&Send"));
-  btnClear = new QPushButton(tr("&Clear"));
+  horizontalGroupBox = new QGroupBox(APP + " " + VERSION, this);
+  QHBoxLayout *layout = new QHBoxLayout(this);
+  lineEditCmd = new QLineEdit(tr("E,L,1"), this);
+  btnSend = new QPushButton(tr("&Send"), this);
+  btnClear = new QPushButton(tr("&Clear"), this);
 
 #ifdef Q_OS_IOS
-  btnBack = new QPushButton(tr("<-"));
+  btnBack = new QPushButton(tr("<-"), this);
   btnBack->setFlat(true);
   btnBack->setMaximumWidth(20);
   layout->addWidget(btnBack);

@@ -4,7 +4,11 @@
 #include <QDialog>
 
 #include "def.h"
+#ifndef FTC
 #include "chat.h"
+#else
+#endif
+
 
 class QGroupBox;
 class QLabel;
@@ -30,10 +34,12 @@ private:
 
   QLabel *labelUrl;
   QLabel *labelPort;
-  QLabel *labelId;
   QLineEdit *lineEditUrl;
   QLineEdit *lineEditPort;
+#ifndef FTC
+  QLabel *labelId;
   QTextEdit *textEditId;
+#endif
   QPushButton *btnConnect;
   QPushButton *btnBack;
 };

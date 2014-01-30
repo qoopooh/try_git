@@ -57,9 +57,15 @@ background-color: #aabbcc;
   position: absolute;
 }
 
+#title{
+  position:absolute;
+  top:5px;left:0;right:0;
+  height: 20px;
+}
+
 #chatwindow{
   position:absolute;
-  top:80px;left:0;right:0;bottom:71px;
+  top:25px;left:0;right:0;bottom:71px;
   /* if you wish to use all of your space, use
   height:100px;
   position:relative;
@@ -85,7 +91,7 @@ background-color: #aabbcc;
   bottom:0;
   height:70px;
   padding:.5em;
-  margin-top:1em;
+  margin-top:.1em;
 }
 
 #inputcontainer > p{

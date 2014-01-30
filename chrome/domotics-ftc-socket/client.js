@@ -141,7 +141,7 @@ function toggleLostConnect(msg) {
 // Gateway
 //////////////////////////
 
-var current_gateway = "192.168.1.39";
+var current_gateway = "";
 
 function setCurrentGateway(obj, cb) {
   var _ip = $(obj).val();
@@ -164,7 +164,8 @@ function clearStorage() {
   });
 }
 
-function startJqm() { $("#currenttime").text(new Date());
+function startJqm() {
+  /*$("#currenttime").text(new Date());*/
   $("#ip").keypress(function(e) {
     if (e.which === 13) {
       e.preventDefault();
@@ -253,7 +254,7 @@ function startJqm() { $("#currenttime").text(new Date());
   chrome.storage.sync.get(function(items) {
     current_gateway = items.current_gateway;
     if (!current_gateway)
-      current_gateway = "192.168.1.39";
+      current_gateway = "192.168.1.38";
     $("#ip").val(current_gateway);
     if (!items.f_failed_last_connect)
       $('#chkConnect').trigger('click');

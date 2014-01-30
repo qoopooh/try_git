@@ -5,8 +5,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h4>FTC Over IP V0.6</h4>
-  <p id="currenttime">date</p>
+  <div id="title">FTC Over IP V0.6</div>
+  <!--<p id="currenttime">date</p>-->
   <div id="chatwindow">
     <div id="messagewindow">
       <ul></ul>
@@ -16,14 +16,14 @@
     IP:<input id="ip" type="text">
     <input id="chkConnect" type="checkbox">Connect</input>
     <br/>
-    <input id="chkTranslate" type="checkbox" checked>Translate message</input>
-    <input id="chkOneLine" type="checkbox" checked>1 line message</input>
-    <input id="chkReceive" type="checkbox" checked>Receive message</input>
+    <input id="chkTranslate" type="checkbox" checked>Translate</input>
+    <input id="chkOneLine" type="checkbox" checked>1 line</input>
+    <input id="chkReceive" type="checkbox" checked>Receive</input>
     <br/>
-    <button id="btnClear" type="button">Clear</button>
-    <button id="btnAddress" type="button">Address</button>
-    <button id="btnVersion" type="button">Version</button>
-    <input id="txtCommandCount" type="text" readonly>-</input>
+    <button id="btnClear">Clear</button>
+    <button id="btnAddress">Address</button>
+    <button id="btnVersion">Version</button>
+    <button id="txtCommandCount" disabled>-</button>
     <select id="selectCommandDevices">
       <option>-</option>
     </select>

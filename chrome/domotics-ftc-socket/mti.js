@@ -457,20 +457,20 @@ function addCommandDevices(words) {
     return;
 
   $("#selectCommandDevices option").each(function() {
-    $("#txtCommandCount").val(++commandCount + " Device(s)");
+    $("#txtCommandCount").text(++commandCount + " mti(s)");
     if (uid == $(this).val()) {
       exist = true;
     }
   });
 
   if (!exist) {
-    $("#txtCommandCount").val(++commandCount + " Device(s)");
+    $("#txtCommandCount").text(++commandCount + " mti(s)");
     $("#selectCommandDevices").append("<option>" + uid + "</option>");
   }
 }
 
 function clearDevice() {
-  $("#txtCommandCount").val("0 Device");
+  $("#txtCommandCount").text("0 mti");
   $("#selectCommandDevices").html("");
 }
 
