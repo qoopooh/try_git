@@ -8,7 +8,7 @@ public class GuestbookServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         resp.setContentType("text/plain");
-        resp.getWriter().println("Hello, GAE");
+        resp.getWriter().println("Hello, 2");
     }
 }
 
