@@ -6,6 +6,9 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
+<head>
+  <link type="text/css" rel="stylesheet" href="/css/style.css" />
+</head>
 <body>
 
 <%
@@ -14,7 +17,7 @@
   if (user != null) {
     pageContext.setAttribute("user", user);
 %>
-    <p>Hello, ${fn:escapeXml(user.nickname)}! (You can
+    <p>Hello, ${fn:escapeXml(user.nickname)}! <br /> (You can
     <a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">sign out</a>.)</p>
 <%
   } else {
