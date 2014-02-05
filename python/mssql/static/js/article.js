@@ -24,6 +24,7 @@ function init() {
     /*onSearch();*/
     /*});*/
   $("#btnSearch").click(onSearch);
+  document.getElementById("search").select();
 
   console.log('param 1', getURLParameter('group'));
 }

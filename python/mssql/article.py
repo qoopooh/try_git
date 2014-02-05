@@ -144,7 +144,7 @@ class index:
                 a = i.search
             report = gen_report(a)
         else:
-            if length > 2:
+            if length > 1:
                 a = i.search
             else:
                 a = 'at_least_two_chars'
