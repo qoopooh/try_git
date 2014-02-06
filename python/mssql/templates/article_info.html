@@ -37,12 +37,12 @@ $else:
     $for pic in figure:
         $if pic == None or pic[0] == None:
             $continue
-        $ im = pic[0].replace("\\", "/")
-        $if "pdf" in im:
+        $ link = pic[0].replace("\\", "/")
+        $if "pdf" in link:
             $ name = pic[1].split('\\')[-1]
-            <p><a href="/unikwareimages/CUSTOMER%20ORDER$im">$name</a></p>
+            <p><a href="/unikwareimages/CUSTOMER%20ORDER$link">$name</a></p>
         $else:
-            <p><img src="/unikwareimages/CUSTOMER%20ORDER$im" width="200" /></p>
+            <p><a href="/unikwareimages/CUSTOMER%20ORDER$link"><img src="/unikwareimages/CUSTOMER%20ORDER$link" width="200" /></a></p>
 $if used == None or len(used) == 0:
     <p>There is no one use $a</p>
 $else:
