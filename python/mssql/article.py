@@ -153,7 +153,8 @@ class index:
         length = len(i.search)
         a = '-'
         if i.group == 'article':
-            if length > 3 and i.search[3] != '-':
+            if length > 3 and i.search[3] != '-' \
+                    and bool(re.compile('\d').search(i.search)):
                 a = i.search[:3] + '-' + i.search[3:]
             elif length > 1:
                 a = i.search
