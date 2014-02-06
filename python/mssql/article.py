@@ -38,12 +38,26 @@ SELECT Artikelnummer AS ItemNumber,
     ISNULL(ArtBezeichnung1, '-') AS Description1,
     ISNULL(ArtBezeichnung2,'-') AS Description2,  
     ISNULL(AlaPhysikalischeMenge1,0) AS InStock,
-    ISNULL(AlaVerfuegbar1Menge1,0) AS Available
+    ISNULL(AlaVerfuegbar1Menge1,0) AS Available,
+    DokDatei, DokOriginalDatei
 FROM Artikel   
     LEFT OUTER JOIN ArtikelLager
-    ON (ArtikelLager.InterneArtikelnummer = Artikel.InterneArtikelnummer)  
+    ON (ArtikelLager.InterneArtikelnummer = Artikel.InterneArtikelnummer)
+    LEFT OUTER JOIN DokumentArtikel
+    ON (DokumentArtikel.InterneArtikelnummer = Artikel.InterneArtikelnummer)
+    LEFT OUTER JOIN Dokumente
+    ON (Dokumente.DokumentID = DokumentArtikel.DokumentID)
 WHERE AlaLagerGruppe IS NULL AND AlaLagerortnummer IS NULL
     AND Artikelnummer = %s
+"""
+
+UNIK_DETAIL_IMAGE = """
+SELECT DokumentArtikel.InterneArtikelnummer, DokumentArtikel.DokumentID, Dokumente.DokDatei
+FROM Artikel, DokumentArtikel, Dokumente
+WHERE Artikelnummer= %s
+    AND Artikel.InterneArtikelnummer=DokumentArtikel.InterneArtikelnummer
+    AND DokumentArtikel.DokumentID=Dokumente.DokumentID
+    AND DokDatei LIKE '%.jpg'
 """
 
 UNIK_USED = """
@@ -112,7 +126,8 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
         t = []
         if UNIK_QUERY == UNIK_DETAIL:
             result = row['Matchcode'], row['Description1'], \
-                     row['Description2'], row['InStock'], row['Available']
+                     row['Description2'], row['InStock'], row['Available'], \
+                     (row['DokDatei'], row['DokOriginalDatei'])
         elif UNIK_QUERY == UNIK_USED:
             result = count, row['ItemNumber'], row['Matchcode'], \
                      row['Description1'], row['Description2']

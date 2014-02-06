@@ -14,6 +14,12 @@ $def with(a, detail=None, used=None, sub=None)
 $if detail == None or len(detail) == 0:
     <p>There is no detail of $a</p>
 $else:
+    $ f_show_info, info, figure = True, [], []
+    $for row in detail:
+        $ figure.extend(row[-1:])
+        $if f_show_info:
+            $ info = row[:-1]
+            $ f_show_info = False
     <table border="2" cellspacing="0" cellpadding="7">
     <tr>Details of $a:</tr>
     <tr>
@@ -23,12 +29,20 @@ $else:
         <th>In Stock</th>
         <th>Available</th>
     </tr>
-    $for row in detail:
-        <tr>
-        $for col in row:
-            <td>$col</td>
-        </tr>
+    <tr>
+    $for col in info:
+        <td>$col</td>
+    </tr>
     </table>
+    $for pic in figure:
+        $if pic == None or pic[0] == None:
+            $continue
+        $ im = pic[0].replace("\\", "/")
+        $if "pdf" in im:
+            $ name = pic[1].split('\\')[-1]
+            <p><a href="/unikwareimages/CUSTOMER%20ORDER$im">$name</a></p>
+        $else:
+            <p><img src="/unikwareimages/CUSTOMER%20ORDER$im" width="200" /></p>
 $if used == None or len(used) == 0:
     <p>There is no one use $a</p>
 $else:
