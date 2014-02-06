@@ -315,7 +315,7 @@ WHERE Usr_UserName=?
 """
 
 CHK_NT = """
-UPDATE tblNewTyreTransactionDetail
+UPDATE tblNewTyreTransaction
 SET NewTrans_Confirm_By=?
     NewTrans_Confirm_Date=?
 WHERE NewTrans_ID=?
@@ -338,10 +338,10 @@ WHERE RejectTrans_ID=?
 CHK_STO = CHK_CUS
 
 CHK_NT0 = """
-UPDATE tblNewTyreTransactionDetail
+UPDATE tblNewTyreTransaction
 SET NewTrans_Confirm_By='',
     NewTrans_Confirm_Date=''
-WHERE NewTrans_ID=?
+WHERE NewTrans_ID='RIJ12050005'
 """
 
 CHK_CUS0 = """
@@ -363,7 +363,14 @@ CHK_STO0 = CHK_CUS0
 def ask(q):
     conn = pyodbc.connect(CONN)
     cur = conn.cursor()
-    cur.execute(q[0], q[1])
+    if q[1] == None:
+        param = ()
+    else:
+        param = q[1]
+    count = cur.execute(q[0], param).rowcount
+    if count < 1:
+        conn.close()
+        return ()
     rows = cur.fetchall()
     conn.close()
 
@@ -375,7 +382,20 @@ def ask(q):
 def ask_json(q):
     conn = pyodbc.connect(CONN)
     cur = conn.cursor()
-    cur.execute(q[0], q[1])
+    if q[1] == None:
+        param = ()
+    else:
+        param = q[1]
+    count = cur.execute(q[0], param).rowcount
+    #if count < 1:
+        #conn.close()
+        #return ()
+    print 'q', q
+    print 'count', count
+    print 'description', cur.description
+    if count < 1:
+        conn.close()
+        return ()
     cols = [col[0] for col in cur.description]
     rows = cur.fetchall()
     conn.close()
