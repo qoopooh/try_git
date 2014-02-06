@@ -24,6 +24,7 @@ WHERE Artikelnummer LIKE %s
     OR ArtMatchcode LIKE %s
     OR ArtBezeichnung1 LIKE %s
     OR ArtBezeichnung2 LIKE %s
+ORDER BY Artikelnummer
 """
 
 UNIK_MATCHCODE = """
@@ -87,6 +88,7 @@ SELECT a1.Artikelnummer,
         THEN StkMultiplikatorMenge1               
         ELSE 1                                                                      
         END AS Multiplier,                                                          
+    ISNULL(a2.KZArtMengeneinheit1, '-') AS Unit,
     ISNULL(StkNotiz, '-') AS PositionOnBoard,
     ISNULL(AlaPhysikalischeMenge1,0) AS InStock,
     ISNULL(AlaVerfuegbar1Menge1,0) AS Available
@@ -134,7 +136,7 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
         elif UNIK_QUERY == UNIK_SUB:
             result = count, row['ItemNumber'], row['Matchcode'], \
                      row['Description1'], row['Description2'], \
-                     row['Quantity'], row['Multiplier'], \
+                     row['Quantity'], row['Unit'], row['Multiplier'], \
                      row['InStock'], row['Available'], \
                      row['PositionOnBoard']
         else:
