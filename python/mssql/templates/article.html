@@ -11,20 +11,24 @@ $def with(search, group, report)
 <body>
 <div  class=page>
   <h3>Article Search Engine version $version</h3>
-  <form>
+  <form id="target">
     <fieldset>
       <label for="search">Search:</label>
       <input id="search" type="text" name="search" value="$search">
       <!--<button type="button" id="btnSearch">search</button>-->
     </fieldset>
     <div id="group">
-$if group == 'article':
-      <input type="radio" name="group" value="article" checked>Article<br>
-      <input type="radio" name="group" value="all">All
-$else:
-      <input type="radio" name="group" value="article">Article<br>
-      <input type="radio" name="group" value="all" checked>All
-    </div>
+$ items = ['article', 'matchcode', 'desc1', 'desc2', 'all']
+$ words = ['Article', 'Match Code', 'Description 1', 'Description 2', 'All']
+$ ln, i, w = len(items), 0, 0
+$while i < ln:
+    $if group == items[i]:
+        $ w = i
+        <input type="radio" name="group" value="$items[i]" checked>$words[i]
+    $else:
+        <input type="radio" name="group" value="$items[i]">$words[i]
+    $ i += 1
+  </div>
   </form>
 </div>
 
@@ -34,7 +38,7 @@ $if report == None or len(report) == 0:
     </div>
 $else:
     <div  class=page>
-    <h3>you're searching $search on $group</h3>
+    <h3>you're searching $search on $words[w]</h3>
     <table border="2" cellspacing="0" cellpadding="7">
     <tr>Total: $len(report) records</tr>
     <tr>

@@ -24,6 +24,9 @@ function init() {
     /*onSearch();*/
     /*});*/
   $("#btnSearch").click(onSearch);
+  $("input:radio").change(function() {
+    $(this).closest("form").submit();
+  });
   document.getElementById("search").select();
 
   console.log('param 1', getURLParameter('group'));

@@ -27,6 +27,17 @@ WHERE Artikelnummer LIKE %s
 ORDER BY Artikelnummer
 """
 
+UNIK_SEARCH = """
+SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
+FROM Artikel
+WHERE %s LIKE %s
+"""
+
+ARTIKEL = "artikelnummer"
+MATCHCODE = "ArtMatchcode"
+DESCRIPTION1 = "ArtBezeichnung1"
+DESCRIPTION2 = "ArtBezeichnung2"
+
 UNIK_MATCHCODE = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
 FROM Artikel
@@ -103,7 +114,7 @@ SELECT a1.Artikelnummer,
     ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
-def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
+def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL, group='all'):
 
     count = 0
     rowarray_list = []
@@ -119,7 +130,7 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL):
         s = '%' + article + '%'
         cur.execute(UNIK_QUERY, (s,s,s,s))
     else:
-        cur.execute(UNIK_QUERY, (article))
+        cur.execute(UNIK_QUERY, (group, '%' + article + '%'))
     rows=cur.fetchall()
     conn.close()
 
@@ -161,6 +172,9 @@ class index:
             elif length > 1:
                 a = i.search
             report = gen_report(a)
+        elif i.group == 'matchcode':
+            a = self.filter_word(a, length, i.search)
+            report = gen_report(a, UNIK_SEARCH, MATCHCODE)
         else:
             if length > 1:
                 a = i.search
@@ -168,6 +182,13 @@ class index:
                 a = 'at_least_two_chars'
             report = gen_report(a, UNIK_ALLSEARCH)
         return render.article(a, i.group, report)
+
+    def filter_word(self, a, ln, s):
+        if ln > 1:
+            a = s
+        else:
+            a = 'at_least_two_chars'
+        return a
 
 class Info:
 
