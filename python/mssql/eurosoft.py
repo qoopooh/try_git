@@ -316,21 +316,21 @@ WHERE Usr_UserName=?
 
 CHK_NT = """
 UPDATE tblNewTyreTransaction
-SET NewTrans_Confirm_By=?
+SET NewTrans_Confirm_By=?,
     NewTrans_Confirm_Date=?
 WHERE NewTrans_ID=?
 """
 
 CHK_CUS = """
 UPDATE tblProductionTransaction
-SET ProdTrans_Confirm_By=?
+SET ProdTrans_Confirm_By=?,
     ProdTrans_Confirm_Date=?
 WHERE ProdTrans_ID=?
 """
 
 CHK_REJ = """
 UPDATE tblRejectTransaction
-SET RejectTrans_Confirm_By=?
+SET RejectTrans_Confirm_By=?,
     RejectTrans_Confirm_Date=?
 WHERE RejectTrans_ID=?
 """
@@ -341,7 +341,7 @@ CHK_NT0 = """
 UPDATE tblNewTyreTransaction
 SET NewTrans_Confirm_By='',
     NewTrans_Confirm_Date=''
-WHERE NewTrans_ID='RIJ12050005'
+WHERE NewTrans_ID=?
 """
 
 CHK_CUS0 = """
@@ -368,9 +368,13 @@ def ask(q):
     else:
         param = q[1]
     count = cur.execute(q[0], param).rowcount
-    if count < 1:
+    if cur.description == None:
+        res = 'failed'
+        if count == 1:
+            conn.commit()
+            res = 'success'
         conn.close()
-        return ()
+        return (res,)
     rows = cur.fetchall()
     conn.close()
 
@@ -387,15 +391,16 @@ def ask_json(q):
     else:
         param = q[1]
     count = cur.execute(q[0], param).rowcount
-    #if count < 1:
-        #conn.close()
-        #return ()
     print 'q', q
     print 'count', count
     print 'description', cur.description
-    if count < 1:
+    if cur.description == None:
+        res = 'failed'
+        if count == 1:
+            conn.commit()
+            res = 'success'
         conn.close()
-        return ()
+        return (res,)
     cols = [col[0] for col in cur.description]
     rows = cur.fetchall()
     conn.close()
@@ -460,10 +465,10 @@ class Table():
         elif act=='INV_STO_ID': q, param = INV_STO_ID, (i['sz'])
         elif act=='INV_REJ': q=INV_REJ
         elif act=='INV_REJ_ID': q, param = INV_REJ_ID, (i['sz'])
-        elif act=='CHK_NT': q, param = CHK_NT, (i['tid'],i['eid'],i['date'])
-        elif act=='CHK_CUS': q, param = CHK_CUS, (i['tid'],i['eid'],i['date'])
-        elif act=='CHK_REJ': q, param = CHK_REJ, (i['tid'],i['eid'],i['date'])
-        elif act=='CHK_STO': q, param = CHK_STO, (i['tid'],i['eid'],i['date'])
+        elif act=='CHK_NT': q, param = CHK_NT, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_CUS': q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_REJ': q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_STO': q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_NT0': q, param = CHK_NT0, (i['tid'])
         elif act=='CHK_CUS0': q, param = CHK_CUS0, (i['tid'])
         elif act=='CHK_REJ0': q, param = CHK_REJ0, (i['tid'])
