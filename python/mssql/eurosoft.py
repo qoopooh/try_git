@@ -28,8 +28,8 @@ __all__ = (
         'IDENTIFY', 'LOGIN',
         'CHK_NT', 'CHK_REJ',
         'CHK_STO', 'CHK_CUS',
-        'CHK_NT0', 'CHK_REJ0',
-        'CHK_STO0', 'CHK_CUS0',
+        'CHK_NT_TYRE', 'CHK_REJ_TYRE',
+        'CHK_PROD_TYRE',
         )
 
 import sys, json
@@ -50,9 +50,10 @@ ORDER BY Doc_Date DESC
 
 RCV_NT = """
 SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,
-       NewTransDetail_IsConfirm as isconf
+       COUNT(NewTransDetail_Tyre_Serial) AS cnt
 FROM tblNewTyreTransactionDetail
 WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
+GROUP BY NewTransDetail_NewTrans_ID
 ORDER BY NewTransDetail_NewTrans_ID DESC
 """
 
@@ -109,11 +110,8 @@ FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
 WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
-    AND Casing_Tyre_Code=Tyre_Code
-    AND Tyre_Size_ID=Size_ID
-    AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
-    AND ProdDetail_IntendLiner_ID=Liner_ID
-    AND Comp_ID=?
+    AND Casing_Tyre_Code=Tyre_Code AND Tyre_Size_ID=Size_ID AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
+    AND ProdDetail_IntendLiner_ID=Liner_ID AND Comp_ID=?
     AND ProdTransDetail_ProdTrans_ID=?
 """
 WIT_CUS_ID = """
@@ -350,16 +348,20 @@ CHK_PROD_TYRE = """
 UPDATE tblProductionTransactionDetail
 SET ProdTransDetail_IsAuthorise=1,
     ProdTransDetail_IsConfirm=?
-WHERE ProdTransDetail_ProdTrans_ID=?
-    AND ProdTransDetail_Casing_ID=?
+FROM tblProductionTransactionDetail, tblCasing
+WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND ProdTransDetail_ProdTrans_ID=?
+    AND Casing_Tyre_Serial=?
 """
 
 CHK_REJ_TYRE = """
 UPDATE tblRejectTransactionDetail
 SET RejectTransDetail_IsAuthorise=1,
     RejectTransDetail_IsConfirm=?
-WHERE RejectTransDetail_RejectTrans_ID=?
-    AND RejectTransDetail_Casing_ID=?
+FROM tblRejectTransactionDetail, tblCasing
+WHERE RejectTransDetail_Casing_ID=Casing_ID
+    AND RejectTransDetail_RejectTrans_ID=?
+    AND Casing_Tyre_Serial=?
 """
 
 def ask(q):
@@ -472,7 +474,7 @@ class Table():
         elif act=='CHK_REJ': q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_STO': q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_NT_TYRE': q, param = CHK_NT_TYRE, (i['check'],i['tid'],i['sn'])
-        elif act=='CHK_PROD_TYPE': q, param = CHK_PROD_TYPE, (i['check'],i['tid'],i['sn'])
+        elif act=='CHK_PROD_TYRE': q, param = CHK_PROD_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_REJ_TYRE': q, param = CHK_REJ_TYRE, (i['check'],i['tid'],i['sn'])
         else: q, param = IDENTIFY, (i['sn'])
         return q, param
