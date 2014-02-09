@@ -53,10 +53,11 @@ SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,
        NewTransDetail_IsConfirm as isconf
 FROM tblNewTyreTransactionDetail
 WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
+ORDER BY NewTransDetail_NewTrans_ID DESC
 """
 
 WIT_NT_ID = """
-SELECT Tyre_SerialNo,Size_Name,Model_Name
+SELECT Tyre_SerialNo,Size_Name,Model_Name,NewTransDetail_IsConfirm as isconf
 FROM tblNewTyreTransactionDetail,tblTyre,tblSize,tblModel
 WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
     AND NewTransDetail_Tyre_Code=Tyre_Code
@@ -116,7 +117,7 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=?
 """
 WIT_CUS_ID = """
-SELECT Tyre_SerialNo,Size_Name,Liner_Name
+SELECT Tyre_SerialNo,Size_Name,Liner_Name,ProdTransDetail_IsConfirm as isconf
 FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,
      tblProductionDetail,tblLiner
 WHERE ProdTransDetail_Casing_ID=Casing_ID
@@ -201,7 +202,7 @@ ORDER BY RejectTrans_Create_Date DESC
 """
 
 WIT_REJ_ID = """
-SELECT Tyre_SerialNo,Size_Name
+SELECT Tyre_SerialNo,Size_Name,RejectTransDetail_IsConfirm as isconf
 FROM tblRejectTransactionDetail,tblCasing,tblTyre,tblSize
 WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
@@ -337,28 +338,29 @@ WHERE RejectTrans_ID=?
 
 CHK_STO = CHK_CUS
 
-CHK_NT0 = """
-UPDATE tblNewTyreTransaction
-SET NewTrans_Confirm_By='',
-    NewTrans_Confirm_Date=''
-WHERE NewTrans_ID=?
+CHK_NT_TYRE = """
+UPDATE tblNewTyreTransactionDetail
+SET NewTransDetail_IsAuthorise=1,
+    NewTransDetail_IsConfirm=?
+WHERE NewTransDetail_NewTrans_ID=?
+    AND NewTransDetail_Tyre_Serial=?
 """
 
-CHK_CUS0 = """
-UPDATE tblProductionTransaction
-SET ProdTrans_Confirm_By='',
-    ProdTrans_Confirm_Date=''
-WHERE ProdTrans_ID=?
+CHK_PROD_TYRE = """
+UPDATE tblProductionTransactionDetail
+SET ProdTransDetail_IsAuthorise=1,
+    ProdTransDetail_IsConfirm=?
+WHERE ProdTransDetail_ProdTrans_ID=?
+    AND ProdTransDetail_Casing_ID=?
 """
 
-CHK_REJ0 = """
-UPDATE tblRejectTransaction
-SET RejectTrans_Confirm_By='',
-    RejectTrans_Confirm_Date=''
-WHERE RejectTrans_ID=?
+CHK_REJ_TYRE = """
+UPDATE tblRejectTransactionDetail
+SET RejectTransDetail_IsAuthorise=1,
+    RejectTransDetail_IsConfirm=?
+WHERE RejectTransDetail_RejectTrans_ID=?
+    AND RejectTransDetail_Casing_ID=?
 """
-
-CHK_STO0 = CHK_CUS0
 
 def ask(q):
     conn = pyodbc.connect(CONN)
@@ -429,7 +431,7 @@ class Table():
 
     def GET(self):
         q = self.get_query(web.input(
-            action='WIT_NT', cid=None, tid=None, sn=None))
+            action='WIT_NT', tid=None, sn=None, check=None))
         web.header('Content-Type', 'text/html;charset=utf8')
         return self.show_resp(q)
 
@@ -469,10 +471,9 @@ class Table():
         elif act=='CHK_CUS': q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_REJ': q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_STO': q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_NT0': q, param = CHK_NT0, (i['tid'])
-        elif act=='CHK_CUS0': q, param = CHK_CUS0, (i['tid'])
-        elif act=='CHK_REJ0': q, param = CHK_REJ0, (i['tid'])
-        elif act=='CHK_STO0': q, param = CHK_STO0, (i['tid'])
+        elif act=='CHK_NT_TYRE': q, param = CHK_NT_TYRE, (i['check'],i['tid'],i['sn'])
+        elif act=='CHK_PROD_TYPE': q, param = CHK_PROD_TYPE, (i['check'],i['tid'],i['sn'])
+        elif act=='CHK_REJ_TYRE': q, param = CHK_REJ_TYRE, (i['check'],i['tid'],i['sn'])
         else: q, param = IDENTIFY, (i['sn'])
         return q, param
 
@@ -505,7 +506,7 @@ class Json(Table):
 
     def GET(self):
         q = self.get_query(web.input(
-            action='WIT_NT', cid=None, tid=None, sn=None))
+            action='WIT_NT', tid=None, sn=None, check=None))
         return self.show_resp(q)
 
     def show_resp(self, query):
