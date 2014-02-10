@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 import sys, re
 import pymssql, web
@@ -30,7 +30,7 @@ ORDER BY Artikelnummer
 UNIK_SEARCH = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
 FROM Artikel
-WHERE %s LIKE %s
+WHERE {group} LIKE %s
 """
 
 ARTIKEL = "artikelnummer"
@@ -129,8 +129,11 @@ def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL, group='all'):
     elif UNIK_QUERY == UNIK_ALLSEARCH:
         s = '%' + article + '%'
         cur.execute(UNIK_QUERY, (s,s,s,s))
+    elif UNIK_QUERY == UNIK_SEARCH:
+        s = '%' + article + '%'
+        cur.execute(UNIK_QUERY.format(group=group), (s))
     else:
-        cur.execute(UNIK_QUERY, (group, '%' + article + '%'))
+        cur.execute(UNIK_QUERY, (article))
     rows=cur.fetchall()
     conn.close()
 
@@ -172,14 +175,16 @@ class index:
             elif length > 1:
                 a = i.search
             report = gen_report(a)
-        elif i.group == 'matchcode':
-            a = self.filter_word(a, length, i.search)
+            return render.article(a, i.group, report)
+
+        a = self.filter_word(a, length, i.search)
+        if i.group == 'matchcode':
             report = gen_report(a, UNIK_SEARCH, MATCHCODE)
+        elif i.group == 'desc1':
+            report = gen_report(a, UNIK_SEARCH, DESCRIPTION1)
+        elif i.group == 'desc2':
+            report = gen_report(a, UNIK_SEARCH, DESCRIPTION2)
         else:
-            if length > 1:
-                a = i.search
-            else:
-                a = 'at_least_two_chars'
             report = gen_report(a, UNIK_ALLSEARCH)
         return render.article(a, i.group, report)
 

@@ -23,7 +23,10 @@ function init() {
     /*if (e.which === 13)*/
     /*onSearch();*/
     /*});*/
-  $("#btnSearch").click(onSearch);
+    /*$("#btnSearch").click(onSearch);*/
+  $("#btnSearch").click(function() {
+    $(this).closest("form").submit();
+  });
   $("input:radio").change(function() {
     $(this).closest("form").submit();
   });
