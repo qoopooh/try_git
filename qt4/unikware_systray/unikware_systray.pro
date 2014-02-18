@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml svg
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,9 +13,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        unikware.cpp
+        unikware.cpp \
+    database.cpp
 
-HEADERS  += unikware.h
+HEADERS  += unikware.h \
+    database.h
 
 RESOURCES += \
     unik.qrc
+
+
