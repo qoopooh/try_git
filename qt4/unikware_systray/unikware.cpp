@@ -13,23 +13,28 @@ Unikware::Unikware(QWidget *parent)
   createTrayIcon();
 
   connect(showMessageButton, SIGNAL(clicked()), this, SLOT(showMessage()));
-  connect(showIconCheckBox, SIGNAL(toggled(bool)),
-          trayIcon, SLOT(setVisible(bool)));
-  connect(iconComboBox, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(setIcon(int)));
-  connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
-  connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-          this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+//  connect(showIconCheckBox, SIGNAL(toggled(bool)),
+//          trayIcon, SLOT(setVisible(bool)));
+//  connect(iconComboBox, SIGNAL(currentIndexChanged(int)),
+//          this, SLOT(setIcon(int)));
+//  connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(messageClicked()));
+//  connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+//          this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(iconGroupBox);
   mainLayout->addWidget(messageGroupBox);
   setLayout(mainLayout);
 
-  iconComboBox->setCurrentIndex(1);
+//  iconComboBox->setCurrentIndex(1);
+  QIcon icon;
+  icon.addPixmap(QPixmap(QString::fromUtf8(":/images/unik")),
+  QIcon::Normal, QIcon::Off);
+  trayIcon->setIcon(icon);
   trayIcon->show();
 
-  setWindowTitle(tr("Systray"));
+  setWindowIcon(icon);
+  setWindowTitle(tr("Unikware Monitor"));
   resize(400, 300);
 }
 
@@ -48,22 +53,22 @@ void Unikware::setVisible(bool visible)
 
 void Unikware::closeEvent(QCloseEvent *event)
 {
-  if (trayIcon->isVisible()) {
-    QMessageBox::information(this, tr("Systray"),
-        tr("The program will keep running in the "
-        "system tray. To terminate the program, "
-        "choose <b>Quit</b> in the context menu "
-        "of the system tray entry."));
-    hide();
-    event->ignore();
-  }
+//  if (trayIcon->isVisible()) {
+//    QMessageBox::information(this, tr("Systray"),
+//        tr("The program will keep running in the "
+//        "system tray. To terminate the program, "
+//        "choose <b>Quit</b> in the context menu "
+//        "of the system tray entry."));
+//    hide();
+//    event->ignore();
+//  }
 }
 
 void Unikware::setIcon(int index)
 {
-  QIcon icon = iconComboBox->itemIcon(index);
-  trayIcon->setIcon(icon);
-  setWindowIcon(icon);
+//  QIcon icon = iconComboBox->itemIcon(index);
+//  trayIcon->setIcon(icon);
+//  setWindowIcon(icon);
 
   trayIcon->setToolTip(iconComboBox->itemText(index));
 }
@@ -106,9 +111,9 @@ void Unikware::createIconGroupBox()
   iconLabel = new QLabel("Icon:");
 
   iconComboBox = new QComboBox;
-  iconComboBox->addItem(QIcon(":/images/bad.svg"), tr("Bad"));
-  iconComboBox->addItem(QIcon(":/images/heart.svg"), tr("Heart"));
-  iconComboBox->addItem(QIcon(":/images/trash.svg"), tr("Trash"));
+//  iconComboBox->addItem(QIcon(":/images/bad.svg"), tr("Bad"));
+//  iconComboBox->addItem(QIcon(":/images/heart.svg"), tr("Heart"));
+//  iconComboBox->addItem(QIcon(":/images/trash.svg"), tr("Trash"));
 
   showIconCheckBox = new QCheckBox(tr("Show icon"));
   showIconCheckBox->setChecked(true);
