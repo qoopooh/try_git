@@ -3,6 +3,8 @@
 
 #include <QSystemTrayIcon>
 #include <QDialog>
+#include <QTimer>
+#include <QProcess>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -27,37 +29,27 @@ public:
 
   void setVisible(bool visible);
 
+  enum TimerState { Idle, Running, LastMinute };
+
 protected:
   void closeEvent(QCloseEvent *event);
 
 private slots:
-  void setIcon(int index);
   void iconActivated(QSystemTrayIcon::ActivationReason reason);
-  void showMessage();
-  void messageClicked();
+  void onTimeout();
 
 private:
-  void createIconGroupBox();
-  void createMessageGroupBox();
+  void createNotifyGroupBox();
   void createActions();
   void createTrayIcon();
+  void showMessage();
+  bool isProcessRunning();
+  bool killProcess();
 
-  QGroupBox *iconGroupBox;
-  QLabel *iconLabel;
-  QComboBox *iconComboBox;
-  QCheckBox *showIconCheckBox;
-
-  QGroupBox *messageGroupBox;
-  QLabel *typeLabel;
-  QLabel *durationLabel;
-  QLabel *durationWarningLabel;
-  QLabel *titleLabel;
-  QLabel *bodyLabel;
-  QComboBox *typeComboBox;
-  QSpinBox *durationSpinBox;
-  QLineEdit *titleEdit;
-  QTextEdit *bodyEdit;
-  QPushButton *showMessageButton;
+  QIcon m_icon;
+  QGroupBox *notifyGroupBox;
+  QLabel *timeLabel;
+  QLineEdit *timeLineEdit;
 
   QAction *minimizeAction;
   QAction *maximizeAction;
@@ -66,6 +58,12 @@ private:
 
   QSystemTrayIcon *trayIcon;
   QMenu *trayIconMenu;
+
+  bool f_startup;
+  bool f_first_close;
+  int m_count;
+  TimerState m_state;
+  QTimer *m_timer;
 };
 
 #endif // UNIKWARE_H
