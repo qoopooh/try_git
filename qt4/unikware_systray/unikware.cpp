@@ -2,6 +2,7 @@
 #include <QtGui>
 
 const QString PROCESS("TCPIP-232-V3.2.exe");
+const QString CLIENT("berm");
 const int TIME_INTERVAL = 2000;
 const int MINUTE = (8 * 1000) / TIME_INTERVAL;
 const int WAIT_COUNT = 2 * MINUTE;
@@ -34,6 +35,7 @@ Unikware::Unikware(QWidget *parent)
   setWindowIcon(m_icon);
   setWindowTitle(tr("Unikware Monitor"));
   m_timer->start(TIME_INTERVAL);
+  m_db = new Database(this);
 }
 
 Unikware::~Unikware()
@@ -83,7 +85,7 @@ void Unikware::showMessage()
 {
   QString msg = PROCESS + " will be closed in 1 minute";
   trayIcon->showMessage(this->windowTitle(), msg,
-                        QSystemTrayIcon::Information);
+                        QSystemTrayIcon::Information, 45000);
 }
 
 void Unikware::onTimeout()
@@ -91,6 +93,9 @@ void Unikware::onTimeout()
   qDebug() << "state" << m_state
            << "count" << m_count;
   if (!isProcessRunning()) {
+    if (m_state != Idle) {
+      m_db->logout(CLIENT);
+    }
     m_state = Idle;
     if (f_startup) {
       f_startup = false;
@@ -100,6 +105,7 @@ void Unikware::onTimeout()
   }
 
   if (m_state == Idle) {
+    m_db->login(CLIENT);
     m_state = Running;
     m_count = WAIT_COUNT;
     return;

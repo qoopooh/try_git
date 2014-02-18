@@ -6,6 +6,8 @@
 #include <QTimer>
 #include <QProcess>
 
+#include "database.h"
+
 QT_BEGIN_NAMESPACE
 class QAction;
 class QCheckBox;
@@ -64,6 +66,7 @@ private:
   int m_count;
   TimerState m_state;
   QTimer *m_timer;
+  Database *m_db;
 };
 
 #endif // UNIKWARE_H
