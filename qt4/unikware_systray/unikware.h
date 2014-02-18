@@ -19,47 +19,53 @@ QT_END_NAMESPACE
 
 class Unikware : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    Unikware(QWidget *parent = 0);
-    ~Unikware();
+  Unikware(QWidget *parent = 0);
+  ~Unikware();
 
-    void setVisible(bool visible);
+  void setVisible(bool visible);
 
 protected:
-    void closeEvent(QCloseEvent *event);
+  void closeEvent(QCloseEvent *event);
+
+private slots:
+  void setIcon(int index);
+  void iconActivated(QSystemTrayIcon::ActivationReason reason);
+  void showMessage();
+  void messageClicked();
 
 private:
-    void createIconGroupBox();
-    void createMessageGroupBox();
-    void createActions();
-    void createTrayIcon();
+  void createIconGroupBox();
+  void createMessageGroupBox();
+  void createActions();
+  void createTrayIcon();
 
-    QGroupBox *iconGroupBox;
-    QLabel *iconLabel;
-    QComboBox *iconComboBox;
-    QCheckBox *showIconCheckBox;
+  QGroupBox *iconGroupBox;
+  QLabel *iconLabel;
+  QComboBox *iconComboBox;
+  QCheckBox *showIconCheckBox;
 
-    QGroupBox *messageGroupBox;
-    QLabel *typeLabel;
-    QLabel *durationLabel;
-    QLabel *durationWarningLabel;
-    QLabel *titleLabel;
-    QLabel *bodyLabel;
-    QComboBox *typeComboBox;
-    QSpinBox *durationSpinBox;
-    QLineEdit *titleEdit;
-    QTextEdit *bodyEdit;
-    QPushButton *showMessageButton;
+  QGroupBox *messageGroupBox;
+  QLabel *typeLabel;
+  QLabel *durationLabel;
+  QLabel *durationWarningLabel;
+  QLabel *titleLabel;
+  QLabel *bodyLabel;
+  QComboBox *typeComboBox;
+  QSpinBox *durationSpinBox;
+  QLineEdit *titleEdit;
+  QTextEdit *bodyEdit;
+  QPushButton *showMessageButton;
 
-    QAction *minimizeAction;
-    QAction *maximizeAction;
-    QAction *restoreAction;
-    QAction *quitAction;
+  QAction *minimizeAction;
+  QAction *maximizeAction;
+  QAction *restoreAction;
+  QAction *quitAction;
 
-    QSystemTrayIcon *trayIcon;
-    QMenu *trayIconMenu;
+  QSystemTrayIcon *trayIcon;
+  QMenu *trayIconMenu;
 };
 
 #endif // UNIKWARE_H
