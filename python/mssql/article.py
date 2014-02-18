@@ -15,6 +15,7 @@ UNIK_ARTIKEL = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
 FROM Artikel
 WHERE artikelnummer LIKE %s
+ORDER BY Artikelnummer
 """
 
 UNIK_ALLSEARCH = """
@@ -31,18 +32,13 @@ UNIK_SEARCH = """
 SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
 FROM Artikel
 WHERE {group} LIKE %s
+ORDER BY Artikelnummer
 """
 
 ARTIKEL = "artikelnummer"
 MATCHCODE = "ArtMatchcode"
 DESCRIPTION1 = "ArtBezeichnung1"
 DESCRIPTION2 = "ArtBezeichnung2"
-
-UNIK_MATCHCODE = """
-SELECT Artikelnummer, ArtMatchcode, ArtBezeichnung1, ArtBezeichnung2
-FROM Artikel
-WHERE ArtMatchcode LIKE %s
-"""
 
 UNIK_DETAIL = """
 SELECT Artikelnummer AS ItemNumber,
@@ -169,11 +165,13 @@ class index:
         length = len(i.search)
         a = '-'
         if i.group == 'article':
-            if length > 3 and i.search[3] != '-' \
-                    and bool(re.compile('\d').search(i.search)):
-                a = i.search[:3] + '-' + i.search[3:]
+            s = i.search.strip()
+            length = len(s)
+            if length > 3 and s[3] != '-' \
+                    and bool(re.compile('\d').search(s)):
+                a = s[:3] + '-' + s[3:]
             elif length > 1:
-                a = i.search
+                a = s
             report = gen_report(a)
             return render.article(a, i.group, report)
 
