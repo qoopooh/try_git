@@ -23,6 +23,6 @@ RESOURCES += \
     unik.qrc
 
 win32 {
-#    RC_FILE = unik.rc # icon on exe file
+    RC_FILE = unik.rc # icon on exe file
 }
 

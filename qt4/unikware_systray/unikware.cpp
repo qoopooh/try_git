@@ -1,11 +1,12 @@
 #include "unikware.h"
 
 const QString APP("Unikware Monitor V1.0");
-const QString PROCESS("TCPIP-232-V3.2.exe");
+const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
 const int TIME_INTERVAL = 2000;
-const int MINUTE = (8 * 1000) / TIME_INTERVAL;
-const int WAIT_COUNT = 2 * MINUTE;
+//const int MINUTE = (8 * 1000) / TIME_INTERVAL;
+const int MINUTE = (60 * 1000) / TIME_INTERVAL;
+const int WAIT_COUNT = 29 * MINUTE;
 const int LAST_MINUTE = MINUTE;
 
 Unikware::Unikware(QWidget *parent)
@@ -85,7 +86,7 @@ void Unikware::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void Unikware::showMessage()
 {
-  QString msg = PROCESS + " will be closed in 1 minute";
+  QString msg = UNIK_PROC + " will be closed in 1 minute";
   trayIcon->showMessage(this->windowTitle(), msg,
                         QSystemTrayIcon::Information, 45000);
 }
@@ -140,14 +141,14 @@ void Unikware::onTimeout()
 bool Unikware::isProcessRunning()
 {
   QProcess tasklist;
-  tasklist.start(
-        "tasklist",
-        QStringList() << "/NH"
-                      << "/FO" << "CSV"
-                      << "/FI" << QString("IMAGENAME eq %1").arg(PROCESS));
+  QStringList args(QStringList() << "/NH"
+                  << "/FO" << "CSV"
+                  << "/FI" << QString("IMAGENAME eq %1").arg(UNIK_PROC));
+  tasklist.start("tasklist", args);
   tasklist.waitForFinished();
-  QString output = tasklist.readAllStandardOutput();
-  return output.startsWith(QString("\"%1").arg(PROCESS));
+  QString output = tasklist.readAllStandardOutput().trimmed().toLower();
+//  qDebug() << args << output;
+  return output.startsWith(QString("\"%1").arg(UNIK_PROC));
 }
 
 bool Unikware::killProcess()
@@ -156,7 +157,7 @@ bool Unikware::killProcess()
   taskkill.start(
         "taskkill",
         QStringList() << "/F"
-                      << "/IM" << PROCESS);
+                      << "/IM" << UNIK_PROC);
   taskkill.waitForFinished();
   QString output = taskkill.readAllStandardOutput();
   qDebug() << output;
