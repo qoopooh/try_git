@@ -49,6 +49,7 @@ private:
   void showMessage();
   bool isProcessRunning();
   bool killProcess();
+  void setMinuteLeft(int);
 
   QIcon m_icon;
   QGroupBox *notifyGroupBox;

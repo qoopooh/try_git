@@ -1,13 +1,13 @@
 #include "unikware.h"
 
-const QString APP("Unikware Monitor V1.0");
+const QString APP("Unikware Monitor V0.1");
 const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
 const int TIME_INTERVAL = 2000;
-//const int MINUTE = (8 * 1000) / TIME_INTERVAL;
-const int MINUTE = (60 * 1000) / TIME_INTERVAL;
-const int WAIT_COUNT = 29 * MINUTE;
-const int LAST_MINUTE = MINUTE;
+const int MIN_UNIT = (8 * 1000) / TIME_INTERVAL;
+//const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
+const int WAIT_COUNT = 9 * MIN_UNIT;
+const int LAST_MINUTE = MIN_UNIT;
 
 Unikware::Unikware(QWidget *parent)
   : QDialog(parent), f_startup(true), f_first_close(true), m_state(Idle),
@@ -22,6 +22,9 @@ Unikware::Unikware(QWidget *parent)
   connect(m_timer, SIGNAL(timeout()),
           this, SLOT(onTimeout()));
   connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
+  connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
+  connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+          this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(notifyGroupBox);
@@ -73,14 +76,12 @@ void Unikware::closeEvent(QCloseEvent *event)
 void Unikware::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
   switch (reason) {
-    case QSystemTrayIcon::Trigger:
-    case QSystemTrayIcon::DoubleClick:
-      break;
-    case QSystemTrayIcon::MiddleClick:
-      showMessage();
-      break;
-    default:
-      ;
+  case QSystemTrayIcon::DoubleClick:
+  case QSystemTrayIcon::MiddleClick:
+    show();
+  case QSystemTrayIcon::Trigger:
+  default:
+    break;
   }
 }
 
@@ -98,6 +99,7 @@ void Unikware::onTimeout()
   if (!isProcessRunning()) {
     if (m_state != Idle) {
       m_db->logout(client);
+      setMinuteLeft(-1);
     }
     m_state = Idle;
     if (f_startup) {
@@ -116,14 +118,14 @@ void Unikware::onTimeout()
 
   if (m_count) {
     --m_count;
-    if ((m_count % MINUTE) == 0) {
-      int min = (m_count / MINUTE);
+    if ((m_count % MIN_UNIT) == 0) {
+      int min = (m_count / MIN_UNIT);
       QString msg("%1");
 
       if (m_state == Running) {
         ++min;
       }
-      timeLineEdit->setText(msg.arg(min));
+      setMinuteLeft(min);
     }
   }
 
@@ -178,6 +180,17 @@ void Unikware::createNotifyGroupBox()
   notifyGroupBox->setLayout(timeLayout);
 }
 
+void Unikware::setMinuteLeft(int m)
+{
+  QString min("-");
+
+  if (m >= 0) {
+    min = QString::number(m);
+  }
+  timeLineEdit->setText(min);
+  trayIcon->setToolTip(min + " minute(s)");
+}
+
 void Unikware::createActions()
 {
   minimizeAction = new QAction(tr("Mi&nimize"), this);
@@ -205,4 +218,3 @@ void Unikware::createTrayIcon()
   trayIcon = new QSystemTrayIcon(this);
   trayIcon->setContextMenu(trayIconMenu);
 }
-
