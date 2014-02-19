@@ -1,5 +1,4 @@
 #include "unikware.h"
-#include <QtGui>
 
 const QString PROCESS("TCPIP-232-V3.2.exe");
 const QString CLIENT("berm");
@@ -9,7 +8,8 @@ const int WAIT_COUNT = 2 * MINUTE;
 const int LAST_MINUTE = MINUTE;
 
 Unikware::Unikware(QWidget *parent)
-  : QDialog(parent), f_startup(true), f_first_close(true), m_state(Idle)
+  : QDialog(parent), f_startup(true), f_first_close(true), m_state(Idle),
+    client(CLIENT)
 {
   createNotifyGroupBox();
 
@@ -36,6 +36,9 @@ Unikware::Unikware(QWidget *parent)
   setWindowTitle(tr("Unikware Monitor"));
   m_timer->start(TIME_INTERVAL);
   m_db = new Database(this);
+  QHostInfo hostInfo;
+  hostInfo = QHostInfo::fromName(QHostInfo::localHostName());
+  client = QHostInfo::localHostName();
 }
 
 Unikware::~Unikware()
@@ -94,7 +97,7 @@ void Unikware::onTimeout()
            << "count" << m_count;
   if (!isProcessRunning()) {
     if (m_state != Idle) {
-      m_db->logout(CLIENT);
+      m_db->logout(client);
     }
     m_state = Idle;
     if (f_startup) {
@@ -105,7 +108,7 @@ void Unikware::onTimeout()
   }
 
   if (m_state == Idle) {
-    m_db->login(CLIENT);
+    m_db->login(client);
     m_state = Running;
     m_count = WAIT_COUNT;
     return;

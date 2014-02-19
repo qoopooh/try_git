@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,4 +22,7 @@ HEADERS  += unikware.h \
 RESOURCES += \
     unik.qrc
 
+win32 {
+    RC_FILE = unik.rc # icon on exe file
+}
 

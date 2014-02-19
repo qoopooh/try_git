@@ -1,10 +1,12 @@
 #ifndef UNIKWARE_H
 #define UNIKWARE_H
 
+#include <QtGui>
 #include <QSystemTrayIcon>
 #include <QDialog>
 #include <QTimer>
 #include <QProcess>
+#include <QtNetwork/QHostInfo>
 
 #include "database.h"
 
@@ -67,6 +69,7 @@ private:
   TimerState m_state;
   QTimer *m_timer;
   Database *m_db;
+  QString client;
 };
 
 #endif // UNIKWARE_H
