@@ -3,9 +3,10 @@
 const QString APP("Unikware Monitor V0.1");
 const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
-const int TIME_INTERVAL = 2000;
-const int MIN_UNIT = (8 * 1000) / TIME_INTERVAL;
-//const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
+//const int TIME_INTERVAL = 2000;
+//const int MIN_UNIT = (8 * 1000) / TIME_INTERVAL;
+const int TIME_INTERVAL = 20000;
+const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
 const int WAIT_COUNT = 9 * MIN_UNIT;
 const int LAST_MINUTE = MIN_UNIT;
 
