@@ -1,5 +1,6 @@
 #include "unikware.h"
 
+const QString APP("Unikware Monitor V1.0");
 const QString PROCESS("TCPIP-232-V3.2.exe");
 const QString CLIENT("berm");
 const int TIME_INTERVAL = 2000;
@@ -20,8 +21,6 @@ Unikware::Unikware(QWidget *parent)
   connect(m_timer, SIGNAL(timeout()),
           this, SLOT(onTimeout()));
   connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
-//  connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-//          this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(notifyGroupBox);
@@ -33,7 +32,7 @@ Unikware::Unikware(QWidget *parent)
   trayIcon->show();
 
   setWindowIcon(m_icon);
-  setWindowTitle(tr("Unikware Monitor"));
+  setWindowTitle(APP);
   m_timer->start(TIME_INTERVAL);
   m_db = new Database(this);
   QHostInfo hostInfo;
