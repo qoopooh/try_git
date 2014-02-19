@@ -2,4 +2,6 @@
 *Release*
 *.user
 *.autosave
+*pre1
+Thumbs.db
 
