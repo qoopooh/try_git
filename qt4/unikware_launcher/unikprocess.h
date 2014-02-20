@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QDebug>
 
 class UnikProcess : public QObject
@@ -12,7 +13,7 @@ public:
   explicit UnikProcess(QObject *parent = 0);
 
   bool isRunning(QString proc);
-  bool exec(QString proc);
+  bool exec(QString proc, QString path="");
 
 signals:
 

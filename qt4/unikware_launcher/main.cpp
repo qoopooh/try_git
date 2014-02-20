@@ -2,9 +2,9 @@
 
 const QString UNIK_PROC("unikware.exe");
 const QString UNIKMON_PROC("unikware_systray.exe");
-const QString PATH("N:\\Program\\");
-const QString UNIKWARE = PATH + UNIK_PROC;
-const QString UNIKWARE_MON = PATH + "UnikwareMonitor\\" + UNIKMON_PROC;
+const QString PATH("N:\\Program");
+const QString UNIKWARE = PATH + "\\" + UNIK_PROC;
+const QString UNIKWARE_MON = PATH + "\\UnikwareMonitor\\" + UNIKMON_PROC;
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +13,6 @@ int main(int argc, char *argv[])
   if (!process.isRunning(UNIKMON_PROC))
     process.exec(UNIKWARE_MON);
   if (!process.isRunning(UNIK_PROC))
-    process.exec(UNIKWARE);
+    process.exec(UNIKWARE, PATH);
   return 0;
 }

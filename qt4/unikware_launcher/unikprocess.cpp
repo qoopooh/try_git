@@ -18,10 +18,18 @@ bool UnikProcess::isRunning(QString proc)
   return output.startsWith(QString("\"%1\"").arg(proc));
 }
 
-bool UnikProcess::exec(QString proc)
+bool UnikProcess::exec(QString proc, QString path)
 {
-  QProcess tasklist;
-  int i = tasklist.startDetached(proc);
+  QProcess process;
+
+  if (path.length() > 0) {
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+//    env.insert("TMPDIR", "C:\\MyApp\\temp"); // Add an environment variable
+    env.insert("PATH", path + ";" + env.value("Path"));
+    process.setProcessEnvironment(env);
+    qDebug() << process.environment();
+  }
+  int i = process.startDetached(proc);
 //  qDebug() << proc << i;
   return i == 1;
 }
