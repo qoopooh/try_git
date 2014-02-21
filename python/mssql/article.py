@@ -110,7 +110,7 @@ SELECT a1.Artikelnummer,
     ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
-def gen_report(article=None, UNIK_QUERY=UNIK_ARTIKEL, group='all'):
+def gen_report(article, UNIK_QUERY, group='all'):
 
     count = 0
     rowarray_list = []
@@ -168,11 +168,11 @@ class index:
             s = i.search.strip()
             length = len(s)
             if length > 3 and s[3] != '-' \
-                    and bool(re.compile('\d').search(s)):
+                    and bool(re.compile('\d{3}').search(s)):
                 a = s[:3] + '-' + s[3:]
             elif length > 1:
                 a = s
-            report = gen_report(a)
+            report = gen_report(a, UNIK_ARTIKEL)
             return render.article(a, i.group, report)
 
         a = self.filter_word(a, length, i.search)
