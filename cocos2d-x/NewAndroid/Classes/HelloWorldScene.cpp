@@ -1,4 +1,5 @@
 #include "HelloWorldScene.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
@@ -83,6 +84,9 @@ bool HelloWorld::init()
 
   _targets = new CCArray;
   _projectiles = new CCArray;
+
+  CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic(
+      "background-music-acc.wav", true);
 
   return true;
 }
@@ -185,6 +189,9 @@ void HelloWorld::ccTouchesEnded (CCSet *pTouches, CCEvent *pEvent)
         NULL));
   projectile->setTag(2);
   _projectiles->addObject(projectile);
+
+  CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect(
+      "pew-pew-lei.wav");
 }
 
 void HelloWorld::update(float dt)
