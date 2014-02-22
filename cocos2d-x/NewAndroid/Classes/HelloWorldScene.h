@@ -7,6 +7,10 @@
 class HelloWorld : public cocos2d::CCLayerColor
 {
 public:
+
+  HelloWorld();
+  virtual ~HelloWorld();
+
   // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
   virtual bool init();  
 
@@ -26,6 +30,13 @@ public:
 
   virtual void ccTouchesEnded(cocos2d::CCSet *pTouches,
       cocos2d::CCEvent *pEvent);
+
+  void update(float dt);
+
+protected:
+  cocos2d::CCArray *_targets;
+  cocos2d::CCArray *_projectiles;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
+
