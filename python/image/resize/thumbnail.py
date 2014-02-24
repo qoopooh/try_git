@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys
-import Image
+from PIL import Image
 
 size = 1024, 768
 
