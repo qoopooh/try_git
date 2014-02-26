@@ -27,7 +27,7 @@ bool UnikProcess::exec(QString proc, QString path)
 //    env.insert("TMPDIR", "C:\\MyApp\\temp"); // Add an environment variable
     env.insert("PATH", path + ";" + env.value("Path"));
     process.setProcessEnvironment(env);
-    qDebug() << process.environment();
+//    qDebug() << process.environment();
   }
   int i = process.startDetached(proc);
 //  qDebug() << proc << i;

@@ -1,13 +1,13 @@
 #include "unikware.h"
 
-const QString APP("Unikware Monitor V0.1");
+const QString APP("Unikware Monitor V0.2");
 const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
 //const int TIME_INTERVAL = 2000;
 //const int MIN_UNIT = (8 * 1000) / TIME_INTERVAL;
 const int TIME_INTERVAL = 20000;
 const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
-const int WAIT_COUNT = 9 * MIN_UNIT;
+const int WAIT_COUNT = 29 * MIN_UNIT;
 const int LAST_MINUTE = MIN_UNIT;
 
 Unikware::Unikware(QWidget *parent)
@@ -100,7 +100,8 @@ void Unikware::onTimeout()
   if (!isProcessRunning()) {
     if (m_state != Idle) {
       m_db->logout(client);
-      setMinuteLeft(-1);
+//      setMinuteLeft(-1);
+      exit(0);
     }
     m_state = Idle;
     if (f_startup) {
@@ -121,8 +122,6 @@ void Unikware::onTimeout()
     --m_count;
     if ((m_count % MIN_UNIT) == 0) {
       int min = (m_count / MIN_UNIT);
-      QString msg("%1");
-
       if (m_state == Running) {
         ++min;
       }
@@ -135,6 +134,7 @@ void Unikware::onTimeout()
       m_state = LastMinute;
       m_count = LAST_MINUTE;
       showMessage();
+      show();
     } else if (m_state == LastMinute) {
       killProcess();
     }
