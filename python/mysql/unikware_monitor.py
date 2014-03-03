@@ -4,7 +4,7 @@
 __version__ = '1.0.0'
 
 import sys
-from time import strftime, localtime
+from datetime import datetime
 import web, MySQLdb
 
 HOST="aaebio"
@@ -13,50 +13,28 @@ PASSWD=USER
 DB="unikware"
 
 UNIK_RUN="""
-SELECT *
+SELECT name, login, logout
 FROM run
+ORDER BY login DESC
 """
-
-def gen_report(dt=0,department=None,startdate=0,enddate=0):
-
-    count = 0
-    rowarray_list = []
-
-    conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa',
-            database='BioStar', as_dict=True)
-    cur = conn.cursor()
-    if dt == 0:
-        query = MONTHLY_REPORT.format(startdate=startdate, enddate=enddate)
-    elif department == 'production':
-        query = PRODUCTION_REPORT.format(date=dt)
-    else:
-        query = ADMIN_REPORT.format(date=dt)
-    cur.execute(query)
-    rows=cur.fetchall()
-    conn.close()
-
-    for row in rows:
-        if dt > 0:
-            date = strftime("%Y-%m-%d", localtime(dt))
-        else:
-            date = strftime("%Y-%m-%d", localtime(row['nDateTime']))
-        start_time = strftime("%M:%S", localtime(row['nStartTime']))
-        end_time = strftime("%M:%S", localtime(row['nEndTime']))
-        work = strftime("%M:%S", \
-                localtime(work_time(row['nStartTime'],row['nEndTime'])))
-        result = row['sUserID'], date, row['sUserName'], row['sDepartment'], \
-            start_time, end_time, work
-        t = []
-        t.extend(result)
-        rowarray_list.append(t)
-        count += 1
-
-    return rowarray_list
 
 class UnikMonitor:
 
     def GET(self):
-        return render.unikware_monitor(self.get_info())
+        raw_info = self.get_info()
+        running = 0
+        info = []
+        for r in raw_info:
+            i = [r[0], "Finished", "-", r[1], r[2]]
+            if r[1] > r[2]:
+                i[1] = "Running"
+                i[2] = datetime.now() - r[1]
+                i[4] = '-'
+                running += 1
+            else:
+                i[2] = r[2] - r[1]
+            info.append(i)
+        return render.unikware_monitor(running, info)
 
     def get_info(self):
         db = MySQLdb.connect(host=HOST, user=USER,

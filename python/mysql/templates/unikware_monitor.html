@@ -1,16 +1,16 @@
-$def with(info)
+$def with(running, info)
 <!DOCTYPE html>
 <head>
     <title>Unikware Usage Monitor V$version</title>
 </head>
 <body>
 $if info:
-    I just want to say <em>$info</em>.
     <table border="2" cellspacing="0" cellpadding="7">
-    <tr>Status on Unikware Users</tr>
+    <tr>Running Status: $running</tr>
     <tr>
         <th>Computer Name</th>
         <th>Status</th>
+        <th>Usage</th>
         <th>Login Time</th>
         <th>Logout Time</th>
     </tr>
