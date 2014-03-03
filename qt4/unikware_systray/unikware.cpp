@@ -1,17 +1,17 @@
 #include "unikware.h"
 
-const QString APP("Unikware Monitor V0.2");
+const QString APP("Unikware Monitor V0.3");
 const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
-//const int TIME_INTERVAL = 2000;
+//const int TIME_INTERVAL = 3000;
 //const int MIN_UNIT = (8 * 1000) / TIME_INTERVAL;
-const int TIME_INTERVAL = 20000;
+const int TIME_INTERVAL = 10000;
 const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
-const int WAIT_COUNT = 29 * MIN_UNIT;
-const int LAST_MINUTE = MIN_UNIT;
+const int WAIT_COUNT = 19 * MIN_UNIT;
+const int LAST_MINUTE = 1 * MIN_UNIT;
 
 Unikware::Unikware(QWidget *parent)
-  : QDialog(parent), f_startup(true), f_first_close(true), m_state(Idle),
+  : QDialog(parent), f_hide(true), f_first_close(true), m_state(Idle),
     client(CLIENT)
 {
   createNotifyGroupBox();
@@ -26,6 +26,7 @@ Unikware::Unikware(QWidget *parent)
   connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
   connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
           this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+  connect(timeExtendPushButton, SIGNAL(clicked()), this, SLOT(onTimeExtend()));
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(notifyGroupBox);
@@ -86,10 +87,11 @@ void Unikware::iconActivated(QSystemTrayIcon::ActivationReason reason)
   }
 }
 
-void Unikware::showMessage()
+void Unikware::showMessage(int min)
 {
-  QString msg = UNIK_PROC + " will be closed in 1 minute";
-  trayIcon->showMessage(this->windowTitle(), msg,
+  QString msg = UNIK_PROC + " will be closed in %1 minute (s)";
+  trayIcon->showMessage(this->windowTitle(),
+                        msg.arg(min),
                         QSystemTrayIcon::Information, 45000);
 }
 
@@ -97,6 +99,12 @@ void Unikware::onTimeout()
 {
   qDebug() << "state" << m_state
            << "count" << m_count;
+
+  if (f_hide) {
+    f_hide = false;
+    this->hide();
+  }
+
   if (!isProcessRunning()) {
     if (m_state != Idle) {
       m_db->logout(client);
@@ -104,10 +112,6 @@ void Unikware::onTimeout()
       exit(0);
     }
     m_state = Idle;
-    if (f_startup) {
-      f_startup = false;
-      this->hide();
-    }
     return;
   }
 
@@ -115,17 +119,15 @@ void Unikware::onTimeout()
     m_db->login(client);
     m_state = Running;
     m_count = WAIT_COUNT;
+    timeExtendPushButton->setDisabled(true);
     return;
   }
 
+  int min = 0;
   if (m_count) {
     --m_count;
     if ((m_count % MIN_UNIT) == 0) {
-      int min = (m_count / MIN_UNIT);
-      if (m_state == Running) {
-        ++min;
-      }
-      setMinuteLeft(min);
+      min = calculateRemainMinute();
     }
   }
 
@@ -133,12 +135,22 @@ void Unikware::onTimeout()
     if (m_state == Running) {
       m_state = LastMinute;
       m_count = LAST_MINUTE;
-      showMessage();
+      showMessage(min);
       show();
+      timeExtendPushButton->setDisabled(false);
     } else if (m_state == LastMinute) {
       killProcess();
     }
   }
+}
+
+void Unikware::onTimeExtend()
+{
+  f_hide = true;
+  m_count = WAIT_COUNT;
+  calculateRemainMinute();
+  m_state = Running;
+  timeExtendPushButton->setDisabled(true);
 }
 
 bool Unikware::isProcessRunning()
@@ -174,10 +186,12 @@ void Unikware::createNotifyGroupBox()
   timeLineEdit = new QLineEdit("-");
   timeLineEdit->setReadOnly(true);
   timeLineEdit->setAlignment(Qt::AlignHCenter);
+  timeExtendPushButton = new QPushButton(tr("Extend the Time"));
 
   QHBoxLayout *timeLayout = new QHBoxLayout;
   timeLayout->addWidget(timeLabel);
   timeLayout->addWidget(timeLineEdit);
+  timeLayout->addWidget(timeExtendPushButton);
   notifyGroupBox->setLayout(timeLayout);
 }
 
@@ -190,6 +204,17 @@ void Unikware::setMinuteLeft(int m)
   }
   timeLineEdit->setText(min);
   trayIcon->setToolTip(min + " minute(s)");
+}
+
+int Unikware::calculateRemainMinute()
+{
+  int min = (m_count / MIN_UNIT);
+  if (m_state == Running) {
+    min += (LAST_MINUTE / MIN_UNIT);
+  }
+  setMinuteLeft(min);
+
+  return min;
 }
 
 void Unikware::createActions()

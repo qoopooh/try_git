@@ -41,20 +41,23 @@ protected:
 private slots:
   void iconActivated(QSystemTrayIcon::ActivationReason reason);
   void onTimeout();
+  void onTimeExtend();
 
 private:
   void createNotifyGroupBox();
   void createActions();
   void createTrayIcon();
-  void showMessage();
+  void showMessage(int);
   bool isProcessRunning();
   bool killProcess();
   void setMinuteLeft(int);
+  int calculateRemainMinute();
 
   QIcon m_icon;
   QGroupBox *notifyGroupBox;
   QLabel *timeLabel;
   QLineEdit *timeLineEdit;
+  QPushButton *timeExtendPushButton;
 
   QAction *minimizeAction;
   QAction *maximizeAction;
@@ -64,7 +67,7 @@ private:
   QSystemTrayIcon *trayIcon;
   QMenu *trayIconMenu;
 
-  bool f_startup;
+  bool f_hide;
   bool f_first_close;
   int m_count;
   TimerState m_state;
