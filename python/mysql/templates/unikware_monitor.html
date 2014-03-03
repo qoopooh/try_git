@@ -1,15 +1,27 @@
-$def with(name)
+$def with(info)
 <!DOCTYPE html>
 <head>
     <title>Unikware Usage Monitor V$version</title>
 </head>
 <body>
-$if name:
-    I just want to say <em>hellow</em> $name.
+$if info:
+    I just want to say <em>$info</em>.
+    <table border="2" cellspacing="0" cellpadding="7">
+    <tr>Status on Unikware Users</tr>
+    <tr>
+        <th>Computer Name</th>
+        <th>Status</th>
+        <th>Login Time</th>
+        <th>Logout Time</th>
+    </tr>
+    $for row in info:
+        <tr>
+        $for col in row:
+            <td>$col</td>
+        </tr>
+    </table>
 $else:
-    <h3>Unikware Usage Monitor V$version</h3>
-    <a href="$app_path('/report/')">Daily Report</a><br/>
-    <a href="$app_path('/monthly/')">Monthly Report</a> 
+    <h3>Cannot connect to Database</h3>
 </body>
 </html>
 

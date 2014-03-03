@@ -5,7 +5,17 @@ __version__ = '1.0.0'
 
 import sys
 from time import strftime, localtime
-import web, _mysql
+import web, MySQLdb
+
+HOST="aaebio"
+USER="berm"
+PASSWD=USER
+DB="unikware"
+
+UNIK_RUN="""
+SELECT *
+FROM run
+"""
 
 def gen_report(dt=0,department=None,startdate=0,enddate=0):
 
@@ -46,17 +56,15 @@ def gen_report(dt=0,department=None,startdate=0,enddate=0):
 class UnikMonitor:
 
     def GET(self):
-        i = web.input(name=None)
-        return render.unikware_monitor(name=self.get_info())
+        return render.unikware_monitor(self.get_info())
 
     def get_info(self):
-        db = _mysql.connect(host="aaebio", user="berm",
-                passwd="berm", db="unikware")
-        db.query("""SELECT *
-                    FROM run""")
-        r=db.store_result()
-        
-        return r.fetch_row()
+        db = MySQLdb.connect(host=HOST, user=USER,
+                passwd=PASSWD, db=DB)
+        c=db.cursor()
+        c.execute(UNIK_RUN)
+
+        return c.fetchall()
 
 urls = (
     '/', 'UnikMonitor',
