@@ -1,7 +1,7 @@
 #include "unikprocess.h"
 
 const QString UNIK_PROC("unikware.exe");
-const QString UNIKMON_PROC("unikware_systray.exe");
+const QString UNIKMON_PROC("unikware_systray-v0.4.exe");
 const QString PATH("N:\\Program");
 const QString UNIKWARE = PATH + "\\" + UNIK_PROC;
 const QString UNIKWARE_MON = PATH + "\\UnikwareMonitor\\" + UNIKMON_PROC;

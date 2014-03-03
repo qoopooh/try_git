@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QtNetwork/QHostInfo>
+#include <QDesktopServices>
 
 #include "database.h"
 
@@ -42,9 +43,11 @@ private slots:
   void iconActivated(QSystemTrayIcon::ActivationReason reason);
   void onTimeout();
   void onTimeExtend();
+  void openLink();
 
 private:
   void createNotifyGroupBox();
+  void createInfoGroupBox();
   void createActions();
   void createTrayIcon();
   void showMessage(int);
@@ -58,6 +61,9 @@ private:
   QLabel *timeLabel;
   QLineEdit *timeLineEdit;
   QPushButton *timeExtendPushButton;
+
+  QGroupBox *infoGroupBox;
+  QPushButton *linkPushButton;
 
   QAction *minimizeAction;
   QAction *maximizeAction;

@@ -1,20 +1,23 @@
 #include "unikware.h"
 
-const QString APP("Unikware Monitor V0.3");
+const QString APP("Unikware Monitor V0.4");
 const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
-//const int TIME_INTERVAL = 3000;
-//const int MIN_UNIT = (8 * 1000) / TIME_INTERVAL;
-const int TIME_INTERVAL = 10000;
+const QString URL("http://192.168.1.44/unikmon/");
+const int PROCESS_CHK_CYCLE = 3;
+const int TIME_INTERVAL = 2000;
+//const int MIN_UNIT = (6 * 1000) / TIME_INTERVAL;
+//const int WAIT_COUNT = 5 * MIN_UNIT;
 const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
 const int WAIT_COUNT = 19 * MIN_UNIT;
 const int LAST_MINUTE = 1 * MIN_UNIT;
 
 Unikware::Unikware(QWidget *parent)
-  : QDialog(parent), f_hide(true), f_first_close(true), m_state(Idle),
-    client(CLIENT)
+  : QDialog(parent), f_hide(true), f_first_close(true),
+    m_count(WAIT_COUNT), m_state(Idle), client(CLIENT)
 {
   createNotifyGroupBox();
+  createInfoGroupBox();
 
   createActions();
   createTrayIcon();
@@ -27,9 +30,11 @@ Unikware::Unikware(QWidget *parent)
   connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
           this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
   connect(timeExtendPushButton, SIGNAL(clicked()), this, SLOT(onTimeExtend()));
+  connect(linkPushButton, SIGNAL(clicked()), this, SLOT(openLink()));
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(notifyGroupBox);
+  mainLayout->addWidget(infoGroupBox);
   setLayout(mainLayout);
 
   m_icon.addPixmap(QPixmap(QString::fromUtf8(":/images/unik")),
@@ -44,6 +49,9 @@ Unikware::Unikware(QWidget *parent)
   QHostInfo hostInfo;
   hostInfo = QHostInfo::fromName(QHostInfo::localHostName());
   client = QHostInfo::localHostName();
+
+  timeExtendPushButton->setDisabled(true);
+  calculateRemainMinute();
 }
 
 Unikware::~Unikware()
@@ -62,16 +70,16 @@ void Unikware::setVisible(bool visible)
 void Unikware::closeEvent(QCloseEvent *event)
 {
   if (trayIcon->isVisible()) {
-    if (f_first_close) {
-      f_first_close = false;
-      QMessageBox::information(this, tr("Systray"),
-          tr("The program will keep running in the "
-          "system tray. To terminate the program, "
-          "choose <b>Quit</b> in the context menu "
-          "of the system tray entry."));
-    }
-    hide();
     event->ignore();
+    hide();
+//    if (f_first_close) {
+//      f_first_close = false;
+//      QMessageBox::information(this, tr("Systray"),
+//          tr("The program will keep running in the "
+//          "system tray. To terminate the program, "
+//          "choose <b>Quit</b> in the context menu "
+//          "of the system tray entry."));
+//    }
   }
 }
 
@@ -97,6 +105,8 @@ void Unikware::showMessage(int min)
 
 void Unikware::onTimeout()
 {
+  static int process_check_cycle = 0;
+  static bool app_running = false;
   qDebug() << "state" << m_state
            << "count" << m_count;
 
@@ -105,42 +115,52 @@ void Unikware::onTimeout()
     this->hide();
   }
 
-  if (!isProcessRunning()) {
-    if (m_state != Idle) {
-      m_db->logout(client);
-//      setMinuteLeft(-1);
-      exit(0);
-    }
-    m_state = Idle;
-    return;
-  }
-
-  if (m_state == Idle) {
-    m_db->login(client);
-    m_state = Running;
-    m_count = WAIT_COUNT;
-    timeExtendPushButton->setDisabled(true);
-    return;
+  ++process_check_cycle;
+  if (process_check_cycle > PROCESS_CHK_CYCLE) {
+    process_check_cycle = 0;
+    app_running = isProcessRunning();
   }
 
   int min = 0;
-  if (m_count) {
+  if ((m_state != Idle) && m_count) {
     --m_count;
     if ((m_count % MIN_UNIT) == 0) {
       min = calculateRemainMinute();
     }
   }
-
-  if (m_count == 0) {
-    if (m_state == Running) {
+  switch (m_state) {
+  case Idle:
+    if (!app_running)
+      return;
+    m_db->login(client);
+    m_state = Running;
+    m_count = WAIT_COUNT;
+    break;
+  case Running:
+    if (!app_running) {
+      m_db->logout(client);
+      exit(0);
+    }
+    if (m_count == 0) {
       m_state = LastMinute;
       m_count = LAST_MINUTE;
       showMessage(min);
       show();
       timeExtendPushButton->setDisabled(false);
-    } else if (m_state == LastMinute) {
-      killProcess();
     }
+    break;
+  case LastMinute:
+    if (m_count == 0) {
+      killProcess();
+      app_running = false;
+    }
+    if (!app_running) {
+      m_db->logout(client);
+      exit(0);
+    }
+    break;
+  default:
+    break;
   }
 }
 
@@ -149,8 +169,15 @@ void Unikware::onTimeExtend()
   f_hide = true;
   m_count = WAIT_COUNT;
   calculateRemainMinute();
-  m_state = Running;
+  if (m_state == LastMinute)
+    m_state = Running;
   timeExtendPushButton->setDisabled(true);
+}
+
+void Unikware::openLink()
+{
+  qDebug() << "openLink";
+  QDesktopServices::openUrl(QUrl(URL));
 }
 
 bool Unikware::isProcessRunning()
@@ -193,6 +220,15 @@ void Unikware::createNotifyGroupBox()
   timeLayout->addWidget(timeLineEdit);
   timeLayout->addWidget(timeExtendPushButton);
   notifyGroupBox->setLayout(timeLayout);
+}
+
+void Unikware::createInfoGroupBox()
+{
+  infoGroupBox = new QGroupBox(tr("Usage Information"));
+  linkPushButton = new QPushButton(URL);
+  QHBoxLayout *infoLayout = new QHBoxLayout;
+  infoLayout->addWidget(linkPushButton);
+  infoGroupBox->setLayout(infoLayout);
 }
 
 void Unikware::setMinuteLeft(int m)
