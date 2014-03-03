@@ -1,0 +1,15 @@
+$def with(name)
+<!DOCTYPE html>
+<head>
+    <title>Unikware Usage Monitor V$version</title>
+</head>
+<body>
+$if name:
+    I just want to say <em>hellow</em> $name.
+$else:
+    <h3>Unikware Usage Monitor V$version</h3>
+    <a href="$app_path('/report/')">Daily Report</a><br/>
+    <a href="$app_path('/monthly/')">Monthly Report</a> 
+</body>
+</html>
+

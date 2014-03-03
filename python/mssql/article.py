@@ -47,6 +47,7 @@ SELECT Artikelnummer AS ItemNumber,
     ISNULL(ArtBezeichnung2,'-') AS Description2,  
     ISNULL(AlaPhysikalischeMenge1,0) AS InStock,
     ISNULL(AlaVerfuegbar1Menge1,0) AS Available,
+    ISNULL(KZArtMengeneinheit1, '-') AS Unit,
     DokDatei, DokOriginalDatei
 FROM Artikel   
     LEFT OUTER JOIN ArtikelLager
@@ -139,6 +140,7 @@ def gen_report(article, UNIK_QUERY, group='all'):
         if UNIK_QUERY == UNIK_DETAIL:
             result = row['Matchcode'], row['Description1'], \
                      row['Description2'], row['InStock'], row['Available'], \
+                     row['Unit'], \
                      (row['DokDatei'], row['DokOriginalDatei'])
         elif UNIK_QUERY == UNIK_USED:
             result = count, row['ItemNumber'], row['Matchcode'], \
