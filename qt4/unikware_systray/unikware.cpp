@@ -1,6 +1,6 @@
 #include "unikware.h"
 
-const QString APP("Unikware Monitor V0.4");
+const QString APP("Unikware Monitor V0.5");
 const QString UNIK_PROC("unikware.exe");
 const QString CLIENT("berm");
 const QString URL("http://192.168.1.44/unikmon/");
@@ -9,7 +9,7 @@ const int TIME_INTERVAL = 2000;
 //const int MIN_UNIT = (6 * 1000) / TIME_INTERVAL;
 //const int WAIT_COUNT = 5 * MIN_UNIT;
 const int MIN_UNIT = (60 * 1000) / TIME_INTERVAL;
-const int WAIT_COUNT = 19 * MIN_UNIT;
+const int WAIT_COUNT = 44 * MIN_UNIT;
 const int LAST_MINUTE = 1 * MIN_UNIT;
 
 Unikware::Unikware(QWidget *parent)
