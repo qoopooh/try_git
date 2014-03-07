@@ -107,11 +107,10 @@ def gen_report(dt=0,department=None,startdate=0,enddate=0):
 
     return rowarray_list
 
-class index:
+class BioStar:
 
     def GET(self):
-        i = web.input(name=None)
-        return render.index(i.name)
+        return render.biostar()
 
 class TimeReport:
 
@@ -169,7 +168,7 @@ class Nanosoft(MonthlyReport):
         return rowarray_list
 
 urls = (
-    '/', 'index',
+    '/', 'BioStar',
     '/report', 'TimeReport',
     '/report/', 'TimeReport',
     '/monthly', 'MonthlyReport',
