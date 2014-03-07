@@ -8,6 +8,11 @@ from time import strftime, localtime
 import pymssql, web
 from date import gmt
 
+HOST='aaebio\\bsserver'
+USER='sa'
+PASSWORD='sa'
+DATABASE='BioStar'
+
 TIME_REPORT = """
 SELECT TB_TA_RESULT.nStartTime, TB_TA_RESULT.nEndTime, TB_USER.sUserID, TB_USER.sUserName, TB_USER_DEPT.sDepartment
 FROM TB_TA_RESULT INNER JOIN
@@ -43,6 +48,14 @@ WHERE TB_TA_RESULT.nDateTime >= {startdate}
     AND TB_TA_RESULT.nDateTime <= {enddate}
 ORDER BY TB_USER_DEPT.sDepartment,CONVERT(INT, TB_USER.sUserID),TB_TA_RESULT.nDateTime
 """
+NANOSOFT = """
+SELECT TB_TA_RESULT.nStartTime, TB_TA_RESULT.nEndTime, TB_USER.sUserID, TB_TA_RESULT.nDateTime
+FROM TB_USER INNER JOIN
+        TB_TA_RESULT ON TB_USER.nUserIdn = TB_TA_RESULT.nUserIdn
+WHERE TB_TA_RESULT.nDateTime >= {startdate}
+    AND TB_TA_RESULT.nDateTime <= {enddate}
+ORDER BY CONVERT(INT, TB_USER.sUserID),TB_TA_RESULT.nDateTime
+"""
 
 OUTPUT_JS = 'output.js'
 
@@ -63,8 +76,8 @@ def gen_report(dt=0,department=None,startdate=0,enddate=0):
     count = 0
     rowarray_list = []
 
-    conn = pymssql.connect(host='aaebio\\bsserver', user='sa', password='sa',
-            database='BioStar', as_dict=True)
+    conn = pymssql.connect(host=HOST, user=USER, password=PASSWORD,
+            database=DATABASE, as_dict=True)
     cur = conn.cursor()
     if dt == 0:
         query = MONTHLY_REPORT.format(startdate=startdate, enddate=enddate)
@@ -121,12 +134,48 @@ class MonthlyReport:
         report = gen_report(startdate=gmt(startdate), enddate=gmt(enddate))
         return render.time_report(report)
 
+class Nanosoft(MonthlyReport):
+
+    def create_table(self, startdate, enddate):
+        report = self.gen_nanosoft_import(startdate=gmt(startdate), enddate=gmt(enddate))
+        return render.nanosoft(report)
+
+    def gen_nanosoft_import(self, startdate=0,enddate=0):
+
+        count = 0
+        rowarray_list = []
+
+        conn = pymssql.connect(host=HOST, user=USER, password=PASSWORD,
+                database=DATABASE, as_dict=True)
+        cur = conn.cursor()
+        query = NANOSOFT.format(startdate=startdate, enddate=enddate)
+        cur.execute(query)
+        rows=cur.fetchall()
+        conn.close()
+
+        for row in rows:
+            date = strftime("%d/%m/%Y", localtime(row['nDateTime']))
+            start_time = strftime("%M:%S", localtime(row['nStartTime']))
+            end_time = strftime("%M:%S", localtime(row['nEndTime']))
+            user_id = str(row['sUserID']).zfill(5)
+            result = user_id, date, \
+                start_time, end_time
+            t = [user_id, date + ' ' + start_time]
+            rowarray_list.append(t)
+            t = [user_id, date + ' ' + end_time]
+            rowarray_list.append(t)
+            count += 1
+
+        return rowarray_list
+
 urls = (
     '/', 'index',
     '/report', 'TimeReport',
     '/report/', 'TimeReport',
     '/monthly', 'MonthlyReport',
     '/monthly/', 'MonthlyReport',
+    '/nanosoft', 'Nanosoft',
+    '/nanosoft/', 'Nanosoft',
 )
 template_globals = {
     'app_path': lambda p: web.ctx.homepath + p,
