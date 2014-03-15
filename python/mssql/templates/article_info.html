@@ -39,7 +39,7 @@ $else:
         $if pic == None or pic[0] == None:
             $continue
         $ link = pic[0].replace("\\", "/")
-        $if "pdf" in link:
+        $if "pdf" in link or "PDF" in link:
             $ name = pic[1].split('\\')[-1]
             <p><a href="/unikwareimages/CUSTOMER%20ORDER$link">$name</a></p>
         $else:

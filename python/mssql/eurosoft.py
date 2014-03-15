@@ -110,7 +110,9 @@ FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
 WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND Casing_Owner_ID=Comp_ID
     AND Casing_Tyre_Serial=Tyre_SerialNo
-    AND Casing_Tyre_Code=Tyre_Code AND Tyre_Size_ID=Size_ID AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
+    AND Casing_Tyre_Code=Tyre_Code
+    AND Tyre_Size_ID=Size_ID
+    AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
     AND ProdDetail_IntendLiner_ID=Liner_ID AND Comp_ID=?
     AND ProdTransDetail_ProdTrans_ID=?
 """
