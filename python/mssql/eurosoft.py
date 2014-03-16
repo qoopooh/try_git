@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 
 #HOST='127.0.0.1'
 HOST='192.168.0.62'
@@ -37,24 +37,28 @@ import web
 import pyodbc
 
 WIT_NT = """
-SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,Comp_Name,NewTransDetail_IsConfirm as isconf,
-       Comp_ID,COUNT(Comp_ID) AS cnt
-FROM tblNewTyreTransactionDetail,tblDocument,tblCompany
+SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,Comp_Name,
+       Comp_ID,COUNT(Comp_ID) AS cnt,
+       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date
+FROM tblNewTyreTransactionDetail,tblDocument,tblCompany,tblNewTyreTransaction
 WHERE NewTransDetail_NewTrans_ID=Doc_Transaction_ID
     AND Doc_Comp_ID=Comp_ID
+    AND NewTransDetail_NewTrans_ID = NewTrans_ID
     AND NewTransDetail_NewTrans_ID LIKE '%NTO%'
-GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,NewTransDetail_IsConfirm,Comp_ID,
-      Doc_Date
-ORDER BY Doc_Date DESC
+GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,Comp_ID,
+      NewTrans_Create_Date
+ORDER BY NewTrans_Create_Date DESC
 """
 
 RCV_NT = """
 SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,
-       COUNT(NewTransDetail_Tyre_Serial) AS cnt
-FROM tblNewTyreTransactionDetail
+       COUNT(NewTransDetail_Tyre_Serial) AS cnt,
+       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date
+FROM tblNewTyreTransactionDetail,tblNewTyreTransaction
 WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
-GROUP BY NewTransDetail_NewTrans_ID
-ORDER BY NewTransDetail_NewTrans_ID DESC
+    AND NewTransDetail_NewTrans_ID = NewTrans_ID
+GROUP BY NewTransDetail_NewTrans_ID,NewTrans_Create_Date
+ORDER BY NewTrans_Create_Date DESC
 """
 
 WIT_NT_ID = """
@@ -71,7 +75,8 @@ RCV_NT_ID = WIT_NT_ID
 
 WIT_CUS = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Comp_ID
+    ProdTransDetail_IsConfirm as isconf,Comp_ID,
+    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
@@ -88,7 +93,8 @@ ORDER BY ProdTrans_Create_Date DESC
 
 RCV_CUS = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Comp_ID
+    ProdTransDetail_IsConfirm as isconf,Comp_ID,
+    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
@@ -134,7 +140,8 @@ RCV_CUS_ID = WIT_CUS_ID
 
 WIT_STO = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Comp_ID
+    ProdTransDetail_IsConfirm as isconf,Comp_ID,
+    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
@@ -151,7 +158,8 @@ ORDER BY ProdTrans_Create_Date DESC
 
 RCV_STO = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Sup_Name as Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Sup_ID as Comp_ID
+    ProdTransDetail_IsConfirm as isconf,Sup_ID as Comp_ID,
+    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblSupplier,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
     FROM tblProductionTransactionDetail
@@ -171,7 +179,8 @@ RCV_STO_ID = WIT_STO_ID
 
 WIT_REJ = """
 SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
-       RejectTransDetail_IsConfirm as isconf,Comp_ID
+       RejectTransDetail_IsConfirm as isconf,Comp_ID,
+        CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date
 FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
     (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
     FROM tblRejectTransactionDetail
@@ -187,7 +196,8 @@ ORDER BY RejectTrans_Create_Date DESC
 
 RCV_REJ = """
 SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
-       RejectTransDetail_IsConfirm as isconf,Comp_ID
+       RejectTransDetail_IsConfirm as isconf,Comp_ID,
+        CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date
 FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
     (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
     FROM tblRejectTransactionDetail
