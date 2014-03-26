@@ -29,7 +29,10 @@ __all__ = (
         'CHK_NT', 'CHK_REJ',
         'CHK_STO', 'CHK_CUS',
         'CHK_NT_TYRE', 'CHK_REJ_TYRE',
-        'CHK_PROD_TYRE',
+        'CHK_PROD_TYRE', 'REM_NT_STOCK',
+        'REM_PROD_STOCK', 'REM_REJ_STOCK'
+        'ADD_NT_STOCK', 'ADD_PROD_STOCK',
+        'ADD_REJ_STOCK'
         )
 
 import sys, json
@@ -74,8 +77,7 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
 RCV_NT_ID = WIT_NT_ID
 
 WIT_CUS = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Comp_ID,
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,Comp_ID,
     CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
@@ -92,8 +94,7 @@ ORDER BY ProdTrans_Create_Date DESC
 """
 
 RCV_CUS = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Comp_ID,
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,Comp_ID,
     CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
@@ -139,8 +140,7 @@ RCV_CUS_ID_CID = WIT_CUS_ID_CID
 RCV_CUS_ID = WIT_CUS_ID
 
 WIT_STO = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Comp_ID,
+SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,Comp_ID,
     CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
@@ -158,7 +158,7 @@ ORDER BY ProdTrans_Create_Date DESC
 
 RCV_STO = """
 SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Sup_Name as Comp_Name,
-    ProdTransDetail_IsConfirm as isconf,Sup_ID as Comp_ID,
+    Sup_ID as Comp_ID,
     CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
 FROM tblProductionTransactionDetail,tblCasing,tblSupplier,tblProductionTransaction,
     (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
@@ -178,8 +178,7 @@ WIT_STO_ID = WIT_CUS_ID
 RCV_STO_ID = WIT_STO_ID
 
 WIT_REJ = """
-SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
-       RejectTransDetail_IsConfirm as isconf,Comp_ID,
+SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,Comp_ID,
         CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date
 FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
     (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
@@ -195,8 +194,7 @@ ORDER BY RejectTrans_Create_Date DESC
 """
 
 RCV_REJ = """
-SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,
-       RejectTransDetail_IsConfirm as isconf,Comp_ID,
+SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,Comp_ID,
         CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date
 FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
     (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
@@ -374,6 +372,68 @@ FROM tblRejectTransactionDetail, tblCasing
 WHERE RejectTransDetail_Casing_ID=Casing_ID
     AND RejectTransDetail_RejectTrans_ID=?
     AND Casing_Tyre_Serial=?
+"""
+
+REM_NT_STOCK = """
+DELETE FROM tblNewTyreStock
+WHERE EXISTS (
+    SELECT 1
+    FROM tblNewTyreTransaction
+    WHERE NewTrans_Approve_Date IS NOT NULL
+    AND NewTrans_ID=?)
+AND NewStock_Tyre_Serial IN (
+    SELECT NewTransDetail_Tyre_Serial
+    FROM tblNewTyreTransactionDetail
+    WHERE NewTransDetail_NewTrans_ID=?)
+"""
+
+REM_PROD_STOCK = """
+DELETE FROM tblProductionStock
+WHERE EXISTS (
+    SELECT 1
+    FROM tblProductionTransaction
+    WHERE ProdTrans_Approve_Date IS NOT NULL
+        AND ProdTrans_ID=?)
+AND ProdStock_Casing_ID IN(
+    SELECT ProdTransDetail_Casing_ID
+    FROM tblProductionTransactionDetail
+    WHERE ProdTransDetail_ProdTrans_ID=?)
+"""
+
+REM_REJ_STOCK = """
+DELETE FROM tblRejectStock
+WHERE EXISTS (
+    SELECT 1
+    FROM tblRejectTransaction
+    WHERE RejectTrans_Approve_Date IS NOT NULL
+        AND RejectTrans_ID=?)
+AND RejectStock_Casing_ID IN(
+    SELECT RejectTransDetail_Casing_ID
+    FROM tblRejectTransactionDetail
+    WHERE RejectTransDetail_RejectTrans_ID=?)
+"""
+
+ADD_NT_STOCK = """
+INSERT tblNewTyreStock (NewStock_Tyre_Serial,NewStock_Tyre_Code)
+SELECT NewTransDetail_Tyre_Serial,NewTransDetail_Tyre_Code
+FROM tblNewTyreTransactionDetail
+WHERE NewTransDetail_NewTrans_ID=?
+"""
+
+ADD_PROD_STOCK = """
+INSERT tblProductionStock (ProdStock_Casing_ID)
+SELECT ProdTransDetail_Casing_ID
+FROM tblProductionTransactionDetail,tblCasing
+WHERE ProdTransDetail_Casing_ID=Casing_ID
+AND ProdTransDetail_ProdTrans_ID=?
+"""
+
+ADD_REJ_STOCK = """
+INSERT tblRejectStock (RejectStock_Casing_ID)
+SELECT Casing_ID
+FROM tblCasing,tblRejectTransactionDetail
+WHERE RejectTransDetail_Casing_ID=Casing_ID
+AND RejectTransDetail_RejectTrans_ID=?
 """
 
 def ask(q):
