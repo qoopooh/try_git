@@ -7,6 +7,13 @@ var f_oneline = true;
 var f_receive = true;
 var f_reading = false;
 
+var no_output = {
+  "41": 8,
+  "43": 2,
+  "55": 4,
+  "5B": 2,
+  "5C": 0
+}
 
 /**
   * write data(string)
@@ -96,6 +103,8 @@ function disableOnConnect(connected) {
   $("#ip").prop('disabled', connected);
   $("#btnAddress").prop('disabled', !connected);
   $("#btnVersion").prop('disabled', !connected);
+  $("#btnName").prop('disabled', !connected);
+  $("#btnStatus").prop('disabled', !connected);
 }
 
 function zeroFill( number, width )
@@ -135,6 +144,87 @@ function toggleLostConnect(msg) {
   $("#lostMsg").text(msg);
   var el = document.getElementById("overlay_lost");
   el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+}
+
+var mti_index = 0;
+var conv = new Converter();
+var out_index = 2; // start at 1
+var max_out_index = 1; // start at 1
+var addr = "00000000";
+
+function enquireName() {
+  if ($('#selectCommandDevices').children('option').length < 1)
+    return;
+  var cmd =  new Uint8Array(7);
+  mti_index = 0;
+  str = $("#selectCommandDevices option").eq(mti_index++).text();
+  addr = conv.hexStringToUint8Array(str);
+  max_out_index = no_output[str.slice(0,2)];
+  if (!max_out_index)
+    max_out_index = 1;
+  out_index = 1;
+  cmd[0] = 0x4C;
+  cmd[1] = 0x4E; // 'N' command
+  cmd[2] = addr[0];
+  cmd[3] = addr[1];
+  cmd[4] = addr[2];
+  cmd[5] = addr[3];
+  cmd[6] = out_index++;
+  buildFtc(cmd, function (buf) {
+    writeData(buf);
+  });
+  setTimeout(anotherName, 1500);
+}
+
+function anotherName() {
+  if ((out_index > max_out_index) || (max_out_index == 0)) {
+    if (++mti_index > $('#selectCommandDevices').children('option').length)
+      return;
+    var str = $("#selectCommandDevices option").eq(mti_index).text();
+    addr = conv.hexStringToUint8Array(str);
+    max_out_index = no_output[str.slice(0,2)];
+    if (!max_out_index)
+      max_out_index = 1;
+    out_index = 1;
+  } else {
+  }
+  var cmd =  new Uint8Array(7);
+  cmd[0] = 0x4C;
+  cmd[1] = 0x4E; // 'N' command
+  cmd[2] = addr[0];
+  cmd[3] = addr[1];
+  cmd[4] = addr[2];
+  cmd[5] = addr[3];
+  cmd[6] = out_index++;
+  buildFtc(cmd, function (buf) {
+    writeData(buf);
+  });
+  setTimeout(anotherName, 500);
+}
+
+function enquireStatus() {
+  mti_index = 0;
+  anotherStatus();
+}
+
+
+function anotherStatus() {
+  if (mti_index >= $('#selectCommandDevices').children('option').length)
+    return;
+  var str = $("#selectCommandDevices option").eq(mti_index++).text();
+  addr = conv.hexStringToUint8Array(str);
+  var cmd =  new Uint8Array(7);
+  cmd[0] = 0x4C;
+  cmd[1] = 0x73; // 's' command
+  cmd[2] = addr[0];
+  cmd[3] = addr[1];
+  cmd[4] = addr[2];
+  cmd[5] = addr[3];
+  cmd[6] = 0xFF;
+  buildFtc(cmd, function (buf) {
+    writeData(buf);
+  });
+  setTimeout(anotherStatus, 500);
 }
 
 //////////////////////////
@@ -207,7 +297,7 @@ function startJqm() {
   });
   $("#btnAddress").click(function() {
     var cmd =  new Uint8Array(3);
-    cmd[0] = 0x4C;
+    cmd[0] = 0x48;
     cmd[1] = 0x61;
     cmd[2] = 0xAA;
     buildFtc(cmd, function (buf) {
@@ -236,6 +326,8 @@ function startJqm() {
       writeData(buf);
     });
   });
+  $("#btnName").click(enquireName);
+  $("#btnStatus").click(enquireStatus);
   $("#chkTranslate").click(function() {
     f_translate = $(this).prop('checked');
   });

@@ -23,6 +23,30 @@
     };
 
     /**
+      * input: HEX String Array
+      * output: Uint8Array
+      */
+    Converter.prototype.hexStringToUint8Array = function(str, offset, len) {
+      var end = str.length;
+
+      if (!offset)
+        offset = 0;
+      if (len > 0)
+        end = offset + len;
+      else
+        len = end;
+      var bufView = new Uint8Array(len / 2);
+      j=0;
+      for (var i = offset; i < end; ++i) {
+        hexStr = str[i] + str[++i];
+        bufView[j++] = parseInt(hexStr, 16);
+        //str += String.fromCharCode(parseInt(words[i], 16));
+      }
+      
+      return bufView;
+    };
+
+    /**
       * input: Uint8
       * output: HEX String (00)
       */

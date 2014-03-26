@@ -2,18 +2,18 @@ var productCode = {
   '31':'W-4Sec',
   '32':'W-4Sec',
   '33':'W-4Sec',
-  '41':'D-8OnOff',
-  '43':'W-2OnOff',
-  '44':'W-1Shutter',
-  '45':'W-1Dim',
-  '47':'B-8Sec',
-  '4C':'W-InpKeyb',
-  '50':'W-Dim010V',
-  '54':'W-Themo',
-  '55':'D-4Shutter',
-  '5B':'W-2VLess',
-  '5C':'D-Gateway',
-  '5E':'W-DimRGB',
+  '41':'D-8ONOFF',
+  '43':'W-2ONOFF',
+  '44':'W-1SHUTT',
+  '45':'W-1DIM',
+  '47':'B-8SEC',
+  '4C':'W-INPKEY',
+  '50':'W-1DIM010V',
+  '54':'W-THERMO',
+  '55':'D-4SHUTT',
+  '5B':'W-2VLESS',
+  '5C':'D-BUSSUPIP',
+  '5E':'W-1DIMRGB',
   '57':'W-FM2BT',
 }
 var commandCode = {
@@ -360,7 +360,8 @@ function getStatus(words, text, cb) {
   var product = productCode[words[4]];
 
   switch (product) {
-    case 'W-2OnOff':
+    case 'W-2ONOFF':
+    case 'W-2VLESS':
       if (words.length !== 11)
         break;
       var out = parseInt(words[8], 16);
@@ -375,7 +376,7 @@ function getStatus(words, text, cb) {
         text += ',out2-' + out1;
       }
       break;
-    case 'W-1Shutter':
+    case 'W-1SHUTT':
       if (words.length !== 11)
         break;
       var out = parseInt(words[8], 16);
@@ -390,7 +391,7 @@ function getStatus(words, text, cb) {
       }
       text += parseInt(words[10], 16) + '%';
       break;
-    case 'D-8OnOff':
+    case 'D-8ONOFF':
       var out = parseInt(words[8], 16);
 
       if (out === 0xFF) {
@@ -407,7 +408,7 @@ function getStatus(words, text, cb) {
         text += ',out' + out + '-' + out_s;
       }
       break;
-    case 'D-4Shutter':
+    case 'D-4SHUTT':
       var out = parseInt(words[8], 16);
 
       if (out === 0xFF) {
@@ -437,6 +438,16 @@ function getStatus(words, text, cb) {
         }
         text += parseInt(words[10], 16) + '%';
       }
+      break;
+    case 'W-1DIM':
+      if (words[9] === '00') {
+        text += ',stop,';
+      } else if (words[9] === '01') {
+        text += ',up,';
+      } else if (words[9] === '02') {
+        text += ',down,';
+      }
+      text += parseInt(words[10], 16) + '%';
       break;
     default:
       break;
