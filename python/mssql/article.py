@@ -170,7 +170,7 @@ class index:
             s = i.search.strip()
             length = len(s)
             if length > 3 and s[3] != '-' \
-                    and bool(re.compile('\d{3}').search(s)):
+                    and bool(re.compile('^\d{3}').search(s)):
                 a = s[:3] + '-' + s[3:]
             elif length > 1:
                 a = s

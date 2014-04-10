@@ -39,11 +39,11 @@ $else:
         $if pic == None or pic[0] == None:
             $continue
         $ link = pic[0].replace("\\", "/")
-        $if "pdf" in link or "PDF" in link:
+        $if link[-3:] in ("png", "PNG", "jpg", "JPG", "bmp", "gif", "GIF"):
+            <p><a href="/unikwareimages/CUSTOMER%20ORDER$link"><img src="/unikwareimages/CUSTOMER%20ORDER$link" width="320" /></a></p>
+        $else:
             $ name = pic[1].split('\\')[-1]
             <p><a href="/unikwareimages/CUSTOMER%20ORDER$link">$name</a></p>
-        $else:
-            <p><a href="/unikwareimages/CUSTOMER%20ORDER$link"><img src="/unikwareimages/CUSTOMER%20ORDER$link" width="320" /></a></p>
 $if used == None or len(used) == 0:
     <p>There is no one use $a</p>
 $else:
