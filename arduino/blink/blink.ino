@@ -5,7 +5,7 @@ Turns on/off an LED, repeatedly.
 
 const int LED0 = 9;
 const int LED = 13;
-const int k_delay = 200;
+const int k_delay = 200; // unit: millisecond
 
 void setup() {                
   // initialize the digital pin as an output.
