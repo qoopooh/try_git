@@ -17,5 +17,12 @@ LEFT OUTER JOIN tblProductionTransaction
 ON mx.tid=ProdTrans_ID
 WHERE Casing_OwnerBranch_ID=-1
 ORDER BY ProdTrans_Create_Date DESC
+
+--INSERT INTO tblProductionStock
+--SELECT ProdTransDetail_Casing_ID
+--FROM tblProductionTransactionDetail
+--WHERE ProdTransDetail_ProdTrans_ID LIKE 'PRO1207001%'
+
 ;
+
 
