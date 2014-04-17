@@ -17,6 +17,11 @@ ON Casing_Owner_ID=Comp_ID
 LEFT OUTER JOIN tblRejectTransaction
 ON mx.tid=RejectTrans_ID
 
+--INSERT INTO tblRejectStock
+--SELECT RejectTransDetail_Casing_ID
+--FROM tblRejectTransactionDetail
+--WHERE RejectTransDetail_RejectTrans_ID LIKE 'RJO1310000%'
+
 --SELECT mx.tid, Comp_Name, CASE WHEN (SELECT COUNT(*) FROM tblRejectStock WHERE RejectStock_Casing_ID=mx.casing)  > 0 THEN 1 ELSE 0 END InStock
 --FROM tblCasing, tblCompany, 
 --(SELECT RejectTransDetail_RejectTrans_ID tid, MAX(RejectTransDetail_Serial) sn, RejectTransDetail_Casing_ID casing
