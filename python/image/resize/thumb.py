@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-import Image
+from PIL import Image
 from glob import glob
 
 THUMB = "-thumb"
