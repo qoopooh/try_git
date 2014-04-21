@@ -61,7 +61,7 @@ ON Doc_Comp_ID=Comp_ID
 ORDER BY NewTrans_Create_Date DESC
 """
 
-RCV_NT = """
+RCV_NT= """
 SELECT TOP 100 mn.tid,
        CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date,
        CASE WHEN
@@ -92,36 +92,46 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
 RCV_NT_ID = WIT_NT_ID
 
 WIT_CUS = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,Comp_ID,
-    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
-FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
-    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
-    FROM tblProductionTransactionDetail
-    GROUP BY ProdTransDetail_ProdTrans_ID) p
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-    AND ProdTransDetail_ProdTrans_ID=p.id
-    AND ProdTransDetail_Serial=p.sn
-    AND Casing_OwnerBranch_ID>0
-    AND ProdTransDetail_ProdTrans_ID LIKE '%PRO%'
+SELECT TOP 100 tid,Comp_Name,
+CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
+CASE WHEN
+(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
+THEN 1 ELSE 0
+END InStock
+FROM
+(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
+FROM tblProductionTransactionDetail
+WHERE ProdTransDetail_Serial=1
+AND ProdTransDetail_ProdTrans_ID LIKE 'PRO%') p
+LEFT OUTER JOIN tblCasing
+ON p.casing=Casing_ID
+LEFT OUTER JOIN tblCompany
+ON Casing_Owner_ID=Comp_ID
+LEFT OUTER JOIN tblProductionTransaction
+ON p.tid=ProdTrans_ID
+WHERE Casing_OwnerBranch_ID>0
 ORDER BY ProdTrans_Create_Date DESC
 """
 
 RCV_CUS = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,Comp_ID,
-    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
-FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
-    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
-    FROM tblProductionTransactionDetail
-    GROUP BY ProdTransDetail_ProdTrans_ID) p
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-    AND ProdTransDetail_ProdTrans_ID=p.id
-    AND ProdTransDetail_Serial=p.sn
-    AND Casing_OwnerBranch_ID>0
-    AND ProdTransDetail_ProdTrans_ID LIKE '%PRI%'
+SELECT TOP 100 tid,Comp_Name,
+CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
+CASE WHEN
+(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
+THEN 1 ELSE 0
+END InStock
+FROM
+(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
+FROM tblProductionTransactionDetail
+WHERE ProdTransDetail_Serial=1
+AND ProdTransDetail_ProdTrans_ID LIKE 'PRI%') p
+LEFT OUTER JOIN tblCasing
+ON p.casing=Casing_ID
+LEFT OUTER JOIN tblCompany
+ON Casing_Owner_ID=Comp_ID
+LEFT OUTER JOIN tblProductionTransaction
+ON p.tid=ProdTrans_ID
+WHERE Casing_OwnerBranch_ID>0
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -155,37 +165,46 @@ RCV_CUS_ID_CID = WIT_CUS_ID_CID
 RCV_CUS_ID = WIT_CUS_ID
 
 WIT_STO = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Comp_Name,Comp_ID,
-    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
-FROM tblProductionTransactionDetail,tblCasing,tblCompany,tblProductionTransaction,
-    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
-    FROM tblProductionTransactionDetail
-    GROUP BY ProdTransDetail_ProdTrans_ID) p
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-    AND ProdTransDetail_ProdTrans_ID=p.id
-    AND ProdTransDetail_Serial=p.sn
-    AND Casing_OwnerBranch_ID=-1
-    AND ProdTransDetail_ProdTrans_ID LIKE '%PRO%'
+SELECT TOP 100 tid,Comp_Name,
+CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
+CASE WHEN
+(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
+THEN 1 ELSE 0
+END InStock
+FROM
+(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
+FROM tblProductionTransactionDetail
+WHERE ProdTransDetail_Serial=1
+AND ProdTransDetail_ProdTrans_ID LIKE 'PRO%') p
+LEFT OUTER JOIN tblCasing
+ON p.casing=Casing_ID
+LEFT OUTER JOIN tblCompany
+ON Casing_Owner_ID=Comp_ID
+LEFT OUTER JOIN tblProductionTransaction
+ON p.tid=ProdTrans_ID
+WHERE Casing_OwnerBranch_ID=-1
 ORDER BY ProdTrans_Create_Date DESC
 """
 
 RCV_STO = """
-SELECT TOP 100 ProdTransDetail_ProdTrans_ID as tid,Sup_Name as Comp_Name,
-    Sup_ID as Comp_ID,
-    CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date
-FROM tblProductionTransactionDetail,tblCasing,tblSupplier,tblProductionTransaction,
-    (SELECT MAX(ProdTransDetail_Serial) as sn,ProdTransDetail_ProdTrans_ID as id
-    FROM tblProductionTransactionDetail
-    GROUP BY ProdTransDetail_ProdTrans_ID) p
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Sup_ID
-    AND ProdTransDetail_ProdTrans_ID=ProdTrans_ID
-    AND ProdTransDetail_ProdTrans_ID=p.id
-    AND ProdTransDetail_Serial=p.sn
-    AND Casing_OwnerBranch_ID=-1
-    AND ProdTransDetail_ProdTrans_ID LIKE '%PRI%'
+SELECT TOP 100 tid, Sup_Name Comp_Name,
+CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
+CASE WHEN
+(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
+THEN 1 ELSE 0
+END InStock
+FROM
+(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
+FROM tblProductionTransactionDetail
+WHERE ProdTransDetail_Serial=1
+AND ProdTransDetail_ProdTrans_ID LIKE 'PRI%') p
+LEFT OUTER JOIN tblCasing
+ON p.casing=Casing_ID
+LEFT OUTER JOIN tblSupplier
+ON Casing_Owner_ID=Sup_ID
+LEFT OUTER JOIN tblProductionTransaction
+ON p.tid=ProdTrans_ID
+WHERE Casing_OwnerBranch_ID=-1
 ORDER BY ProdTrans_Create_Date DESC
 """
 
@@ -193,34 +212,44 @@ WIT_STO_ID = WIT_CUS_ID
 RCV_STO_ID = WIT_STO_ID
 
 WIT_REJ = """
-SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,Comp_ID,
-        CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date
-FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
-    (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
-    FROM tblRejectTransactionDetail
-    GROUP BY RejectTransDetail_RejectTrans_ID) r
-WHERE RejectTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
-    AND RejectTransDetail_RejectTrans_ID=r.id
-    AND RejectTransDetail_Serial=r.sn
-    AND RejectTransDetail_RejectTrans_ID LIKE '%RJO%'
+SELECT TOP 100 tid,Comp_Name,
+  CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date,
+  CASE WHEN
+    (SELECT COUNT(*) FROM tblRejectStock WHERE RejectStock_Casing_ID=mn.casing)>0
+  THEN 1 ELSE 0
+  END InStock
+FROM
+(SELECT RejectTransDetail_RejectTrans_ID tid, RejectTransDetail_Casing_ID casing
+FROM tblRejectTransactionDetail
+WHERE RejectTransDetail_RejectTrans_ID LIKE 'RJO%'
+AND RejectTransDetail_Serial=1) mn
+LEFT OUTER JOIN tblCasing
+ON mn.casing=Casing_ID
+LEFT OUTER JOIN tblCompany
+ON Casing_Owner_ID=Comp_ID
+LEFT OUTER JOIN tblRejectTransaction
+ON mn.tid=RejectTrans_ID
 ORDER BY RejectTrans_Create_Date DESC
 """
 
 RCV_REJ = """
-SELECT TOP 100 RejectTransDetail_RejectTrans_ID as tid,Comp_Name,Comp_ID,
-        CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date
-FROM tblRejectTransactionDetail,tblCasing,tblCompany,tblRejectTransaction,
-    (SELECT MAX(RejectTransDetail_Serial) as sn,RejectTransDetail_RejectTrans_ID as id
-    FROM tblRejectTransactionDetail
-    GROUP BY RejectTransDetail_RejectTrans_ID) r
-WHERE RejectTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND RejectTransDetail_RejectTrans_ID=RejectTrans_ID
-    AND RejectTransDetail_RejectTrans_ID=r.id
-    AND RejectTransDetail_Serial=r.sn
-    AND RejectTransDetail_RejectTrans_ID LIKE '%RJI%'
+SELECT TOP 100 tid,Comp_Name,
+  CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date,
+  CASE WHEN
+    (SELECT COUNT(*) FROM tblRejectStock WHERE RejectStock_Casing_ID=mn.casing)>0
+  THEN 1 ELSE 0
+  END InStock
+FROM
+(SELECT RejectTransDetail_RejectTrans_ID tid, RejectTransDetail_Casing_ID casing
+FROM tblRejectTransactionDetail
+WHERE RejectTransDetail_RejectTrans_ID LIKE 'RJI%'
+AND RejectTransDetail_Serial=1) mn
+LEFT OUTER JOIN tblCasing
+ON mn.casing=Casing_ID
+LEFT OUTER JOIN tblCompany
+ON Casing_Owner_ID=Comp_ID
+LEFT OUTER JOIN tblRejectTransaction
+ON mn.tid=RejectTrans_ID
 ORDER BY RejectTrans_Create_Date DESC
 """
 
