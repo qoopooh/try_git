@@ -40,57 +40,42 @@ import web
 import pyodbc
 
 WIT_NT = """
-SELECT TOP 100 mx.tid, Comp_Name,
+SELECT TOP 100 mn.tid, Comp_Name,
        CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date,
        CASE WHEN
         (SELECT COUNT(*) FROM tblNewTyreStock
-         WHERE mx.serial=NewStock_Tyre_Serial AND mx.code=NewStock_Tyre_Code)>0
+         WHERE mn.serial=NewStock_Tyre_Serial AND mn.code=NewStock_Tyre_Code)>0
         THEN 1 ELSE 0
         END InStock
 FROM
-(SELECT tid, NewTransDetail_Tyre_Serial serial, NewTransDetail_Tyre_Code code
- FROM tblNewTyreTransactionDetail,
- (SELECT NewTransDetail_NewTrans_ID tid, MAX(NewTransDetail_Serial) sn
-  FROM tblNewTyreTransactionDetail                                                   
-  WHERE NewTransDetail_NewTrans_ID LIKE 'NTO%'
-  GROUP BY NewTransDetail_NewTrans_ID) maxsn
- WHERE NewTransDetail_Serial=sn
- AND NewTransDetail_NewTrans_ID=tid) mx
+(SELECT NewTransDetail_NewTrans_ID tid, NewTransDetail_Tyre_Serial serial, NewTransDetail_Tyre_Code code
+FROM tblNewTyreTransactionDetail
+WHERE NewTransDetail_NewTrans_ID LIKE 'NTO%'
+AND NewTransDetail_Serial=1) mn
 LEFT OUTER JOIN tblNewTyreTransaction
-ON mx.tid=NewTrans_ID
+ON mn.tid=NewTrans_ID
 LEFT OUTER JOIN tblDocument
-ON mx.tid=Doc_Transaction_ID
+ON mn.tid=Doc_Transaction_ID
 LEFT OUTER JOIN tblCompany
 ON Doc_Comp_ID=Comp_ID
 ORDER BY NewTrans_Create_Date DESC
 """
-WIT_NT1 = """
-SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,Comp_Name,
-       Comp_ID,COUNT(Comp_ID) AS cnt,
-       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date
-FROM tblNewTyreTransactionDetail,tblDocument,tblCompany,tblNewTyreTransaction
-WHERE NewTransDetail_NewTrans_ID=Doc_Transaction_ID
-    AND Doc_Comp_ID=Comp_ID
-    AND NewTransDetail_NewTrans_ID = NewTrans_ID
-    AND NewTransDetail_NewTrans_ID LIKE '%NTO%'
-GROUP BY NewTransDetail_NewTrans_ID,Comp_Name,Comp_ID,
-      NewTrans_Create_Date
-ORDER BY NewTrans_Create_Date DESC
-"""
 
 RCV_NT = """
-SELECT TOP 100 NewTransDetail_NewTrans_ID as tid,
-       COUNT(NewTransDetail_Tyre_Serial) AS cnt,
-       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date, instock
-FROM tblNewTyreTransactionDetail,tblNewTyreTransaction,
-     (SELECT COUNT(1) as instock
-      FROM tblNewTyreTransactionDetail, tblNewTyreStock
-      WHERE NewTransDetail_Serial = 1
-      AND NewStock_Tyre_Serial=NewTransDetail_Tyre_Serial
-      AND NewStock_Tyre_Code=NewTransDetail_Tyre_Code) S
-WHERE NewTransDetail_NewTrans_ID LIKE '%NTI%'
-    AND NewTransDetail_NewTrans_ID = NewTrans_ID
-GROUP BY NewTransDetail_NewTrans_ID,NewTrans_Create_Date, instock
+SELECT TOP 100 mn.tid,
+       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date,
+       CASE WHEN
+        (SELECT COUNT(*) FROM tblNewTyreStock
+         WHERE mn.serial=NewStock_Tyre_Serial AND mn.code=NewStock_Tyre_Code)>0
+        THEN 1 ELSE 0
+        END InStock
+FROM
+(SELECT NewTransDetail_NewTrans_ID tid, NewTransDetail_Tyre_Serial serial, NewTransDetail_Tyre_Code code
+FROM tblNewTyreTransactionDetail
+WHERE NewTransDetail_NewTrans_ID LIKE 'NTI%'
+AND NewTransDetail_Serial=1) mn
+LEFT OUTER JOIN tblNewTyreTransaction
+ON mn.tid=NewTrans_ID
 ORDER BY NewTrans_Create_Date DESC
 """
 
