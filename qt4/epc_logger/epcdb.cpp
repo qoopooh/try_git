@@ -2,25 +2,21 @@
 
 EpcDb::EpcDb()
 {
-  db =  QSqlDatabase::addDatabase("QSQLITE");
-  db.setDatabaseName("epc.sqlite");
+  db = QSqlDatabase::addDatabase("QSQLITE");
+  db.setDatabaseName(k_db_name);
 
-  if (db.open()) {
-    QSqlQuery query(db);
-    if (query.exec("CREATE TABLE \"epc\" (\"id\" VARCHAR PRIMARY KEY, \
-                   \"time\" DATETIME, \"attenuation\" INTEGER);")) {
+  m_open = db.open();
+  if (m_open) {
+    QSqlQuery query("CREATE TABLE \"epc\" (\"id\" VARCHAR PRIMARY KEY, \
+                    \"time\" DATETIME, \"attenuation\" INTEGER);", db);
+    if (query.exec()) {
       qDebug() << "Create table";
     } else {
       qDebug() << "Database exists! " << query.lastError();
     }
-    db.close();
   } else {
     qDebug() << "Cannot open database";
   }
-}
-
-EpcDb::~EpcDb()
-{
   db.close();
 }
 
@@ -29,13 +25,17 @@ bool EpcDb::addEpc(const QByteArray &epchex, int atten)
   bool exist = false;
   bool success = false;
 
+  if (!m_open)
+    return false;
   db.open();
-  QSqlQuery query("SELECT id FROM epc WHERE id='" + epchex + "'");
+  QSqlQuery query("SELECT id FROM epc WHERE id='" + epchex + "'", db);
   while (query.next()) {
     exist = true;
   }
-  if (exist)
-    return false;
+  if (exist) {
+    db.close();
+    return true;
+  }
 
   query.prepare("INSERT INTO epc (id, time, attenuation) VALUES (?, ?, ?)");
   query.addBindValue(QString(epchex));
@@ -54,7 +54,7 @@ int EpcDb::getEpcCount()
   int number = 0;
 
   db.open();
-  QSqlQuery query("SELECT id FROM epc");
+  QSqlQuery query("SELECT id FROM epc", db);
   while (query.next()) {
     ++number;
   }
@@ -66,7 +66,7 @@ int EpcDb::getEpcCount()
 void EpcDb::clear()
 {
   db.open();
-  QSqlQuery query("DELETE FROM epc");
+  QSqlQuery query("DELETE FROM epc", db);
   query.exec();
   db.close();
 }
@@ -80,7 +80,7 @@ void EpcDb::report(const QString &path)
   file.open(QIODevice::WriteOnly);
   QTextStream stream(&file);
   db.open();
-  QSqlQuery query("SELECT * FROM epc");
+  QSqlQuery query("SELECT * FROM epc", db);
   while (query.next()) {
     ++number;
     stream << "'" << query.value(0).toString() << "," << query.value(1).toString()
@@ -89,4 +89,19 @@ void EpcDb::report(const QString &path)
   qDebug() << "count " << number;
   file.close();
   db.close();
+}
+
+QString EpcDb::error()
+{
+  return db.lastError().text();
+}
+
+void EpcDb::close()
+{
+  QString connection;
+  connection=db.connectionName();
+
+  db = QSqlDatabase();
+  db.removeDatabase(connection);
+  qDebug() << "close db";
 }

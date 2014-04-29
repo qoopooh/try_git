@@ -11,7 +11,7 @@ lessThan(QT_MAJOR_VERSION, 5) {
 } else {
   QT += widgets
 }
-TARGET = EpcLogger
+TARGET = TireTagLogger
 TEMPLATE = app
 
 HEADERS  += mainwindow.h \
@@ -39,7 +39,7 @@ RESOURCES += \
     resource.qrc
 
 win32 {
-#    RC_FILE = tiretag.rc
+    RC_FILE = tiretag.rc
 }
 
 

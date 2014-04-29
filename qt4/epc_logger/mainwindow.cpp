@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
+  m_db->close();
+  delete m_db;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -149,7 +151,6 @@ void MainWindow::onAttenuation(const int &attn)
 void MainWindow::setEpcNumber(const QByteArray &epchex)
 {
   static int tree_count = 0;
-
   onEpcString(epchex);
   if (model->count() != tree_count) {
     tree_count = model->count();
@@ -160,6 +161,11 @@ void MainWindow::setEpcNumber(const QByteArray &epchex)
       ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
       ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
       db_changed_tout = 300;
+    } else {
+      disconnect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
+      QMessageBox::critical(0, qApp->tr("Cannot open database"),
+                            m_db->error(), QMessageBox::Cancel);
+      QCoreApplication::exit(-1);
     }
   }
 }
