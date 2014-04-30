@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>images/tiretag.png</file>
+        <file>images/cancel.png</file>
     </qresource>
 </RCC>

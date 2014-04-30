@@ -29,7 +29,6 @@ protected:
     void createLogTable();
 
 private slots:
-    void on_pushButtonRefresh_clicked();
     void setConnectingControl(bool connect);
     void onReaderPacketIn(const QByteArray &input);
     void onEpc(const QByteArray &);
@@ -38,8 +37,10 @@ private slots:
     void on10msTimer();
     void onExportDatabase();
     void onDeleteDatabase();
+    void onDeleteEpc();
     void onInfo();
 
+    void on_pushButtonRefresh_clicked();
     void on_checkBoxConnect_clicked(bool checked);
     void on_pushButtonStart_clicked();
     void on_pushButtonStop_clicked();
@@ -57,8 +58,8 @@ private:
     int attenuation_tout;
     int m_attn;
     EpcDb *m_db;
-
     QTimer *clk10msTimer;
+    QAction *delRowAction;
 
     void getReaderChannels();
     void setEpcNumber(const QByteArray &);

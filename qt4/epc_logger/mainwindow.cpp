@@ -32,7 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
   channel = ui->comboBoxPort->currentText();
   stReader->connectReader(channel);
-  ui->checkBoxConnect->setChecked(true);
+  if (ui->comboBoxPort->count() > 0)
+    ui->checkBoxConnect->setChecked(true);
   ui->statusBar->showMessage(tr("Started!"));
 }
 
@@ -60,6 +61,14 @@ void MainWindow::createLogTable()
   ui->treeViewLog->setModel(model);
   ui->treeViewLog->setColumnWidth(0, 200);
   ui->treeViewLog->setWindowTitle(QObject::tr("EPC Reading"));
+
+  delRowAction = new QAction(tr("&Delete EPC"), this);
+  delRowAction->setIcon(QIcon(":/images/cancel.png"));
+  delRowAction->setShortcut(tr("Ctrl+D"));
+  delRowAction->setStatusTip(tr("Delete test record from database"));
+  connect(delRowAction, SIGNAL(triggered()), this, SLOT(onDeleteEpc()));
+  ui->treeViewLog->addAction(delRowAction);
+  ui->treeViewLog->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void MainWindow::on_pushButtonRefresh_clicked()
@@ -75,6 +84,7 @@ void MainWindow::getReaderChannels()
     ui->comboBoxPort->addItem(channels.at(i));
   }
   ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1); // for window
+  ui->checkBoxConnect->setEnabled(ui->comboBoxPort->count() > 0);
 }
 
 void MainWindow::on_checkBoxConnect_clicked(bool checked)
@@ -220,6 +230,21 @@ void MainWindow::onDeleteDatabase()
     m_db->clear();
   } else {
     qDebug() << "Yes was *not* clicked";
+  }
+}
+
+void MainWindow::onDeleteEpc()
+{
+  QMessageBox::StandardButton reply;
+
+  QModelIndex index = ui->treeViewLog->currentIndex();
+  QString var = index.data().toString();
+  reply = QMessageBox::question(this, "Delete EPC record",
+                                QString("Do you really want to delete %1?").arg(var),
+                                QMessageBox::Yes|QMessageBox::No);
+  if (reply == QMessageBox::Yes) {
+//    m_db->clear();
+    m_db->deleteEpc(var);
   }
 }
 

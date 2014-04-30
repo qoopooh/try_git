@@ -10,6 +10,7 @@ class EpcDb
 public:
     EpcDb();
     bool addEpc(const QByteArray &epchex, int atten);
+    bool deleteEpc(const QString &epchex);
     int getEpcCount();
     void clear();
     void report(const QString &path);

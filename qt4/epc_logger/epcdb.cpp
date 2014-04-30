@@ -46,6 +46,22 @@ bool EpcDb::addEpc(const QByteArray &epchex, int atten)
   return success;
 }
 
+bool EpcDb::deleteEpc(const QString &epchex)
+{
+  bool success = false;
+
+  if (!m_open)
+    return false;
+  db.open();
+  QSqlQuery query(db);
+  query.prepare("DELETE FROM epc WHERE id=?");
+  query.addBindValue(epchex);
+  success = query.exec();
+  db.close();
+
+  return success;
+}
+
 int EpcDb::getEpcCount()
 {
   int number = 0;
