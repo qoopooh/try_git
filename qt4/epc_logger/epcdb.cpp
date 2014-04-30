@@ -2,6 +2,7 @@
 
 EpcDb::EpcDb()
 {
+  qDebug()<<"QSqlDatabase drivers: "<< QSqlDatabase::drivers();
   db = QSqlDatabase::addDatabase("QSQLITE");
   db.setDatabaseName(k_db_name);
 
@@ -22,7 +23,6 @@ EpcDb::EpcDb()
 
 bool EpcDb::addEpc(const QByteArray &epchex, int atten)
 {
-  bool exist = false;
   bool success = false;
 
   if (!m_open)
@@ -30,9 +30,6 @@ bool EpcDb::addEpc(const QByteArray &epchex, int atten)
   db.open();
   QSqlQuery query("SELECT id FROM epc WHERE id='" + epchex + "'", db);
   while (query.next()) {
-    exist = true;
-  }
-  if (exist) {
     db.close();
     return true;
   }
@@ -53,6 +50,8 @@ int EpcDb::getEpcCount()
 {
   int number = 0;
 
+  if (!m_open)
+    return -1;
   db.open();
   QSqlQuery query("SELECT id FROM epc", db);
   while (query.next()) {

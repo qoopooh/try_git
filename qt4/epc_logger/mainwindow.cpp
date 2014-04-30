@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
   connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
   connect(stReader, SIGNAL(attenuation(int)), this, SLOT(onAttenuation(int)));
+  connect(ui->action_Info, SIGNAL(triggered()), this, SLOT(onInfo()));
   connect(ui->actionE_xit, SIGNAL(triggered()), this, SLOT(close()));
   connect(ui->actionE_xport, SIGNAL(triggered()), this, SLOT(onExportDatabase()));
   connect(ui->action_Delete, SIGNAL(triggered()), this, SLOT(onDeleteDatabase()));
@@ -220,6 +221,16 @@ void MainWindow::onDeleteDatabase()
   } else {
     qDebug() << "Yes was *not* clicked";
   }
+}
+
+void MainWindow::onInfo()
+{
+  QString paths;
+  foreach(QString str, QApplication::libraryPaths()) {
+    paths += str + ":";
+  }
+
+  QMessageBox::information(this, tr("Parameter"), paths);
 }
 
 void MainWindow::on_pushButtonStart_clicked()

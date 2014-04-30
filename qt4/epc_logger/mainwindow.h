@@ -38,6 +38,7 @@ private slots:
     void on10msTimer();
     void onExportDatabase();
     void onDeleteDatabase();
+    void onInfo();
 
     void on_checkBoxConnect_clicked(bool checked);
     void on_pushButtonStart_clicked();
