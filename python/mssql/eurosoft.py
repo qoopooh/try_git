@@ -135,19 +135,6 @@ WHERE Casing_OwnerBranch_ID>0
 ORDER BY ProdTrans_Create_Date DESC
 """
 
-WIT_CUS_ID_CID = """
-SELECT Tyre_SerialNo,Size_Name,Liner_Name
-FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
-     tblProductionDetail,tblLiner
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND Casing_Tyre_Serial=Tyre_SerialNo
-    AND Casing_Tyre_Code=Tyre_Code
-    AND Tyre_Size_ID=Size_ID
-    AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
-    AND ProdDetail_IntendLiner_ID=Liner_ID AND Comp_ID=?
-    AND ProdTransDetail_ProdTrans_ID=?
-"""
 WIT_CUS_ID = """
 SELECT Tyre_SerialNo,Size_Name,Liner_Name,ProdTransDetail_IsConfirm as isconf
 FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,
@@ -161,7 +148,6 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=?
 """
 
-RCV_CUS_ID_CID = WIT_CUS_ID_CID
 RCV_CUS_ID = WIT_CUS_ID
 
 WIT_STO = """
@@ -462,6 +448,12 @@ INSERT tblNewTyreStock (NewStock_Tyre_Serial,NewStock_Tyre_Code)
 SELECT NewTransDetail_Tyre_Serial,NewTransDetail_Tyre_Code
 FROM tblNewTyreTransactionDetail
 WHERE NewTransDetail_NewTrans_ID=?
+AND NOT EXISTS (SELECT 1
+    FROM tblNewTyreTransactionDetail,tblNewTyreStock
+    WHERE NewStock_Tyre_Serial=NewTransDetail_Tyre_Serial
+    AND NewStock_Tyre_Code=NewTransDetail_Tyre_Code
+    AND NewTransDetail_Serial=1
+    AND NewTransDetail_NewTrans_ID=?)
 """
 
 ADD_PROD_STOCK = """
@@ -470,6 +462,12 @@ SELECT ProdTransDetail_Casing_ID
 FROM tblProductionTransactionDetail,tblCasing
 WHERE ProdTransDetail_Casing_ID=Casing_ID
 AND ProdTransDetail_ProdTrans_ID=?
+AND NOT EXISTS (SELECT 1
+    FROM tblProductionTransactionDetail,tblCasing,tblProductionStock
+    WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND ProdTransDetail_Casing_ID=ProdStock_Casing_ID
+    AND ProdTransDetail_Serial=1
+    AND ProdTransDetail_ProdTrans_ID=?)
 """
 
 ADD_REJ_STOCK = """
@@ -478,6 +476,12 @@ SELECT Casing_ID
 FROM tblCasing,tblRejectTransactionDetail
 WHERE RejectTransDetail_Casing_ID=Casing_ID
 AND RejectTransDetail_RejectTrans_ID=?
+AND NOT EXISTS (SELECT 1
+    FROM tblRejectStock,tblCasing,tblRejectTransactionDetail
+    WHERE RejectTransDetail_Casing_ID=Casing_ID
+    AND RejectTransDetail_Casing_ID=RejectStock_Casing_ID
+    AND RejectTransDetail_Serial=1
+    AND RejectTransDetail_RejectTrans_ID=?)
 """
 
 def ask(q):
@@ -488,9 +492,10 @@ def ask(q):
     else:
         param = q[1]
     count = cur.execute(q[0], param).rowcount
+    print q[0], param, count
     if cur.description == None:
         res = 'failed'
-        if count == 1:
+        if count > 0: # To support insert multirow
             conn.commit()
             res = 'success'
         conn.close()
@@ -516,7 +521,7 @@ def ask_json(q):
     print 'description', cur.description
     if cur.description == None:
         res = 'failed'
-        if count == 1:
+        if count > 0: # To support insert multirow
             conn.commit()
             res = 'success'
         conn.close()
@@ -561,10 +566,6 @@ class Table():
         elif act=='WIT_NT_ID': q, param = WIT_NT_ID, (i['tid'])
         elif act=='WIT_CUS': q=WIT_CUS
         elif act=='WIT_CUS_ID': q, param = WIT_CUS_ID, (i['tid'])
-            #if i['cid'] is not None:
-                #q=WIT_CUS_ID_CID.format(tid=i['tid'],cid=i['cid'])
-            #else:
-                #q=WIT_CUS_ID.format(tid=i['tid'])
         elif act=='WIT_STO': q=WIT_STO
         elif act=='WIT_STO_ID': q, param = WIT_STO_ID, (i['tid'])
         elif act=='WIT_REJ': q=WIT_REJ
@@ -592,6 +593,9 @@ class Table():
         elif act=='CHK_NT_TYRE': q, param = CHK_NT_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_PROD_TYRE': q, param = CHK_PROD_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_REJ_TYRE': q, param = CHK_REJ_TYRE, (i['check'],i['tid'],i['sn'])
+        elif act=='ADD_NT_STOCK': q, param = ADD_NT_STOCK, (i['tid'],i['tid'])
+        elif act=='ADD_PROD_STOCK': q, param = ADD_PROD_STOCK, (i['tid'],i['tid'])
+        elif act=='ADD_REJ_STOCK': q, param = ADD_REJ_STOCK, (i['tid'],i['tid'])
         else: q, param = IDENTIFY, (i['sn'])
         return q, param
 
