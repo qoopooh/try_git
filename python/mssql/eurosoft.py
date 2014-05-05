@@ -596,6 +596,9 @@ class Table():
         elif act=='ADD_NT_STOCK': q, param = ADD_NT_STOCK, (i['tid'],i['tid'])
         elif act=='ADD_PROD_STOCK': q, param = ADD_PROD_STOCK, (i['tid'],i['tid'])
         elif act=='ADD_REJ_STOCK': q, param = ADD_REJ_STOCK, (i['tid'],i['tid'])
+        elif act=='REM_NT_STOCK': q, param = REM_NT_STOCK, (i['tid'],i['tid'])
+        elif act=='REM_PROD_STOCK': q, param = REM_PROD_STOCK, (i['tid'],i['tid'])
+        elif act=='REM_REJ_STOCK': q, param = REM_REJ_STOCK, (i['tid'],i['tid'])
         else: q, param = IDENTIFY, (i['sn'])
         return q, param
 
