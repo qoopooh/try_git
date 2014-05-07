@@ -69,9 +69,9 @@ int EpcDb::getEpcCount()
   if (!m_open)
     return -1;
   db.open();
-  QSqlQuery query("SELECT id FROM epc", db);
+  QSqlQuery query("SELECT COUNT(id) FROM epc", db);
   while (query.next()) {
-    ++number;
+    number = query.value(0).toInt();
   }
   db.close();
 
@@ -96,11 +96,13 @@ void EpcDb::report(const QString &path)
   QTextStream stream(&file);
   db.open();
   QSqlQuery query("SELECT * FROM epc", db);
+  stream << "EPC" << "," << "Date" << "," << "Result" << endl;
   while (query.next()) {
     ++number;
     stream << "'" << query.value(0).toString() << "," << query.value(1).toString()
-           << "," << query.value(2).toString() << endl;
+           << "," << "PASS" << endl;
   }
+  stream << "Total" << "," << number << endl;
   qDebug() << "count " << number;
   file.close();
   db.close();

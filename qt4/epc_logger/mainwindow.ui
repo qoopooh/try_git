@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Tire Tag Logger V0.03</string>
+   <string>Tire Tag Logger </string>
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
