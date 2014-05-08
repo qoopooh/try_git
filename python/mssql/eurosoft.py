@@ -269,11 +269,25 @@ WHERE Usr_UserName=?
     AND Usr_Password=?
 """
 
+CHK_NT_NULL = """
+UPDATE tblNewTyreTransaction
+SET NewTrans_Confirm_By=NULL,
+    NewTrans_Confirm_Date=NULL
+WHERE NewTrans_ID=?
+"""
+
 CHK_NT = """
 UPDATE tblNewTyreTransaction
 SET NewTrans_Confirm_By=?,
     NewTrans_Confirm_Date=?
 WHERE NewTrans_ID=?
+"""
+
+CHK_CUS_NULL = """
+UPDATE tblProductionTransaction
+SET ProdTrans_Confirm_By=NULL,
+    ProdTrans_Confirm_Date=NULL
+WHERE ProdTrans_ID=?
 """
 
 CHK_CUS = """
@@ -283,6 +297,13 @@ SET ProdTrans_Confirm_By=?,
 WHERE ProdTrans_ID=?
 """
 
+CHK_REJ_NULL = """
+UPDATE tblRejectTransaction
+SET RejectTrans_Confirm_By=NULL,
+    RejectTrans_Confirm_Date=NULL
+WHERE RejectTrans_ID=?
+"""
+
 CHK_REJ = """
 UPDATE tblRejectTransaction
 SET RejectTrans_Confirm_By=?,
@@ -290,6 +311,7 @@ SET RejectTrans_Confirm_By=?,
 WHERE RejectTrans_ID=?
 """
 
+CHK_STO_NULL = CHK_CUS_NULL
 CHK_STO = CHK_CUS
 
 CHK_NT_TYRE = """
@@ -505,10 +527,26 @@ class Table():
         elif act=='INV_STO_ID': q, param = INV_STO_ID, (i['sz'])
         elif act=='INV_REJ': q=INV_REJ
         elif act=='INV_REJ_ID': q, param = INV_REJ_ID, (i['sz'])
-        elif act=='CHK_NT': q, param = CHK_NT, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_CUS': q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_REJ': q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_STO': q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_NT':
+            if i['date'] == 'null':
+                q, param = CHK_NT_NULL, (i['tid'])
+            else:
+                q, param = CHK_NT, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_CUS':
+            if i['date'] == 'null':
+                q, param = CHK_CUS_NULL, (i['tid'])
+            else:
+                q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_REJ':
+            if i['date'] == 'null':
+                q, param = CHK_REJ_NULL, (i['tid'])
+            else:
+                q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_STO':
+            if i['date'] == 'null':
+                q, param = CHK_STO_NULL, (i['tid'])
+            else:
+                q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_NT_TYRE': q, param = CHK_NT_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_PROD_TYRE': q, param = CHK_PROD_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_REJ_TYRE': q, param = CHK_REJ_TYRE, (i['check'],i['tid'],i['sn'])
