@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+const QString k_version("V1.00");
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -35,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
   if (ui->comboBoxPort->count() > 0)
     ui->checkBoxConnect->setChecked(true);
   ui->statusBar->showMessage(tr("Started!"));
+  this->setWindowTitle(this->windowTitle() + k_version);
 }
 
 MainWindow::~MainWindow()
@@ -162,6 +165,7 @@ void MainWindow::onAttenuation(const int &attn)
 void MainWindow::setEpcNumber(const QByteArray &epchex)
 {
   static int tree_count = 0;
+  static int db_count = 0;
   onEpcString(epchex);
   if (model->count() != tree_count) {
     tree_count = model->count();
@@ -169,6 +173,9 @@ void MainWindow::setEpcNumber(const QByteArray &epchex)
     ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
     count_changed_tout = 300;
     if (m_db->addEpc(epchex, m_attn)) {
+      if (db_count == m_db->getEpcCount())
+        return;
+      db_count = m_db->getEpcCount();
       ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
       ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
       db_changed_tout = 300;
