@@ -25,7 +25,8 @@
       c_user_include_directories="$(TargetsDir)/STM32/include;$(TargetsDir)/CMSIS_3/CMSIS/Include"
       linker_memory_map_file="$(TargetsDir)/STM32/STM32F103RB_MemoryMap.xml"
       linker_output_format="bin"
-      linker_section_placement_file="$(StudioDir)/targets/Cortex_M/flash_placement.xml" project_directory=""
+      linker_section_placement_file="$(StudioDir)/targets/Cortex_M/flash_placement.xml"
+      project_directory=""
       project_type="Executable"
       property_groups_file_path="$(TargetsDir)/STM32/propertyGroups.xml"
       target_get_partname_script="GetPartName()"
@@ -52,6 +53,9 @@
       <file file_name="$(TargetsDir)/STM32/STM32_Target.js">
         <configuration Name="Common" file_type="Reset Script" />
       </file>
+    </folder>
+    <folder Name="Header Files">
+      <file file_name="stm32f10x.h" />
     </folder>
   </project>
   <configuration Name="THUMB Debug" inherited_configurations="THUMB;Debug" />

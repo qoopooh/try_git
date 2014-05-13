@@ -6,4 +6,5 @@
 *.elf
 *.bin
 *.hzs
+*.bak
 *THUMB*
