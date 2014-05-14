@@ -1,6 +1,6 @@
 #include <__cross_studio_io.h>
 #include "stdint.h"
-#include "stm32f10x.h"
+#include "def.h"
 #include <stdio.h>
 
 uint32_t state;
@@ -13,38 +13,55 @@ void delay(int count)
 
 void board_init(void)
 {
-  uint32_t temp;
   uint32_t mask;
   uint32_t mode;
   uint32_t pin;
 
-  RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+  SET_BIT(RCC->APB2ENR, RCC_APB2ENR_IOPBEN);
+  SET_BIT(RCC->APB2ENR, RCC_APB2ENR_IOPCEN);
 
-  pin = 4;
+  // Set OUTPUT
+  pin = 1;
   mode = (uint32_t) 0x05 << (pin * 4);
   mask = (uint32_t) 0x0f << (pin * 4);
-  temp = GPIOA->CRL & ~mask;
-  GPIOA->CRL = temp | mode;
-
+  //temp = GPIOB->CRH & ~mask;
+  //GPIOB->CRH = temp | mode;
+  MODIFY_REG(GPIOB->CRH, mask, mode); // BIT9 output 10 MHz open-drain
   pin = 0;
-  mode = (uint32_t) 0x04 << (pin * 4);
+  mode = (uint32_t) 0x05 << (pin * 4);
   mask = (uint32_t) 0x0f << (pin * 4);
-  temp = GPIOA->CRL & ~mask;
-  GPIOA->CRL = temp | mode;
+  MODIFY_REG(GPIOB->CRH, mask, mode); // BIT8 output 10 MHz open-drain
+
+  // Set INPUT
+  pin = 0;
+  mode = (uint32_t) 0x08 << (pin * 4);
+  mask = (uint32_t) 0x0f << (pin * 4);
+  MODIFY_REG(GPIOC->CRL, mask, mode); // BIT0 input push-pull
+  SET_BIT(GPIOC->ODR, BIT0); // Set PC0 to high for input
+  pin = 1;
+  mode = (uint32_t) 0x08 << (pin * 4);
+  mask = (uint32_t) 0x0f << (pin * 4);
+  MODIFY_REG(GPIOC->CRL, mask, mode); // BIT1 input push-pull
+  SET_BIT(GPIOC->ODR, BIT1); // Set PC0 to high for input
+
+  SET_LED1_OFF;
+  SET_LED2_OFF;
 }
 
 void set_leds(unsigned on)
 {
   if (on)
-    GPIOA->BSRR = (1 << 4);
+    SET_LED1_ON;
   else
-    GPIOA->BRR = (1 << 4);
+    SET_LED1_OFF;
 }
 
 int get_button(void)
 {
-  if (GPIOA->IDR & 0x01) {
-    while ((GPIOA->IDR & 0x01) == 0x01);
+  if (BUTTON2 != BIT0) {
+    SET_LED2_ON;
+    while (BUTTON2 != BIT0);
+    SET_LED2_OFF;
     return 1;
   } else {
     return 0;
