@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+const QString k_version("V1.00");
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -22,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(stReader, SIGNAL(dataReceived(QByteArray)), this, SLOT(onReaderPacketIn(QByteArray)));
   connect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
   connect(stReader, SIGNAL(attenuation(int)), this, SLOT(onAttenuation(int)));
+  connect(ui->action_Info, SIGNAL(triggered()), this, SLOT(onInfo()));
   connect(ui->actionE_xit, SIGNAL(triggered()), this, SLOT(close()));
   connect(ui->actionE_xport, SIGNAL(triggered()), this, SLOT(onExportDatabase()));
   connect(ui->action_Delete, SIGNAL(triggered()), this, SLOT(onDeleteDatabase()));
@@ -31,13 +34,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
   channel = ui->comboBoxPort->currentText();
   stReader->connectReader(channel);
-  ui->checkBoxConnect->setChecked(true);
+  if (ui->comboBoxPort->count() > 0)
+    ui->checkBoxConnect->setChecked(true);
   ui->statusBar->showMessage(tr("Started!"));
+  this->setWindowTitle(this->windowTitle() + k_version);
 }
 
 MainWindow::~MainWindow()
 {
   delete ui;
+  m_db->close();
+  delete m_db;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -57,6 +64,14 @@ void MainWindow::createLogTable()
   ui->treeViewLog->setModel(model);
   ui->treeViewLog->setColumnWidth(0, 200);
   ui->treeViewLog->setWindowTitle(QObject::tr("EPC Reading"));
+
+  delRowAction = new QAction(tr("&Delete EPC"), this);
+  delRowAction->setIcon(QIcon(":/images/cancel.png"));
+  delRowAction->setShortcut(tr("Ctrl+D"));
+  delRowAction->setStatusTip(tr("Delete test record from database"));
+  connect(delRowAction, SIGNAL(triggered()), this, SLOT(onDeleteEpc()));
+  ui->treeViewLog->addAction(delRowAction);
+  ui->treeViewLog->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void MainWindow::on_pushButtonRefresh_clicked()
@@ -72,6 +87,7 @@ void MainWindow::getReaderChannels()
     ui->comboBoxPort->addItem(channels.at(i));
   }
   ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->count() - 1); // for window
+  ui->checkBoxConnect->setEnabled(ui->comboBoxPort->count() > 0);
 }
 
 void MainWindow::on_checkBoxConnect_clicked(bool checked)
@@ -149,7 +165,7 @@ void MainWindow::onAttenuation(const int &attn)
 void MainWindow::setEpcNumber(const QByteArray &epchex)
 {
   static int tree_count = 0;
-
+  static int db_count = 0;
   onEpcString(epchex);
   if (model->count() != tree_count) {
     tree_count = model->count();
@@ -157,9 +173,17 @@ void MainWindow::setEpcNumber(const QByteArray &epchex)
     ui->lineEditCount->setStyleSheet("QLineEdit{background: orange;}");
     count_changed_tout = 300;
     if (m_db->addEpc(epchex, m_attn)) {
+      if (db_count == m_db->getEpcCount())
+        return;
+      db_count = m_db->getEpcCount();
       ui->lineEditTotal->setText(QString::number(m_db->getEpcCount()));
       ui->lineEditTotal->setStyleSheet("QLineEdit{background: orange;}");
       db_changed_tout = 300;
+    } else {
+      disconnect(stReader, SIGNAL(readingEpc(QByteArray)), this, SLOT(onEpc(QByteArray)));
+      QMessageBox::critical(0, qApp->tr("Cannot open database"),
+                            m_db->error(), QMessageBox::Cancel);
+      QCoreApplication::exit(-1);
     }
   }
 }
@@ -214,6 +238,31 @@ void MainWindow::onDeleteDatabase()
   } else {
     qDebug() << "Yes was *not* clicked";
   }
+}
+
+void MainWindow::onDeleteEpc()
+{
+  QMessageBox::StandardButton reply;
+
+  QModelIndex index = ui->treeViewLog->currentIndex();
+  QString var = index.data().toString();
+  reply = QMessageBox::question(this, "Delete EPC record",
+                                QString("Do you really want to delete %1?").arg(var),
+                                QMessageBox::Yes|QMessageBox::No);
+  if (reply == QMessageBox::Yes) {
+//    m_db->clear();
+    m_db->deleteEpc(var);
+  }
+}
+
+void MainWindow::onInfo()
+{
+  QString paths;
+  foreach(QString str, QApplication::libraryPaths()) {
+    paths += str + ":";
+  }
+
+  QMessageBox::information(this, tr("Parameter"), paths);
 }
 
 void MainWindow::on_pushButtonStart_clicked()

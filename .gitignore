@@ -24,3 +24,4 @@ test.js
 obj
 build-*
 qtquick2*
+cscope.*

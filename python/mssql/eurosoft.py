@@ -39,45 +39,24 @@ import sys, json
 import web
 import pyodbc
 
-WIT_NT = """
-SELECT TOP 100 mn.tid, Comp_Name,
-       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date,
-       CASE WHEN
-        (SELECT COUNT(*) FROM tblNewTyreStock
-         WHERE mn.serial=NewStock_Tyre_Serial AND mn.code=NewStock_Tyre_Code)>0
-        THEN 1 ELSE 0
-        END InStock
-FROM
-(SELECT NewTransDetail_NewTrans_ID tid, NewTransDetail_Tyre_Serial serial, NewTransDetail_Tyre_Code code
-FROM tblNewTyreTransactionDetail
-WHERE NewTransDetail_NewTrans_ID LIKE 'NTO%'
-AND NewTransDetail_Serial=1) mn
-LEFT OUTER JOIN tblNewTyreTransaction
-ON mn.tid=NewTrans_ID
+TRANS_NT = """
+SELECT TOP 100 NewTrans_ID as tid, Comp_Name,
+    CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date,
+    CASE WHEN
+    NewTrans_Confirm_Date IS NULL
+    THEN 1 ELSE 0
+    END InStock
+FROM tblNewTyreTransaction
 LEFT OUTER JOIN tblDocument
-ON mn.tid=Doc_Transaction_ID
+ON NewTrans_ID=Doc_Transaction_ID
 LEFT OUTER JOIN tblCompany
 ON Doc_Comp_ID=Comp_ID
+WHERE NewTrans_ID LIKE '%s'
 ORDER BY NewTrans_Create_Date DESC
 """
 
-RCV_NT= """
-SELECT TOP 100 mn.tid,
-       CONVERT (VARCHAR, NewTrans_Create_Date, 20) as date,
-       CASE WHEN
-        (SELECT COUNT(*) FROM tblNewTyreStock
-         WHERE mn.serial=NewStock_Tyre_Serial AND mn.code=NewStock_Tyre_Code)>0
-        THEN 1 ELSE 0
-        END InStock
-FROM
-(SELECT NewTransDetail_NewTrans_ID tid, NewTransDetail_Tyre_Serial serial, NewTransDetail_Tyre_Code code
-FROM tblNewTyreTransactionDetail
-WHERE NewTransDetail_NewTrans_ID LIKE 'NTI%'
-AND NewTransDetail_Serial=1) mn
-LEFT OUTER JOIN tblNewTyreTransaction
-ON mn.tid=NewTrans_ID
-ORDER BY NewTrans_Create_Date DESC
-"""
+WIT_NT = TRANS_NT % ('NTO%')
+RCV_NT = TRANS_NT % ('NTI%')
 
 WIT_NT_ID = """
 SELECT Tyre_SerialNo,Size_Name,Model_Name,NewTransDetail_IsConfirm as isconf
@@ -91,63 +70,29 @@ WHERE NewTransDetail_Tyre_Serial=Tyre_SerialNo
 
 RCV_NT_ID = WIT_NT_ID
 
-WIT_CUS = """
-SELECT TOP 100 tid,Comp_Name,
+TRANS_PROD = """
+SELECT TOP 100 ProdTrans_ID tid, Comp_Name,
 CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
 CASE WHEN
-(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
+ProdTrans_Confirm_Date IS NULL
 THEN 1 ELSE 0
 END InStock
-FROM
-(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
-FROM tblProductionTransactionDetail
-WHERE ProdTransDetail_Serial=1
-AND ProdTransDetail_ProdTrans_ID LIKE 'PRO%') p
+FROM tblProductionTransaction
+LEFT OUTER JOIN tblProductionTransactionDetail
+ON ProdTrans_ID=ProdTransDetail_ProdTrans_ID
 LEFT OUTER JOIN tblCasing
-ON p.casing=Casing_ID
+ON ProdTransDetail_Casing_ID=Casing_ID
 LEFT OUTER JOIN tblCompany
 ON Casing_Owner_ID=Comp_ID
-LEFT OUTER JOIN tblProductionTransaction
-ON p.tid=ProdTrans_ID
-WHERE Casing_OwnerBranch_ID>0
+WHERE Casing_OwnerBranch_ID %s
+AND ProdTransDetail_ProdTrans_ID LIKE '%s'
+AND ProdTransDetail_Serial=1
 ORDER BY ProdTrans_Create_Date DESC
 """
 
-RCV_CUS = """
-SELECT TOP 100 tid,Comp_Name,
-CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
-CASE WHEN
-(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
-THEN 1 ELSE 0
-END InStock
-FROM
-(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
-FROM tblProductionTransactionDetail
-WHERE ProdTransDetail_Serial=1
-AND ProdTransDetail_ProdTrans_ID LIKE 'PRI%') p
-LEFT OUTER JOIN tblCasing
-ON p.casing=Casing_ID
-LEFT OUTER JOIN tblCompany
-ON Casing_Owner_ID=Comp_ID
-LEFT OUTER JOIN tblProductionTransaction
-ON p.tid=ProdTrans_ID
-WHERE Casing_OwnerBranch_ID>0
-ORDER BY ProdTrans_Create_Date DESC
-"""
+WIT_CUS = TRANS_PROD % ("> 0", "PRO%")
+RCV_CUS = TRANS_PROD % ("> 0", "PRI%")
 
-WIT_CUS_ID_CID = """
-SELECT Tyre_SerialNo,Size_Name,Liner_Name
-FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,tblCompany,
-     tblProductionDetail,tblLiner
-WHERE ProdTransDetail_Casing_ID=Casing_ID
-    AND Casing_Owner_ID=Comp_ID
-    AND Casing_Tyre_Serial=Tyre_SerialNo
-    AND Casing_Tyre_Code=Tyre_Code
-    AND Tyre_Size_ID=Size_ID
-    AND ProdTransDetail_Casing_ID=ProdDetail_Casing_ID
-    AND ProdDetail_IntendLiner_ID=Liner_ID AND Comp_ID=?
-    AND ProdTransDetail_ProdTrans_ID=?
-"""
 WIT_CUS_ID = """
 SELECT Tyre_SerialNo,Size_Name,Liner_Name,ProdTransDetail_IsConfirm as isconf
 FROM tblProductionTransactionDetail,tblCasing,tblTyre,tblSize,
@@ -161,97 +106,54 @@ WHERE ProdTransDetail_Casing_ID=Casing_ID
     AND ProdTransDetail_ProdTrans_ID=?
 """
 
-RCV_CUS_ID_CID = WIT_CUS_ID_CID
 RCV_CUS_ID = WIT_CUS_ID
 
-WIT_STO = """
-SELECT TOP 100 tid,Comp_Name,
-CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
-CASE WHEN
-(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
-THEN 1 ELSE 0
-END InStock
-FROM
-(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
-FROM tblProductionTransactionDetail
-WHERE ProdTransDetail_Serial=1
-AND ProdTransDetail_ProdTrans_ID LIKE 'PRO%') p
-LEFT OUTER JOIN tblCasing
-ON p.casing=Casing_ID
-LEFT OUTER JOIN tblCompany
-ON Casing_Owner_ID=Comp_ID
-LEFT OUTER JOIN tblProductionTransaction
-ON p.tid=ProdTrans_ID
-WHERE Casing_OwnerBranch_ID=-1
-ORDER BY ProdTrans_Create_Date DESC
-"""
+WIT_STO = TRANS_PROD % ("= -1", "PRO%")
 
 RCV_STO = """
-SELECT TOP 100 tid, Sup_Name Comp_Name,
+SELECT TOP 100 ProdTrans_ID tid, Sup_Name Comp_Name,
 CONVERT (VARCHAR, ProdTrans_Create_Date, 20) as date,
 CASE WHEN
-(SELECT COUNT(*) FROM tblProductionStock WHERE ProdStock_Casing_ID=p.casing)>0
+ProdTrans_Confirm_Date IS NULL
 THEN 1 ELSE 0
 END InStock
-FROM
-(SELECT ProdTransDetail_ProdTrans_ID tid, ProdTransDetail_Casing_ID casing
-FROM tblProductionTransactionDetail
-WHERE ProdTransDetail_Serial=1
-AND ProdTransDetail_ProdTrans_ID LIKE 'PRI%') p
+FROM tblProductionTransaction
+LEFT OUTER JOIN tblProductionTransactionDetail
+ON ProdTrans_ID=ProdTransDetail_ProdTrans_ID
 LEFT OUTER JOIN tblCasing
-ON p.casing=Casing_ID
+ON ProdTransDetail_Casing_ID=Casing_ID
 LEFT OUTER JOIN tblSupplier
 ON Casing_Owner_ID=Sup_ID
-LEFT OUTER JOIN tblProductionTransaction
-ON p.tid=ProdTrans_ID
 WHERE Casing_OwnerBranch_ID=-1
+AND ProdTransDetail_ProdTrans_ID LIKE 'PRI%'
+AND ProdTransDetail_Serial=1
 ORDER BY ProdTrans_Create_Date DESC
 """
 
 WIT_STO_ID = WIT_CUS_ID
 RCV_STO_ID = WIT_STO_ID
 
-WIT_REJ = """
-SELECT TOP 100 tid,Comp_Name,
+TRANS_REJ = """
+SELECT TOP 100 RejectTrans_ID tid,Comp_Name,
   CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date,
   CASE WHEN
-    (SELECT COUNT(*) FROM tblRejectStock WHERE RejectStock_Casing_ID=mn.casing)>0
+    RejectTrans_Confirm_Date IS NULL
   THEN 1 ELSE 0
   END InStock
-FROM
-(SELECT RejectTransDetail_RejectTrans_ID tid, RejectTransDetail_Casing_ID casing
-FROM tblRejectTransactionDetail
-WHERE RejectTransDetail_RejectTrans_ID LIKE 'RJO%'
-AND RejectTransDetail_Serial=1) mn
+FROM tblRejectTransaction
+LEFT OUTER JOIN tblRejectTransactionDetail
+ON RejectTrans_ID=RejectTransDetail_RejectTrans_ID
 LEFT OUTER JOIN tblCasing
-ON mn.casing=Casing_ID
+ON RejectTransDetail_Casing_ID=Casing_ID
 LEFT OUTER JOIN tblCompany
 ON Casing_Owner_ID=Comp_ID
-LEFT OUTER JOIN tblRejectTransaction
-ON mn.tid=RejectTrans_ID
+WHERE RejectTransDetail_RejectTrans_ID LIKE '%s'
+AND RejectTransDetail_Serial=1
 ORDER BY RejectTrans_Create_Date DESC
 """
 
-RCV_REJ = """
-SELECT TOP 100 tid,Comp_Name,
-  CONVERT (VARCHAR, RejectTrans_Create_Date, 20) as date,
-  CASE WHEN
-    (SELECT COUNT(*) FROM tblRejectStock WHERE RejectStock_Casing_ID=mn.casing)>0
-  THEN 1 ELSE 0
-  END InStock
-FROM
-(SELECT RejectTransDetail_RejectTrans_ID tid, RejectTransDetail_Casing_ID casing
-FROM tblRejectTransactionDetail
-WHERE RejectTransDetail_RejectTrans_ID LIKE 'RJI%'
-AND RejectTransDetail_Serial=1) mn
-LEFT OUTER JOIN tblCasing
-ON mn.casing=Casing_ID
-LEFT OUTER JOIN tblCompany
-ON Casing_Owner_ID=Comp_ID
-LEFT OUTER JOIN tblRejectTransaction
-ON mn.tid=RejectTrans_ID
-ORDER BY RejectTrans_Create_Date DESC
-"""
+WIT_REJ = TRANS_REJ % ("RJO%")
+RCV_REJ = TRANS_REJ % ("RJI%")
 
 WIT_REJ_ID = """
 SELECT Tyre_SerialNo,Size_Name,RejectTransDetail_IsConfirm as isconf
@@ -367,11 +269,25 @@ WHERE Usr_UserName=?
     AND Usr_Password=?
 """
 
+CHK_NT_NULL = """
+UPDATE tblNewTyreTransaction
+SET NewTrans_Confirm_By=NULL,
+    NewTrans_Confirm_Date=NULL
+WHERE NewTrans_ID=?
+"""
+
 CHK_NT = """
 UPDATE tblNewTyreTransaction
 SET NewTrans_Confirm_By=?,
     NewTrans_Confirm_Date=?
 WHERE NewTrans_ID=?
+"""
+
+CHK_CUS_NULL = """
+UPDATE tblProductionTransaction
+SET ProdTrans_Confirm_By=NULL,
+    ProdTrans_Confirm_Date=NULL
+WHERE ProdTrans_ID=?
 """
 
 CHK_CUS = """
@@ -381,6 +297,13 @@ SET ProdTrans_Confirm_By=?,
 WHERE ProdTrans_ID=?
 """
 
+CHK_REJ_NULL = """
+UPDATE tblRejectTransaction
+SET RejectTrans_Confirm_By=NULL,
+    RejectTrans_Confirm_Date=NULL
+WHERE RejectTrans_ID=?
+"""
+
 CHK_REJ = """
 UPDATE tblRejectTransaction
 SET RejectTrans_Confirm_By=?,
@@ -388,6 +311,7 @@ SET RejectTrans_Confirm_By=?,
 WHERE RejectTrans_ID=?
 """
 
+CHK_STO_NULL = CHK_CUS_NULL
 CHK_STO = CHK_CUS
 
 CHK_NT_TYRE = """
@@ -462,6 +386,15 @@ INSERT tblNewTyreStock (NewStock_Tyre_Serial,NewStock_Tyre_Code)
 SELECT NewTransDetail_Tyre_Serial,NewTransDetail_Tyre_Code
 FROM tblNewTyreTransactionDetail
 WHERE NewTransDetail_NewTrans_ID=?
+AND NOT EXISTS (SELECT 1
+    FROM tblNewTyreTransactionDetail,tblNewTyreStock
+    WHERE NewStock_Tyre_Serial=NewTransDetail_Tyre_Serial
+    AND NewStock_Tyre_Code=NewTransDetail_Tyre_Code
+    AND NewTransDetail_Serial=1
+    AND NewTransDetail_NewTrans_ID=?);
+UPDATE tblNewTyreTransaction
+SET NewTrans_Confirm_Date=NULL
+WHERE NewTrans_ID=?
 """
 
 ADD_PROD_STOCK = """
@@ -470,6 +403,12 @@ SELECT ProdTransDetail_Casing_ID
 FROM tblProductionTransactionDetail,tblCasing
 WHERE ProdTransDetail_Casing_ID=Casing_ID
 AND ProdTransDetail_ProdTrans_ID=?
+AND NOT EXISTS (SELECT 1
+    FROM tblProductionTransactionDetail,tblCasing,tblProductionStock
+    WHERE ProdTransDetail_Casing_ID=Casing_ID
+    AND ProdTransDetail_Casing_ID=ProdStock_Casing_ID
+    AND ProdTransDetail_Serial=1
+    AND ProdTransDetail_ProdTrans_ID=?)
 """
 
 ADD_REJ_STOCK = """
@@ -478,6 +417,12 @@ SELECT Casing_ID
 FROM tblCasing,tblRejectTransactionDetail
 WHERE RejectTransDetail_Casing_ID=Casing_ID
 AND RejectTransDetail_RejectTrans_ID=?
+AND NOT EXISTS (SELECT 1
+    FROM tblRejectStock,tblCasing,tblRejectTransactionDetail
+    WHERE RejectTransDetail_Casing_ID=Casing_ID
+    AND RejectTransDetail_Casing_ID=RejectStock_Casing_ID
+    AND RejectTransDetail_Serial=1
+    AND RejectTransDetail_RejectTrans_ID=?)
 """
 
 def ask(q):
@@ -488,9 +433,10 @@ def ask(q):
     else:
         param = q[1]
     count = cur.execute(q[0], param).rowcount
+    print q[0], param, count
     if cur.description == None:
         res = 'failed'
-        if count == 1:
+        if count > 0: # To support insert multirow
             conn.commit()
             res = 'success'
         conn.close()
@@ -516,7 +462,7 @@ def ask_json(q):
     print 'description', cur.description
     if cur.description == None:
         res = 'failed'
-        if count == 1:
+        if count > 0: # To support insert multirow
             conn.commit()
             res = 'success'
         conn.close()
@@ -561,10 +507,6 @@ class Table():
         elif act=='WIT_NT_ID': q, param = WIT_NT_ID, (i['tid'])
         elif act=='WIT_CUS': q=WIT_CUS
         elif act=='WIT_CUS_ID': q, param = WIT_CUS_ID, (i['tid'])
-            #if i['cid'] is not None:
-                #q=WIT_CUS_ID_CID.format(tid=i['tid'],cid=i['cid'])
-            #else:
-                #q=WIT_CUS_ID.format(tid=i['tid'])
         elif act=='WIT_STO': q=WIT_STO
         elif act=='WIT_STO_ID': q, param = WIT_STO_ID, (i['tid'])
         elif act=='WIT_REJ': q=WIT_REJ
@@ -585,13 +527,35 @@ class Table():
         elif act=='INV_STO_ID': q, param = INV_STO_ID, (i['sz'])
         elif act=='INV_REJ': q=INV_REJ
         elif act=='INV_REJ_ID': q, param = INV_REJ_ID, (i['sz'])
-        elif act=='CHK_NT': q, param = CHK_NT, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_CUS': q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_REJ': q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_STO': q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_NT':
+            if i['date'] == 'null':
+                q, param = CHK_NT_NULL, (i['tid'])
+            else:
+                q, param = CHK_NT, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_CUS':
+            if i['date'] == 'null':
+                q, param = CHK_CUS_NULL, (i['tid'])
+            else:
+                q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_REJ':
+            if i['date'] == 'null':
+                q, param = CHK_REJ_NULL, (i['tid'])
+            else:
+                q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
+        elif act=='CHK_STO':
+            if i['date'] == 'null':
+                q, param = CHK_STO_NULL, (i['tid'])
+            else:
+                q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
         elif act=='CHK_NT_TYRE': q, param = CHK_NT_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_PROD_TYRE': q, param = CHK_PROD_TYRE, (i['check'],i['tid'],i['sn'])
         elif act=='CHK_REJ_TYRE': q, param = CHK_REJ_TYRE, (i['check'],i['tid'],i['sn'])
+        elif act=='ADD_NT_STOCK': q, param = ADD_NT_STOCK, (i['tid'],i['tid'],i['tid'])
+        elif act=='ADD_PROD_STOCK': q, param = ADD_PROD_STOCK, (i['tid'],i['tid'])
+        elif act=='ADD_REJ_STOCK': q, param = ADD_REJ_STOCK, (i['tid'],i['tid'])
+        elif act=='REM_NT_STOCK': q, param = REM_NT_STOCK, (i['tid'],i['tid'])
+        elif act=='REM_PROD_STOCK': q, param = REM_PROD_STOCK, (i['tid'],i['tid'])
+        elif act=='REM_REJ_STOCK': q, param = REM_REJ_STOCK, (i['tid'],i['tid'])
         else: q, param = IDENTIFY, (i['sn'])
         return q, param
 
