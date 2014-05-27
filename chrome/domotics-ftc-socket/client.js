@@ -103,6 +103,7 @@ function disableOnConnect(connected) {
   $("#ip").prop('disabled', connected);
   $("#btnAddress").prop('disabled', !connected);
   $("#btnVersion").prop('disabled', !connected);
+  $("#btnExit").prop('disabled', !connected);
   $("#btnName").prop('disabled', !connected);
   $("#btnStatus").prop('disabled', !connected);
 }
@@ -128,11 +129,28 @@ function log(msg) {
   /*list.append('<li>something</li>');*/
   if (bright_dark) {
     bright_dark = false;
-    list.prepend('<li class="bright">' + time + '-> ' + msg + '</li>');
+    list.prepend('<li class="bright">{0}-> {1}</li>'.format(time, msg));
   } else {
     bright_dark = true;
-    list.prepend('<li class="dark">' + time + '-> ' + msg + '</li>');
+    list.prepend('<li class="dark">{0}-> {1}</li>'.format(time, msg));
   }
+}
+
+// First, checks if it isn't implemented yet.
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+function error_log(code, data) {
+  log("ftc message error: {0}, {1}".format(code, data));
 }
 
 function toggleClearLogDialog() {
@@ -321,6 +339,15 @@ function startJqm() {
     var cmd =  new Uint8Array(3);
     cmd[0] = 0x4C;
     cmd[1] = 0x77;
+    cmd[2] = 0xAA;
+    buildFtc(cmd, function (buf) {
+      writeData(buf);
+    });
+  });
+  $("#btnExit").click(function() {
+    var cmd =  new Uint8Array(3);
+    cmd[0] = 0x48;
+    cmd[1] = 0x72; // 'r' exit FTC, go back to gateway
     cmd[2] = 0xAA;
     buildFtc(cmd, function (buf) {
       writeData(buf);
