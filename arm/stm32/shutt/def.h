@@ -2,6 +2,9 @@
 #define __DEF_H
 
 #include "stm32f10x.h"
+/*#include "cmsis_nvic.h"*/
+
+#define NVIC_EN0_R              (*((volatile uint32_t *)0xE000E100))
 
 #define BIT0    0x0001 
 #define BIT1    0x0002 

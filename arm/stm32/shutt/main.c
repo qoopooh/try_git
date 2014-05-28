@@ -90,10 +90,27 @@ void TIM2_IRQHandler(void)
   TIM2->SR &= ~(TIM_SR_UIF);
 }
 
+
+//################## Interrupt Configuration Routine #########################
+void NVIC_Configuration(void)
+{
+  //NVIC_InitTypeDef NVIC_InitStructure;
+
+  ////enable tim2 irq
+  //NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+  //NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  //NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  //NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  //NVIC_Init(&NVIC_InitStructure);
+  NVIC_EN0_R |= (1<<TIM2_IRQn); // Enable Timer 2
+}
+
 void main(void)
 {
 //  debug_exit(0);
   board_init();
+  /* Interrupt Config */
+  NVIC_Configuration();
   timer_init();
   state = 0;
   debug_printf("hello world\n");
