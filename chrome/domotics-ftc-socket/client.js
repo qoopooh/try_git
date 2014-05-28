@@ -272,7 +272,20 @@ function clearStorage() {
   });
 }
 
+function getVersion(callback) {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open('GET', 'manifest.json');
+  xmlhttp.onload = function (e) {
+      var manifest = JSON.parse(xmlhttp.responseText);
+      callback(manifest.version);
+  }
+  xmlhttp.send(null);
+}
+
 function startJqm() {
+  getVersion(function (ver) {
+    $("#title").text("FTC Over IP V" + ver);
+  });
   /*$("#currenttime").text(new Date());*/
   $("#ip").keypress(function(e) {
     if (e.which === 13) {

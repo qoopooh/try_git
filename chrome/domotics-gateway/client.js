@@ -274,7 +274,20 @@ function clearStorage() {
   });
 }
 
+function getVersion(callback) {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open('GET', 'manifest.json');
+  xmlhttp.onload = function (e) {
+      var manifest = JSON.parse(xmlhttp.responseText);
+      callback(manifest.version);
+  }
+  xmlhttp.send(null);
+}
+
 function startJqm() {
+  getVersion(function (ver) {
+    $("#version").text("A-touch Gateway V" + ver);
+  });
   $("#ip").keypress(function(e) {
     if (e.which === 13) {
       e.preventDefault();
