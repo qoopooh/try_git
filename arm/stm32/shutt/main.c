@@ -3,6 +3,9 @@
 #include "def.h"
 #include <stdio.h>
 
+const int TIMER_PSC_1SEC = 10000;
+const int TIMER_ARR_1SEC = 4800;
+
 uint32_t state;
 
 void delay(int count)
@@ -17,7 +20,10 @@ void board_init(void)
   uint32_t mode;
   uint32_t pin;
 
-  RCC->CFGR |= RCC_CFGR_PLLMULL_0 | RCC_CFGR_PLLSRC; // HSE oscillator clock selected as PLL input clock
+  RCC->CFGR |= RCC_CFGR_PLLSRC; // HSE oscillator clock selected as PLL input clock
+  RCC->CFGR &= ~(RCC_CFGR_PLLXTPRE);   // no HSE divider for PLL entry
+  RCC->CFGR |= RCC_CFGR_PLLMULL_2; // 0100: PLL input clock x6 = 8MHz * 8 = 48MHz
+  RCC->CFGR |= RCC_CFGR_SW_PLL;
   RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
   RCC->CR |= RCC_CR_HSEON | RCC_CR_PLLON;
   while ((RCC->CR & RCC_CR_PLLRDY) == 0);
@@ -52,8 +58,8 @@ void board_init(void)
 
 void timer_init(void)
 {
-  TIM2->PSC = 10; // prescaler
-  TIM2->ARR = 10; // autoreload
+  TIM2->PSC = TIMER_PSC_1SEC; // prescaler
+  TIM2->ARR = TIMER_ARR_1SEC; // autoreload
   TIM2->DIER |= TIM_DIER_UIE;
 
   TIM2->CR1 |= TIM_CR1_CEN; // Timer 2 upcounter is enable
@@ -107,7 +113,6 @@ void NVIC_Configuration(void)
 
 void main(void)
 {
-//  debug_exit(0);
   board_init();
   /* Interrupt Config */
   NVIC_Configuration();
@@ -132,3 +137,4 @@ void main(void)
     }
   }
 }
+
