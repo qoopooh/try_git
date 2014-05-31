@@ -6,7 +6,8 @@ HEX=$(addprefix $(OBJDIR)/, $(notdir $(CURDIR)).hex)
 LST=$(addprefix $(OBJDIR)/, $(notdir $(CURDIR)).lst)
 
 ## Tool path
-TOOLROOT=$(HOME)/bin/gcc-arm-none-eabi/bin
+#TOOLROOT=$(HOME)/bin/gcc-arm-none-eabi/bin
+TOOLROOT=/usr/bin
 
 ## Library path
 LIBROOT=$(HOME)/bin/STM32F10x_StdPeriph_Lib_V3.5.0
