@@ -1,5 +1,6 @@
 package com.berm.motor;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -34,5 +35,13 @@ public class AppTest
     public void testApp()
     {
         assertTrue( true );
+    }
+
+    /**
+      * Test compact car
+      */
+    public void testCompact() {
+        Assert.assertEquals(App.getHondaCity(),
+                "Compact car: Honda, City, 2003, seating: 4, 4 doors.");
     }
 }
