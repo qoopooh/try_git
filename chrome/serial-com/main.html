@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="assets/css/jquery.mobile-1.4.2.min.css">
+  <link rel="stylesheet" href="assets/css/jquery.mobile.theme-1.4.2.min.css">
+  <script src="assets/js/jquery.js"></script>
+  <script src="assets/js/jquery.mobile-1.4.2.min.js"></script>
+</head>
+<body>
+  <div id="title">FTC Over IP</div>
+  <!--<p id="currenttime">date</p>-->
+  <div id="chatwindow">
+    <div id="messagewindow">
+      <ul></ul>
+    </div>
+  </div>
+  <div id="inputcontainer">
+    IP:<input id="ip" type="text">
+    <input id="chkConnect" type="checkbox">Connect</input>
+    <br/>
+    <input id="chkTranslate" type="checkbox" checked>Translate</input>
+    <input id="chkOneLine" type="checkbox" checked>1 line</input>
+    <input id="chkReceive" type="checkbox" checked>Receive</input>
+    <br/>
+    <button id="btnClear">Clear</button>
+    <button id="btnAddress">Address</button>
+    <button id="btnVersion">Version</button>
+    <button id="btnExit">Exit FTC</button>
+    <button id="btnName">Name</button>
+    <button id="btnStatus">Status</button>
+    <button id="txtCommandCount" disabled>-</button>
+    <select id="selectCommandDevices">
+      <option>-</option>
+    </select>
+  </div>
+  <div id="overlay_log">
+    <div>
+      <p>Would you like to clear the log?</p>
+      <button id="btnClearLog">Yes</button>
+      <button id="btnNotClearLog">No</button>
+    </div>
+  </div>
+  <div id="overlay_lost">
+    <div>
+      <p id="lostMsg">Connection Failed!</p>
+      <p>Please try to reconnect again.</p>
+      <button id="btnLostConfirm">OK</button>
+    </div>
+  </div>
+  <!--<script src="converter.js"></script>-->
+  <!--<script src="mti.js"></script>-->
+  <!--<script src="client.js"></script>-->
+</body>
+</html>
+

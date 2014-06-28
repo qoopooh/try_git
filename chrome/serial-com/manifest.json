@@ -1,0 +1,26 @@
+{
+  "name": "Serial Communication",
+  "short_name": "serial-com",
+  "version": "0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "33",
+  "description": "This application is used for debugging serial port",
+
+  "app": {
+    "background": {
+      "scripts": [ "background.js" ],
+      "transient": true
+    }
+  },
+
+  "icons": {
+    "16": "assets/images/icon-16.png",
+    "128": "assets/images/logo-domotics-icon.png"
+  },
+
+  "permissions": [
+    "serial",
+    "storage"
+  ]
+}
+
