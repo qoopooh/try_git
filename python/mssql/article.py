@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 import sys, re
 import pymssql, web
@@ -160,6 +160,12 @@ def gen_report(article, UNIK_QUERY, group='all'):
 
     return rowarray_list
 
+def gen_bom(article, rev):
+    bom = {'rev': '0', 'name': '', 'date': '2014-06-30', 'header': [], \
+        'info': []}
+
+    return bom
+
 class index:
 
     def GET(self):
@@ -204,9 +210,17 @@ class Info:
                 gen_report(i.a, UNIK_USED),
                 gen_report(i.a, UNIK_SUB))
 
+class Bom:
+
+    def GET(self):
+        i = web.input(a=None, rev=None)
+        return render.article_bom(i.a, \
+                gen_bom(i.a, i.rev))
+
 urls = (
     '/', 'index',
     '/info', 'Info',
+    '/bom', 'Bom',
 )
 
 template_globals = {
