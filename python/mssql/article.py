@@ -3,8 +3,10 @@
 
 __version__ = '1.2'
 
-import sys, re
+import sys, re, time, csv, codecs
 import pymssql, web
+
+from StringIO import StringIO
 
 SQL_SERVER = "erpraid\\sqlexpress"
 USER = "cis"
@@ -111,6 +113,11 @@ SELECT a1.Artikelnummer,
     ORDER BY a1.Artikelnummer, StkPositionsnummer
 """
 
+
+#######################################################################
+# Functions
+#######################################################################
+
 def gen_report(article, UNIK_QUERY, group='all'):
 
     count = 0
@@ -160,11 +167,83 @@ def gen_report(article, UNIK_QUERY, group='all'):
 
     return rowarray_list
 
+def query_bom(article):
+    headers = ["No.", "Article", "Match Code", \
+            "Description", "Quantity", "Unit", "Multiplier", \
+            "Designator"]
+    info = []
+    count = 0
+    conn = pymssql.connect(host=SQL_SERVER, user=USER, password=PASSWD,
+            database=DATABASE, as_dict=True)
+    cur = conn.cursor()
+    cur.execute(UNIK_SUB, (article))
+    rows=cur.fetchall()
+    conn.close()
+
+    for row in rows:
+        count += 1
+        result = count, row['ItemNumber'], \
+                 row['Matchcode'], row['Description1'], \
+                 row['Quantity'], row['Unit'], row['Multiplier'], \
+                 row['PositionOnBoard']
+        for r in result:
+            if isinstance(r, basestring):
+                r = r.encode('utf-8')
+        info.append(result)
+
+    return headers, info
+
 def gen_bom(article, rev):
-    bom = {'rev': '0', 'name': '', 'date': '2014-06-30', 'header': [], \
+    bom = {'rev': '0', 'name': '', 'date': '2014-06-30', 'headers': [], \
         'info': []}
+    bom["name"] = gen_report(article, UNIK_DETAIL)[0][0] # Match code
+    if rev != None:
+        bom["rev"] = rev
+    bom["date"] = time.strftime("%y-%m-%d %H:%M")
+    query = query_bom(article)
+    bom["headers"] = query[0]
+    bom["info"] = query[1]
 
     return bom
+
+#######################################################################
+# Classes
+#######################################################################
+
+class UnicodeWriter:
+    """
+    A CSV writer which will write rows to CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        # Redirect output to a queue
+        self.queue = StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+
+    def writerow(self, row):
+        t = []
+        for s in row:
+            if isinstance(s, basestring):
+                t.append(s.encode("utf-8"))
+            else:
+                t.append(s)
+
+        # Fetch UTF-8 output from the queue ...
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        # ... and reencode it into the target encoding
+        data = self.encoder.encode(data)
+        # write to the target stream
+        self.stream.write(data)
+        # empty queue
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
 
 class index:
 
@@ -214,8 +293,29 @@ class Bom:
 
     def GET(self):
         i = web.input(a=None, rev=None)
-        return render.article_bom(i.a, \
-                gen_bom(i.a, i.rev))
+        bom = gen_bom(i.a, i.rev)
+
+        csv_file = StringIO()
+        writer = csv.writer(csv_file)
+        writer.writerow(["ARTICLE:", i.a])
+        writer.writerow(["MODEL:", bom["name"]])
+        writer.writerow(["REVISION:", bom["rev"]])
+        writer.writerow(["DATE:", bom["date"]])
+        writer.writerow([])
+        writer.writerow(bom["headers"])
+        for row in bom["info"]:
+            r = []
+            for col in row:
+                if isinstance(col, basestring):
+                    r.append(col.encode('utf-8'))
+                else:
+                    r.append(col)
+            writer.writerow(r)
+
+        filename = "BOM_" + i.a + "_" + bom["name"].strip() + ".csv"
+        web.header('Content-Type', 'text/cvs')
+        web.header('Content-disposition', 'attachment; filename=' + filename)
+        return csv_file.getvalue()
 
 urls = (
     '/', 'index',

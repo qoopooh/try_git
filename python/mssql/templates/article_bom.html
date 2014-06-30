@@ -4,8 +4,19 @@ $def with(article, bom)
     <title>Unikware BOM V$version - $article</title>
 </head>
 <body>
-$article
-$bom
+<div>
+ARTICLE, :$article
+MODEL, :$bom["name"]
+REVISION, :$bom["rev"]
+DATE, :$bom["date"]
+</div>
+<div>
+$for x in bom["headers"]
+    $x
+</div>
+<div>
+$bom["info"]
+</div>
 </body>
 </html>
 
