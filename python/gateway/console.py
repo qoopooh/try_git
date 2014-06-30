@@ -13,7 +13,7 @@ from time import localtime, strftime
 from encrypt import Encrypt
 
 BUFFER_SIZE = 1024
-REQ_PHONE_ID = "R,U,{uuid}\r\n"
+REQ_PHONE_ID = "0,R,U,{uuid}\r\n"
 
 def remove_newline(msg):
     return msg.replace('\r\n','')
@@ -45,13 +45,14 @@ def main(argv, gateway=GATEWAY, uuid=UUID, f_hex=HEX):
             f_hex = True
 
 
-    print gateway, uuid
+    register = REQ_PHONE_ID.format(uuid=uuid)
+    print register
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((gateway, TCP_PORT))
-    s.send(REQ_PHONE_ID.format(uuid=uuid))
+    s.send(register)
     data = s.recv(BUFFER_SIZE)
     print '[HANDSHAKE]', data
-    if len(data) != 9:
+    if len(data) != 11:
         print 'Incorrect message'
         sys.exit(1)
     e = Encrypt(uuid=uuid, phone_id=data[4])
