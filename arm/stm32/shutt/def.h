@@ -1,6 +1,11 @@
 #ifndef __DEF_H
 #define __DEF_H
 
+#ifndef STARTUP_FROM_RESET
+#define DEBUG
+#include <__cross_studio_io.h>
+#endif
+
 #include "stm32f10x.h"
 /*#include "cmsis_nvic.h"*/
 
