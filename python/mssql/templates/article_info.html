@@ -62,7 +62,7 @@ $else:
         $for col in row:
             $ nr += 1
             $if nr == 2:
-                <td><a href="info?a=$col">$col</a></td>
+                <td width="10%"><a href="info?a=$col">$col</a></td>
             $else:
                 <td>$col</td>
         </tr>
@@ -92,14 +92,16 @@ $else:
         $for col in row:
             $ nr += 1
             $if nr == 2:
-                <td><a href="info?a=$col">$col</a></td>
+                <td width="10%"><a href="info?a=$col">$col</a></td>
             $else:
                 <td>$col</td>
         </tr>
     </table>
+    <button type="button" id="btnBOM">Generate BOM</button>
 </div>
 
-<script type="text/javascript" src="static/js/article.js"></script>
+<script type="text/javascript" src="static/js/QueryString.js"></script>
+<script type="text/javascript" src="static/js/article_info.js"></script>
 </body>
 </html>
 
