@@ -199,7 +199,7 @@ def gen_bom(article, rev):
     bom["name"] = gen_report(article, UNIK_DETAIL)[0][0] # Match code
     if rev != None:
         bom["rev"] = rev
-    bom["date"] = time.strftime("%y-%m-%d %H:%M")
+    bom["date"] = time.strftime("%Y-%m-%d %H:%M")
     query = query_bom(article)
     bom["headers"] = query[0]
     bom["info"] = query[1]
@@ -296,7 +296,7 @@ class Bom:
         bom = gen_bom(i.a, i.rev)
 
         csv_file = StringIO()
-        writer = csv.writer(csv_file)
+        writer = csv.writer(csv_file, delimiter=",")
         writer.writerow(["ARTICLE:", i.a])
         writer.writerow(["MODEL:", bom["name"]])
         writer.writerow(["REVISION:", bom["rev"]])
