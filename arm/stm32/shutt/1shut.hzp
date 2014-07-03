@@ -56,7 +56,11 @@
     </folder>
     <folder Name="Header Files">
       <file file_name="stm32f10x.h" />
+      <file file_name="def.h" />
     </folder>
+    <configuration
+      Name="Release"
+      c_preprocessor_definitions="STARTUP_FROM_RESET" />
   </project>
   <configuration Name="THUMB Debug" inherited_configurations="THUMB;Debug" />
   <configuration

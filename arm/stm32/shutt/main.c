@@ -1,4 +1,4 @@
-#include <__cross_studio_io.h>
+
 #include "stdint.h"
 #include "def.h"
 #include <stdio.h>
@@ -143,7 +143,9 @@ void main(void)
   NVIC_Configuration();
   timer_init();
   state = 0;
+#ifdef DEBUG
   debug_printf("hello world\n");
+#endif
 
   while (1) {
     switch (state) {
