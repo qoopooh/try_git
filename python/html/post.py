@@ -11,7 +11,7 @@ data={"packageName":"com.simple_different.android",
   "uid":"1082",
   "sid":"1499",
   "orderId":"12999763169054705758.1306450723735179",
-  "price":u"฿1,600.00"}
+  "price":"฿1,600.00"}
 
 print "DATA:", repr(data)
 
