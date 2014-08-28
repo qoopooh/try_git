@@ -3,7 +3,7 @@
  */
 var express = require('express')
   , http = require('http')
-  , mysql = require('mysql')
+  /*, mysql = require('mysql')*/
   , path = require('path');
 
 var fs = require('fs');
@@ -84,8 +84,8 @@ FTC_COMMANDS = {
 }
 
 var SerialPort = require('serialport').SerialPort;
-/*var serial = new SerialPort(config.serial_port, { baudrate: 38400 });*/
-var serial = new SerialPort("/dev/ttyS0", { baudrate: 38400 });
+var serial = new SerialPort(config.serial_port, { baudrate: 38400 });
+/*var serial = new SerialPort("/dev/ttyS0", { baudrate: 38400 });*/
 serial.on('open', function() {
   log('Open serial port', serial.path);
   serial.on('data', getFtcMessage);
@@ -230,40 +230,40 @@ function sendFtc(data, sum) {
 
 function dbAddCommand(sn, callback) {
   return callback(); // ignore sql
-  var q = "SELECT id FROM command WHERE serial='" + sn + "';";
+  /*var q = "SELECT id FROM command WHERE serial='" + sn + "';";*/
 
-  try {
-    /*if (f_sql_failed) {*/
-    /*try {*/
-        var sql = mysql.createConnection(sql_options);
-        /*} catch (err) {*/
-        /*return callback(err);*/
-        /*}*/
-        /*}*/
-    sql.query(q, function(err, rows, fields) {
-      if (err)
-        return callback(err, q);
-      if (rows.length > 0) {
-        if (arguments.length == 3) {
-          return callback(err, q);
-        }
-        return;
-      }
+  /*try {*/
+  /**//*if (f_sql_failed) {*/
+  /**//*try {*/
+  /*var sql = mysql.createConnection(sql_options);*/
+  /**//*} catch (err) {*/
+  /**//*return callback(err);*/
+  /**//*}*/
+  /**//*}*/
+  /*sql.query(q, function(err, rows, fields) {*/
+  /*if (err)*/
+  /*return callback(err, q);*/
+  /*if (rows.length > 0) {*/
+  /*if (arguments.length == 3) {*/
+  /*return callback(err, q);*/
+  /*}*/
+  /*return;*/
+  /*}*/
 
-      var date = dateToString();
-      q = "INSERT INTO command (serial, create_date) VALUES ('" + sn + "', '"
-          + date + "');";
-      sql.query(q, function(err, rows, fields) {
-        /*if (err) throw err;*/
-        if (arguments.length == 3) {
-          return callback(err, q);
-        }
-      });
-    });
-  } catch (err) {
-    f_sql_failed = true;
-    return callback(err);
-  }
+  /*var date = dateToString();*/
+  /*q = "INSERT INTO command (serial, create_date) VALUES ('" + sn + "', '"*/
+  /*+ date + "');";*/
+  /*sql.query(q, function(err, rows, fields) {*/
+  /**//*if (err) throw err;*/
+  /*if (arguments.length == 3) {*/
+  /*return callback(err, q);*/
+  /*}*/
+  /*});*/
+  /*});*/
+  /*} catch (err) {*/
+  /*f_sql_failed = true;*/
+  /*return callback(err);*/
+  /*}*/
 }
 
 function dateToString(d) {
