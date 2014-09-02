@@ -181,6 +181,7 @@ function translate(words, cb) {
       break;
     case 'CMD_NAME':
     case 'CMD_SOFT_VERSION':
+    case 'CMD_LEDS_BUZZ':
       translateProductCommand(cmd, words, function(text) {
         text += ', ' + hexStringToAscii(words, 8);
         cb(text);
@@ -202,7 +203,10 @@ function hexStringToAscii(w, offset, len) {
   if (!len)
     len = w.length;
   for (var i = offset; i < len; ++i) {
-    str += String.fromCharCode(parseInt(w[i], 16));
+    var ch = parseInt(w[i], 16);
+    if ((ch < 32) || (ch > 126))
+      ch = 63; // ?
+    str += String.fromCharCode(ch);
   }
 
   return str;
