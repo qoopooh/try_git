@@ -18,6 +18,8 @@ def resize(infile):
     print 'Thumbnailing', infile
 
 def remove(fn):
+    if THUMB in infile:
+        return
     os.remove(fn)
     print 'Removed', fn
 
