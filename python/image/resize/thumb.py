@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding:utf-8 -*-
 
 import os
 from PIL import Image
@@ -8,17 +9,17 @@ THUMB = "-thumb"
 SIZE = 1024, 768
 TYPES = ('*.jpg', '*.JPG', '*.png', '*.jpeg')
 
-def resize(infile):
-    if THUMB in infile:
+def resize(fn):
+    if THUMB in fn:
         return
-    outfile = os.path.splitext(infile)
-    im = Image.open(infile)
+    outfile = os.path.splitext(fn)
+    im = Image.open(fn)
     im.thumbnail(SIZE, Image.ANTIALIAS)
     im.save(outfile[0] + THUMB + outfile[1], "JPEG")
-    print 'Thumbnailing', infile
+    print 'Thumbnailing', fn
 
 def remove(fn):
-    if THUMB in infile:
+    if THUMB in fn:
         return
     os.remove(fn)
     print 'Removed', fn
