@@ -34,6 +34,22 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1-beta-1</version>
+        <executions>
+          <execution>
+          <goals>
+            <goal>java</goal>
+          </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>com.berm.swing.App</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

@@ -57,8 +57,16 @@ public class RectangleAreaCalculator extends JFrame
         public void actionPerformed(ActionEvent e) {
             double length, width, area;
 
-            length = Double.parseDouble(lengthText.getText());
-            width = Double.parseDouble(widthText.getText());
+            try {
+                length = Double.parseDouble(lengthText.getText());
+            } catch (NumberFormatException ex) {
+                length = 0;
+            }
+            try {
+                width = Double.parseDouble(widthText.getText());
+            } catch (NumberFormatException ex) {
+                width = 0;
+            }
             area = length * width;
 
             areaText.setText("" + area);

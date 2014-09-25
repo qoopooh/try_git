@@ -8,8 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
         RectangleAreaCalculator rectObj = new RectangleAreaCalculator();
-        System.out.println( "Bye" );
+        System.out.println( "Hello World!" );
     }
 }
