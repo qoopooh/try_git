@@ -22,8 +22,8 @@ public class RectangleAreaCalculator extends JFrame
         widthLabel = new JLabel("Please enter the rectangle's width: ");
         areaLabel = new JLabel("ค่าพื้นที่คือ: ", SwingConstants.RIGHT);
 
-        lengthText = new JTextField(12);
-        widthText = new JTextField(12);
+        lengthText = new JTextField("40", 12);
+        widthText = new JTextField("30", 12);
         areaText = new JTextField(12);
 
         calculateButton = new JButton("What's the Area?");
@@ -60,7 +60,8 @@ public class RectangleAreaCalculator extends JFrame
         pane.add(calculateButton);
         pane.add(exitButton);
 
-        setSize(WIDTH, HEIGHT);
+        //setSize(WIDTH, HEIGHT);
+		pack();
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
