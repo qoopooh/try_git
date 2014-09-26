@@ -76,7 +76,17 @@ public class RectangleAreaCalculator extends JFrame
     private class ExitButtonHandler implements ActionListener
     {
         public void actionPerformed(ActionEvent e) {
-            System.exit(0);
+            String name = JOptionPane.showInputDialog(null, "What is your name?");
+
+            if (name == null)
+                return;
+
+            int choice = JOptionPane.showConfirmDialog(null,
+                    String.format("Do you want really close the app, %s?", name));
+            if (choice == JOptionPane.YES_OPTION) {
+                JOptionPane.showMessageDialog(null, "See you next time, " + name);
+                System.exit(0);
+            }
         }
     }
 }
