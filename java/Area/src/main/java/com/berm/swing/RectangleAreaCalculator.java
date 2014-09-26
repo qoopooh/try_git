@@ -3,6 +3,7 @@ package com.berm.swing;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+//import java.net.URL;
 
 public class RectangleAreaCalculator extends JFrame
 {
@@ -32,6 +33,9 @@ public class RectangleAreaCalculator extends JFrame
         exitButton = new JButton("ปิด");
         exitButtonHandler = new ExitButtonHandler();
         exitButton.addActionListener(exitButtonHandler);
+        //exitButton.setIcon(new ImageIcon("images/d-mcu.png"));
+        //URL imageURL = RectangleAreaCalculator.class.getResource("images/d-mcu.png");
+        //exitButton.setIcon(new ImageIcon(imageURL));
 
 
         // Add icon does not work
