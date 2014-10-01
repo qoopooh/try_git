@@ -248,7 +248,7 @@ class UnicodeWriter:
 class index:
 
     def GET(self):
-        i = web.input(search='900-', group='article')
+        i = web.input(search='780-', group='article')
         length = len(i.search)
         a = '-'
         if i.group == 'article':
