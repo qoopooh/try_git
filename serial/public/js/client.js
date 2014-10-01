@@ -225,7 +225,7 @@ function translateProductCommand(cmd, words, cb) {
   }
 
   text = product + ',' + sn + ',' + cmd + ',' + SRC[words[0]] + ','
-    + DST[words[1]] + ',' + MSG_TYPE[words[2]];
+      + DST[words[1]] + ',' + MSG_TYPE[words[2]];
   cb(text);
 }
 
@@ -310,11 +310,37 @@ function getStatus(words, text, cb) {
         }
         text += parseInt(words[10], 16) + '%';
       }
+    case 'W-1DIMRGB':
+      if (words.length !== 16)
+        break;
+      var out = parseInt(words[8], 16);
+      var d_stat = getStatText(parseInt(words[9], 16));
+      var d_val = parseInt(words[10], 16);
+      var h_stat = getStatText(parseInt(words[11], 16));
+      var h_val = (parseInt(words[12], 16) * 256) + parseInt(words[13], 16);
+      var s_stat = getStatText(parseInt(words[14], 16));
+      var s_val = parseInt(words[15], 16);
+
+      /*console.log("W-1DIMRGB", d_stat, d_val, h_stat, h_val, s_stat, s_val);*/
+      text += ',d-' + d_stat + ',dv-' + d_val;
+      text += ',h-' + h_stat + ',hv-' + h_val;
+      text += ',s-' + s_stat + ',sv-' + s_val;
       break;
     default:
       break;
   }
   cb(text);
+}
+
+function getStatText(stat) {
+  if (stat == 0) {
+    return "STOP";
+  } else if (stat == 1) {
+    return "UP";
+  } else if (stat == 2) {
+    return "DOWN";
+  }
+  return "UNKNOWN";
 }
 
 function addCommandDevices(words) {
