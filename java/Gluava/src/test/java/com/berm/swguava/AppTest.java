@@ -6,6 +6,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 /**
@@ -80,7 +82,48 @@ public class AppTest
         assertFalse(aToZ.matchesAllOf("scream4"));
     }
 
-    public void TestJoiner() {
-        ArrayList<String> charList = Lists.newArrayList("a", "b", "c", "d");
+    public void testJoiner() {
+        ArrayList charList = Lists.newArrayList("a", "b", "c", "d");
+        StringBuilder buffer = new StringBuilder();
+
+        buffer = Joiner.on("|").appendTo(buffer, charList);
+        assertTrue(buffer.toString().equals("a|b|c|d"));
+
+        String joinedCharList = Joiner.on(", ").join(charList);
+        assertTrue(joinedCharList.equals("a, b, c, d"));
+
+        charList.add(null);
+        String join4 = Joiner.on(" - ").skipNulls().join(charList);
+        assertTrue(join4.equals("a - b - c - d"));
+
+        join4 = Joiner.on(" - ").useForNull("defaultValue").join(charList);
+        assertTrue(join4.equals("a - b - c - d - defaultValue"));
+
+        join4 = Joiner.on("|").join("first", "second", "third");
+        assertTrue(join4.equals("first|second|third"));
+    }
+
+    public void testNullString() {
+        String arg = "";
+        assertTrue(Strings.isNullOrEmpty(arg));
+        arg = null;
+        assertTrue(Strings.isNullOrEmpty(arg));
+        arg = "something";
+        assertFalse(Strings.isNullOrEmpty(arg));
+    }
+
+    public void testRepeatedString() {
+        String repeat = Strings.repeat("beetlejuice", 3);
+        assertTrue(repeat.equals("beetlejuicebeetlejuicebeetlejuice"));
+    }
+
+    public void testPadding() {
+        String padEnd = Strings.padEnd("star wars", 15, 'X');
+        String padStart = Strings.padStart("star wars", 15, 'X');
+
+        assertTrue(padEnd.equals("star warsXXXXXX"));
+        assertTrue(padEnd.length() == 15);
+        assertTrue(padStart.equals("XXXXXXstar wars"));
+        assertTrue(padStart.length() == 15);
     }
 }
