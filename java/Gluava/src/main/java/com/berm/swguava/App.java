@@ -1,6 +1,7 @@
 package com.berm.swguava;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Joiner;
@@ -26,14 +27,28 @@ class MJoiner
     }
 }
 
+class Order
+{
+    private List < Employee > employeeList;
+    public Order() {
+        Employee sezinKarli = new Employee(4, "Sezin Karli", 4);
+        Employee darthVader =  new Employee(3, "Darth Vader", 5);
+        Employee hanSolo =  new Employee(2, "Han Solo", 10);
+        employeeList = Lists.newArrayList(sezinKarli, hanSolo, darthVader);
+    }
+
+    public List<Employee> getList() {
+        return employeeList;
+    }
+}
+
 /**
  * Test guava libraries
  *
  */
 public class App 
 {
-    public static void main( String[] args )
-    {
+    private static void StringTest() {
         MJoiner joiner = new MJoiner();
         System.out.println(joiner.toString());
 
@@ -53,5 +68,15 @@ public class App
 
         emptyToNull = Strings.emptyToNull("");
         System.out.println(emptyToNull);
+    }
+
+    private static void OrderTest() {
+        Order order = new Order();
+        System.out.println(order.getList());
+    }
+
+    public static void main( String[] args ) {
+        //StringTest();
+        OrderTest();
     }
 }
