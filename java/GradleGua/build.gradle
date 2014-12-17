@@ -3,6 +3,12 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.berm.guava.Compar'
+    }
+}
+
 task initSourceFolders { // add << before { to prevent executing during configuration phase
      sourceSets*.java.srcDirs*.each { it.mkdirs() }
         sourceSets*.resources.srcDirs*.each { it.mkdirs() }
