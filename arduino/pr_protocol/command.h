@@ -6,8 +6,10 @@
 
 class Command {
   public:
-    Command(unsigned char);
+    Command(unsigned char cmd);
     Command(unsigned char cmd, char *param, int p_size);
+    Command(unsigned char cmd, char param);
+    Command(unsigned char cmd, char param1, char param2);
     ~Command();
 
     unsigned char getCommand();

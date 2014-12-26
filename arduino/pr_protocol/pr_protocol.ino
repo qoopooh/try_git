@@ -45,6 +45,7 @@ void readCommand() {
         char *param = command->getParam();
         p_size = command->getParamSize();
 
+        // Debug command information
         Serial.print("Command: ");
         Serial.println(command->getCommand());
         Serial.print("Parameter size: ");
@@ -58,6 +59,10 @@ void readCommand() {
         Serial.print("String: ");
         Serial.println(command->toString(buffer, sizeof(buffer)));
 
+        // Handle the command
+
+
+        // Clean up command
         delete command;
         command = NULL;
       }

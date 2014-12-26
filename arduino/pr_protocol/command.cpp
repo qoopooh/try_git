@@ -23,6 +23,23 @@ Command::Command(unsigned char cmd, char *param, int p_size) {
   }
 }
 
+Command::Command(unsigned char cmd, char param) {
+  m_cmd = cmd;
+  m_param_size = 1;
+
+  m_param = new char[1];
+  m_param[0] = param;
+}
+
+Command::Command(unsigned char cmd, char param1, char param2) {
+  m_cmd = cmd;
+  m_param_size = 2;
+
+  m_param = new char[2];
+  m_param[0] = param1;
+  m_param[1] = param2;
+}
+
 Command::~Command() {
   if (m_param != NULL) {
     delete m_param;
