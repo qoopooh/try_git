@@ -24,22 +24,32 @@ char * Convert::HexToAscii(const char *in_buff, int nr_bytes, char *out_buff)
   return out_buff;
 }
 
-char * Convert::AsciiToHex(char const *in_buff, int nr_words, char *out_buff)
+char * Convert::AsciiToHex(char const *in_buff, int nr_hex, char *out_buff)
 {
-  int i,j;
+  int nr_words = nr_hex << 1;
+  int j = 0;
+  int i;
+  char ch;
 
-  for ( i = 0; i<(nr_words*2); i++ ) {
-    j = i>>1;
-    if ( in_buff[i] > '9' )
-      out_buff[j] = in_buff[i] - 0x37;
+  for ( i = 0; i<nr_words; i++ ) {
+    ch = in_buff[i];
+    if (ch > 0x60)  // a, b, c, ...
+      ch -= 0x20;   // now is A, B, C, ...
+    if ( ch > '9' )
+      out_buff[j] = ch - 0x37;
     else
-      out_buff[j] = in_buff[i] - 0x30;
+      out_buff[j] = ch - 0x30;
     out_buff[j] <<= 4;
-    i++;
-    if ( in_buff[i] > '9' )
-      out_buff[j] |= (in_buff[i] - 0x37);
+
+    ch = in_buff[++i];
+    if (ch > 0x60)  // a, b, c, ...
+      ch -= 0x20;   // now is A, B, C, ...
+    if ( ch > '9' )
+      out_buff[j] |= (ch - 0x37);
     else
-      out_buff[j] |= (in_buff[i] - 0x30);
+      out_buff[j] |= (ch - 0x30);
+
+    ++j;
   }
 
   return out_buff;
