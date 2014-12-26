@@ -55,6 +55,8 @@ void readCommand() {
           Serial.print(" ");
         }
         Serial.println();
+        Serial.print("String: ");
+        Serial.println(command->toString(buffer, sizeof(buffer)));
 
         delete command;
         command = NULL;

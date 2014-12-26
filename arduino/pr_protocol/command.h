@@ -2,6 +2,7 @@
 #define COMMAND_H
 
 #include "Arduino.h"
+#include "convert.h"
 
 class Command {
   public:
@@ -11,11 +12,12 @@ class Command {
 
     unsigned char getCommand();
     int getParamSize();
-    char * getParam();
+    char* getParam();
+    char* toString(char* buffer, int buffer_size);
 
   private:
     unsigned char m_cmd;
-    char * m_param;
+    char* m_param;
     int m_param_size;
 };
 
