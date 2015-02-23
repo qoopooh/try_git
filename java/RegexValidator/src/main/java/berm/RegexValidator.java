@@ -32,7 +32,7 @@ public class RegexValidator {
   * 
   * @return true, if is field valid
   */
-  protected boolean isFieldValid(String value)
+  public boolean isFieldValid(String value)
   {
     return Pattern.matches(mRegex, value);
   }
