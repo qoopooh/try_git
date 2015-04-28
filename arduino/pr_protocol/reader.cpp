@@ -1,6 +1,6 @@
 #include "reader.h"
 
-Reader::Reader() {
+Reader::Reader() : m_auto_read(true) {
 }
 
 Reader::~Reader() {
@@ -26,6 +26,16 @@ void Reader::handle(Command* cmd) {
       t_cmd = new Command(id, param, 2);
       assignNewCommand(t_cmd);
       break;
+    case CMD_STOP_AUTO_READ:
+      m_auto_read = false;
+      t_cmd = new Command(id, param, 0);
+      assignNewCommand(t_cmd);
+      break;
+    case CMD_START_AUTO_READ:
+      m_auto_read = true;
+      t_cmd = new Command(id, param, 0);
+      assignNewCommand(t_cmd);
+      break;
     default:
       break;
   }
@@ -33,6 +43,10 @@ void Reader::handle(Command* cmd) {
 
 bool Reader::isCommandAvailable() {
   return m_cmd_available;
+}
+
+bool Reader::isAutoRead() {
+  return m_auto_read;
 }
 
 Command* Reader::getCommand() {

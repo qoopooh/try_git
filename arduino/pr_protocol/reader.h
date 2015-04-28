@@ -11,6 +11,7 @@ class Reader {
 
     void handle(Command* cmd);
     bool isCommandAvailable();
+    bool isAutoRead();
     Command* getCommand();
 
   protected:
@@ -19,6 +20,7 @@ class Reader {
   private:
     Command* m_cmd;
     bool m_cmd_available;
+    bool m_auto_read;
 };
 
 #endif /* READER_H */

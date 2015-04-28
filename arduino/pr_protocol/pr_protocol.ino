@@ -26,14 +26,16 @@ void setup() {
   pinMode(LED, OUTPUT);
   pinMode(D12, INPUT);
 
-  Serial.begin(BAUD_9600);
+  Serial.begin(BAUD_115200);
 }
 
 void loop() {
-  digitalWrite(LED, HIGH);
-  delay(DELAY);
-  digitalWrite(LED, LOW);
-  delay(DELAY);
+  if (reader.isAutoRead()) {
+    digitalWrite(LED, HIGH);
+    delay(DELAY);
+    digitalWrite(LED, LOW);
+    delay(DELAY);
+  }
 
   readPin();
   readSerial();
@@ -56,11 +58,12 @@ void readPin() {
       d12_state = reading;
 
       //if (d12_state == HIGH) {
+      if (reader.isAutoRead()) {
         // Send EPC
         String epc = String(last_d12_debounce, DEC);
         epc.toCharArray(out_buff, sizeof(out_buff));
         tx_pending = true;
-        //}
+      }
     }
     //}
 
@@ -78,7 +81,7 @@ void readSerial() {
 
     in_buff[in_buff_index++] = (char) inChar;
 
-    if (inChar == '\n') {
+    if (inChar == '\r') {
       if (rx_command != NULL) {
         // Clean up command
         delete rx_command;
