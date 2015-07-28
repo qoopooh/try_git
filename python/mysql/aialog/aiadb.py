@@ -8,14 +8,16 @@ DB_HOST = 'localhost'
 DB_USER = 'root'
 DB_PASS = 'sddba'
 DB_NAME = 'test'
+SQL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+JSON_TIME_FORMAT = '%a, %d %b %Y %H:%M:%S +0000'
 
 TABLES = {}
 TABLES['aiacode'] = (
     "CREATE TABLE `aiacode` ("
     " `id` int NOT NULL AUTO_INCREMENT,"
     " `code` varchar(32) NOT NULL,"
-    " `name` varchar(96) NOT NULL,"
-    " `date` date,"
+    " `name` text,"
+    " `date` datetime,"
     " PRIMARY KEY (`id`)"
     ") ENGINE=InnoDB DEFAULT CHARSET=UTF8;"
 )
@@ -24,8 +26,8 @@ TABLES['aiaprice'] = (
     " `id` int(11) NOT NULL AUTO_INCREMENT,"
     " `code_id` int NOT NULL,"
     " `price` varchar(24) NOT NULL,"
-    " `date` date NOT NULL,"
-    " PRIMARY KEY (`id`)"
+    " `date` datetime NOT NULL,"
+    " UNIQUE KEY (`id`)"
     ") ENGINE=InnoDB DEFAULT CHARSET=UTF8;"
 )
 
@@ -35,7 +37,13 @@ SELECT id FROM aiacode
 WHERE code = %s OR name = %s
 """
 
+SELECT_PRICE = """
+SELECT id FROM aiaprice
+WHERE code_id = %s AND date = %s
+"""
+
 INSERT_CID = "INSERT INTO aiacode (`code`, `name`, `date`) VALUES (%s, %s, %s)"
+INSERT_PRICE = "INSERT INTO aiaprice (`code_id`, `price`, `date`) VALUES (%s, %s, %s)"
 
 cursor = None
 
@@ -82,7 +90,7 @@ def create_database(cursor):
 def get_code_id(c, db, code, name=None):
     c.execute(SELECT_CID, (code, name))
     row = c.fetchone()
-    now = time.strftime('%Y-%m-%d %H:%M:%S')
+    now = time.strftime(SQL_TIME_FORMAT)
     if row == None:
         c.execute(INSERT_CID, (code, name, now))
         db.commit()
@@ -91,16 +99,25 @@ def get_code_id(c, db, code, name=None):
         return row[0]
     return row[0]
 
-def update_price(code, name, price, time):
+def update_price(code, name, price, ts):
     db = MySQLdb.connect(host=DB_HOST, user=DB_USER,
             passwd=DB_PASS, db=DB_NAME)
     cursor = db.cursor()
     cid = get_code_id(cursor, db, code, name.encode('utf8'))
     if cid == None:
         return False
-    print cid
+
+    t = time.strptime(ts, JSON_TIME_FORMAT)
+    tt = time.strftime(SQL_TIME_FORMAT, t)
+    cursor.execute(SELECT_PRICE, (cid, tt))
+    row = cursor.fetchone()
+    if row != None:
+        return False
+    cursor.execute(INSERT_PRICE, (cid, price, tt))
+    db.commit()
     cursor.close()
     db.close()
+    return True
 
 if __name__ == "__main__":
     preparedb()
