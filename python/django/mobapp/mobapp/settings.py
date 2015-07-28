@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'pub',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -52,11 +53,13 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'mobapp.urls'
 
+        #'DIRS': [ os.path.join(BASE_DIR, '../pub/templates'), ],
+        #'DIRS': [],
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
         'APP_DIRS': True,
+        'DIRS': [ BASE_DIR + '/../pub/templates', ],
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
