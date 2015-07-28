@@ -60,7 +60,13 @@ if __name__ == "__main__":
     prices = get_prices(j)
     #print time, prices
 
+    failure = False
     for k, v in prices.iteritems():
         if not update_price(k, v[0], v[1], time):
-            logger.info("Cannot update price of " +  k + " :: " + time)
+            failure = True
+
+    if failure:
+        logger.warn("Cannot update price on " + time)
+    else:
+        logger.info("Update price successfully for " + time)
 
