@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import urllib, json
+import urllib, json, logging
 from aiadb import preparedb, update_price
 
 URL = 'https://go-uranus.appspot.com/aia'
@@ -35,13 +35,25 @@ def get_time(j):
 def is_ok(j):
     return j.get('Status') == 'OK'
 
+def init_log():
+    logger = logging.getLogger('aialog')
+    hdlr = logging.FileHandler('/var/tmp/aia.log')
+
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr) 
+    logger.setLevel(logging.DEBUG)
+    return logger
+
 if __name__ == "__main__":
+    logger = init_log()
+
     preparedb()
-    j = get_json_from_file()
-    #j = get_json()
+    #j = get_json_from_file()
+    j = get_json()
     
     if not is_ok(j):
-        print 'Load aia source:', j.get('Status')
+        logger.error('Load aia source:', j.get('Status'))
         exit(1)
 
     time = get_time(j)
@@ -50,5 +62,5 @@ if __name__ == "__main__":
 
     for k, v in prices.iteritems():
         if not update_price(k, v[0], v[1], time):
-            print "Cannot update price of", k, "::", time
+            logger.info("Cannot update price of " +  k + " :: " + time)
 

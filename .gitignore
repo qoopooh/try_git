@@ -9,7 +9,7 @@ lib-cov
 *.pid
 *.swp
 *.swo
-*.dia~
+*~
 *.user
 *.o
 moc_*
