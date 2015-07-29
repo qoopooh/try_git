@@ -37,6 +37,11 @@ SELECT id FROM aiacode
 WHERE code = %s OR name = %s
 """
 
+SELECT_PRICE_DUP = """
+SELECT price FROM aiaprice
+WHERE code_id = %s AND date = %s
+"""
+
 SELECT_PRICE = """
 SELECT price FROM aiaprice
 WHERE code_id = %s
@@ -111,6 +116,10 @@ def update_price(code, name, price, ts):
 
     t = time.strptime(ts, JSON_TIME_FORMAT)
     tt = time.strftime(SQL_TIME_FORMAT, t)
+    cursor.execute(SELECT_PRICE_DUP, (cid, tt))
+    row = cursor.fetchone()
+    if row != None:
+        return False
     cursor.execute(SELECT_PRICE, (cid, ))
     row = cursor.fetchone()
     if row != None or row[0] == price:
