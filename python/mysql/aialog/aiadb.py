@@ -38,8 +38,10 @@ WHERE code = %s OR name = %s
 """
 
 SELECT_PRICE = """
-SELECT id FROM aiaprice
-WHERE code_id = %s AND date = %s
+SELECT price FROM aiaprice
+WHERE code_id = %s
+ORDER BY date DESC
+LIMIT 1;
 """
 
 INSERT_CID = "INSERT INTO aiacode (`code`, `name`, `date`) VALUES (%s, %s, %s)"
@@ -109,9 +111,9 @@ def update_price(code, name, price, ts):
 
     t = time.strptime(ts, JSON_TIME_FORMAT)
     tt = time.strftime(SQL_TIME_FORMAT, t)
-    cursor.execute(SELECT_PRICE, (cid, tt))
+    cursor.execute(SELECT_PRICE, (cid, ))
     row = cursor.fetchone()
-    if row != None:
+    if row != None or row[0] == price:
         return False
     cursor.execute(INSERT_PRICE, (cid, price, tt))
     db.commit()
