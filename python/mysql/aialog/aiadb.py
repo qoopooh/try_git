@@ -122,9 +122,11 @@ def update_price(code, name, price, ts):
         return False
     cursor.execute(SELECT_PRICE, (cid, ))
     row = cursor.fetchone()
-    if row != None or row[0] == price:
+    #print 'SELECT_PRICE', row[0], price
+    if row == None or row[0] == price:
         return False
     cursor.execute(INSERT_PRICE, (cid, price, tt))
+    #print 'INSERT_PRICE', cid, price
     db.commit()
     cursor.close()
     db.close()

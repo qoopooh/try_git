@@ -48,7 +48,12 @@ def init_log():
 if __name__ == "__main__":
     logger = init_log()
 
-    preparedb()
+    try:
+        preparedb()
+    except Exception as err:
+        logger.error(err[1])
+        exit(1)
+
     #j = get_json_from_file()
     j = get_json()
     
@@ -58,7 +63,6 @@ if __name__ == "__main__":
 
     time = get_time(j)
     prices = get_prices(j)
-    #print time, prices
 
     failure = False
     for k, v in prices.iteritems():
