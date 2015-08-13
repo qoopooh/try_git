@@ -9,13 +9,57 @@ USER='sa'
 PASSWORD='sa'
 DATABASE='Eurosoft'
 
+# microsoft
 #CONN='DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
     #USER + ';PWD=' + PASSWORD
+
+# linux
 CONN='DRIVER={FreeTDS};PORT=1433;SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
     USER + ';PWD=' + PASSWORD
+
+# mac
+CONN='DSN=eurosoftdatasource;UID=' + \
+    USER + ';PWD=' + PASSWORD
 ###############################################################################
-# Test freetds for linux
+# Test unixodbc for macport
+# $ sudo port install freetds +mssql +odbc +universal
+#
+# /opt/local/etc/odbcinst.ini
+#   [FreeTDS]
+#   Description=FreeTDS Driver for Linux & MSSQL on Win32
+#   Driver=/opt/local/lib/libtdsodbc.so
+#   Setup=/opt/local/lib/libtdsodbc.so
+#   UsageCount=1
+#
+# ~/.odbc.ini 
+#   [eurosoftdatasource]
+#   Description = "Some Description"
+#   Driver = FreeTDS
+#   Server = 192.168.1.66
+#   Port = 1433
+#   Database = Eurosoft
+#   TDS_Version = 7.0
+#
+# Test unixodbc for linux
+# $ sudo apt-get install freetds-dev freetds-bin unixodbc-dev tdsodbc
+# $ pip install pyodbc 
+# 
+# /etc/odbcinst.ini 
+#   [FreeTDS]
+#   Description=FreeTDS Driver
+#   Driver=/usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
+#   Setup=/usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
+#
+# ~/.odbc.ini
+#   [eurosoftdatasource]
+#   Description = "Some Description"
+#   Driver = FreeTDS
+#   Server = 192.168.1.66
+#   Port = 1433
+#   Database = Eurosoft
+#
 # $ tsql -H 192.168.1.66 -p 1433 -U sa -P sa
+# $ isql -v eurosoftdatasource sa sa
 ###############################################################################
 __all__ = (
         'WIT_NT', 'WIT_NT_ID',
