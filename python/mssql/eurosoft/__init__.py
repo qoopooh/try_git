@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.6'
+__version__ = '1.0.6.1'
 
-#HOST='127.0.0.1'
-HOST='192.168.0.62'
+HOST='127.0.0.1'
+#HOST='192.168.0.62'
+HOST='192.168.1.66'
 USER='sa'
 PASSWORD='sa'
 DATABASE='EUROSOFT'
@@ -480,7 +481,9 @@ class index():
     def GET(self):
         inp = web.input(usr=None, passwd=None)
         if inp['usr'] == None:
-            return render.idx()
+            return render.idx(__version__, 
+                    socket.gethostname() + ' (' + socket.gethostbyname(socket.gethostname()) + ')',
+                    HOST)
         q = LOGIN
         param = (inp['usr'], inp['passwd'])
         return self.show_resp((q, param))
@@ -614,6 +617,8 @@ import socket
 if __name__ == '__main__':
     print "Eurosoft Web Application", __version__
     print "Web Host:", socket.gethostbyname(socket.gethostname())
+
+    web.config.debug = True # comment out when release
     app = web.application(urls, globals())
     app.run()
 
