@@ -4,14 +4,18 @@
 __version__ = '1.0.6.1'
 
 HOST='127.0.0.1'
-#HOST='192.168.0.62'
 HOST='192.168.1.66'
 USER='sa'
 PASSWORD='sa'
-DATABASE='EUROSOFT'
+DATABASE='Eurosoft'
 
-CONN='DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
+#CONN='DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
+    #USER + ';PWD=' + PASSWORD
+CONN='DRIVER={FreeTDS};PORT=1433;SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
     USER + ';PWD=' + PASSWORD
+###############################################################################
+# Test freetds for linux
+# $ tsql -H 192.168.1.66 -p 1433 -U sa -P sa
 ###############################################################################
 __all__ = (
         'WIT_NT', 'WIT_NT_ID',
@@ -446,8 +450,9 @@ def ask(q):
     conn.close()
 
     out_rows = []
-    for r in rows:
-        out_rows.append(tuple(r))
+    for row in rows:
+        rr = decode(row)
+        out_rows.append(rr)
     return tuple(out_rows)
 
 def ask_json(q):
@@ -474,8 +479,18 @@ def ask_json(q):
 
     out_rows = []
     for row in rows:
-        out_rows.append(dict(zip(cols, row)))
+        rr = decode(row)
+        out_rows.append(dict(zip(cols, rr)))
     return tuple(out_rows)
+
+def decode(row):
+    out = []
+    for c in row:
+        if isinstance(c, str):
+            out.append(unicode(c, 'tis-620'))
+        else:
+            out.append(c)
+    return tuple(out)
 
 class index():
     def GET(self):
