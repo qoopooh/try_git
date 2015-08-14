@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf8 --
 
-__version__ = '1.0.6.1'
+__version__ = '1.0.6.3'
 
 HOST='127.0.0.1'
 HOST='192.168.1.66'
@@ -84,6 +84,7 @@ __all__ = (
         )
 
 import sys, json
+import time
 import web
 import pyodbc
 
@@ -473,6 +474,41 @@ AND NOT EXISTS (SELECT 1
     AND RejectTransDetail_RejectTrans_ID=?)
 """
 
+web.config.debug = True # comment out when release
+#web.config.debug = False
+web.config.db_parameters = {
+    'dbn':'sqlite',
+    'db':'web.db',
+}
+web.config.db_printing = True
+
+urls = (
+    '/', 'index',
+    '/login', 'login',
+    '/logout', 'logout',
+    '/table/', 'Table',
+    '/json/', 'Json',
+)
+template_globals = {
+    'app_path': lambda p: web.ctx.homepath + p,
+}
+render = web.template.render('templates/', globals=template_globals)
+app = web.application(urls, globals())
+
+# To make session available on debug mode
+if web.config.get('_session') is None:
+    ss = web.session.Session(app, web.session.DiskStore('sessions'),
+        initializer={
+            'count':0,
+            'usr':None,
+            'passwd':None,
+            'eid':None,
+        })
+    web.config._session = ss
+else:
+    ss = web.config._session
+
+
 def ask(q):
     conn = pyodbc.connect(CONN)
     cur = conn.cursor()
@@ -502,6 +538,8 @@ def ask(q):
     return tuple(out_rows), tuple(cols)
 
 def ask_json(q):
+    """Get dict tuple of query result
+    """
     conn = pyodbc.connect(CONN)
     cur = conn.cursor()
     if q[1] == None:
@@ -547,17 +585,29 @@ class index():
     """
 
     def GET(self):
+
         inp = web.input(usr=None, passwd=None)
         if inp['usr'] == None:
-            return render.idx(__version__, 
-                    socket.gethostname() + ' (' + socket.gethostbyname(socket.gethostname()) + ')',
-                    HOST)
+            ss['count'] += 1
+            return render.index(__version__, \
+                    socket.gethostname() + ' (' \
+                        + socket.gethostbyname(socket.gethostname()) + ')' \
+                        + ' -- page count: ' + str(ss.count), \
+                    HOST, ss.usr)
         q = LOGIN
         param = (inp['usr'], inp['passwd'])
+
         return self.show_resp((q, param))
 
     def show_resp(self, query):
         resp = ask_json(query)
+        if len(resp) > 0:
+            eid = resp[0].get('Usr_Emp_ID')
+            if eid is not None:
+                ss.eid = eid
+                ss.usr = query[1][0]
+                ss.passwd = query[1][1]
+
         web.header('Content-Type', 'application/json;charset=utf8')
         j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
         return j
@@ -568,6 +618,7 @@ class Table():
         q = self.get_query(web.input(
             action='WIT_NT', tid=None, sn=None, check=None))
         web.header('Content-Type', 'text/html;charset=utf8')
+        ss.count += 1
         return self.show_resp(q)
 
     def get_query(self, i):
@@ -660,6 +711,7 @@ class Json(Table):
     def GET(self):
         q = self.get_query(web.input(
             action='WIT_NT', tid=None, sn=None, check=None))
+        ss.count += 1
         return self.show_resp(q)
 
     def show_resp(self, query):
@@ -671,22 +723,25 @@ class Json(Table):
             print >> f, j
         return j
 
-urls = (
-    '/', 'index',
-    '/table/', 'Table',
-    '/json/', 'Json',
-)
-template_globals = {
-    'app_path': lambda p: web.ctx.homepath + p,
-}
-render = web.template.render('templates/', globals=template_globals)
+class login:
+    def GET(self):
+        return render.login()
+
+class logout:
+    def GET(self):
+        resp = {
+            'count':ss.count,
+            'usr':ss.usr,
+            #'passwd':ss.passwd,
+            'eid':ss.eid,
+        }
+        ss.kill()
+        return resp
 
 import socket
 if __name__ == '__main__':
-    print "Eurosoft Web Application", __version__
+    print "Eurosoft Application", __version__
     print "Web Host:", socket.gethostbyname(socket.gethostname())
 
-    web.config.debug = True # comment out when release
-    app = web.application(urls, globals())
     app.run()
 

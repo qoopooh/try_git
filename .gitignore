@@ -25,3 +25,5 @@ obj
 build-*
 qtquick2*
 cscope.*
+
+sessions
