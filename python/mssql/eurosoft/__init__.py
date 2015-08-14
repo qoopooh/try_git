@@ -9,17 +9,16 @@ USER='sa'
 PASSWORD='sa'
 DATABASE='Eurosoft'
 
-# microsoft
-#CONN='DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
-    #USER + ';PWD=' + PASSWORD
 
-# linux
-CONN='DRIVER={FreeTDS};PORT=1433;SERVER=' + HOST + ';DATABASE=' + DATABASE + ';UID=' + \
-    USER + ';PWD=' + PASSWORD
+# os.name == 'nt'
+CONN='DRIVER={SQL Server};SERVER=' + HOST + ';DATABASE=' + DATABASE \
+     + ';UID=' + USER + ';PWD=' + PASSWORD
+# os.name == 'posix'
+CONN='DRIVER={FreeTDS};PORT=1433;SERVER=' + HOST + ';DATABASE=' + DATABASE \
+     + ';UID=' + USER + ';PWD=' + PASSWORD
+# Data Sources (ODBC)
+CONN='DSN=eurosoftdatasource;UID=' + USER + ';PWD=' + PASSWORD
 
-# mac
-CONN='DSN=eurosoftdatasource;UID=' + \
-    USER + ';PWD=' + PASSWORD
 ###############################################################################
 # Test unixodbc for macport
 # $ sudo port install freetds +mssql +odbc +universal
@@ -488,16 +487,19 @@ def ask(q):
         if count > 0: # To support insert multirow
             conn.commit()
             res = 'success'
+        cur.close()
         conn.close()
         return (res,)
     rows = cur.fetchall()
+    cols = [col[0] for col in cur.description]
+    cur.close()
     conn.close()
 
     out_rows = []
     for row in rows:
         rr = decode(row)
         out_rows.append(rr)
-    return tuple(out_rows)
+    return tuple(out_rows), tuple(cols)
 
 def ask_json(q):
     conn = pyodbc.connect(CONN)
@@ -515,10 +517,12 @@ def ask_json(q):
         if count > 0: # To support insert multirow
             conn.commit()
             res = 'success'
+        cur.close()
         conn.close()
         return (res,)
-    cols = [col[0] for col in cur.description]
     rows = cur.fetchall()
+    cols = [col[0] for col in cur.description]
+    cur.close()
     conn.close()
 
     out_rows = []
@@ -528,6 +532,8 @@ def ask_json(q):
     return tuple(out_rows)
 
 def decode(row):
+    """Decode thai string to UTF-8
+    """
     out = []
     for c in row:
         if isinstance(c, str):
@@ -537,6 +543,9 @@ def decode(row):
     return tuple(out)
 
 class index():
+    """Index Page
+    """
+
     def GET(self):
         inp = web.input(usr=None, passwd=None)
         if inp['usr'] == None:
@@ -622,10 +631,10 @@ class Table():
         return q, param
 
     def show_resp(self, query):
-        resp = ask(query)
-        resp = self.filter_PRI(resp)
+        rows, cols = ask(query)
+        resp = self.filter_PRI(rows)
 
-        return render.tyretable(resp)
+        return render.tyretable(resp, cols)
 
     def filter_PRI(self, resp):
         if self._input['action'] != 'WIT_STO' or len(resp) < 1:
