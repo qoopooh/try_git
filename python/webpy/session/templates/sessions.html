@@ -1,4 +1,6 @@
-$def with (count)
+$def with (count, message)
 
 <h1>You refreshed the page $:count times</h1>
+    $if message is not None:
+        <h2>Result: $:message<h2>
 <a href="/kill">End the session</a>

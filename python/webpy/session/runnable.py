@@ -24,15 +24,26 @@ app = web.application(urls, globals())
 # Session is automatically enabled and cookie is sent to the user
 #session = web.session.Session(app, web.session.DiskStore('/var/www/sessions'),
 session = web.session.Session(app, web.session.DiskStore('sessions'),
-    initializer={'count': 0})
+    initializer={
+        'count': 0,
+        'message': None,
+    })
 
 class Index:
     def GET(self):
         # Get the data from session, increment it and display the page
         # Saving the data is done automatically
         refreshes = session.count
-        session.count += 1
-        return render.sessions(count=refreshes)
+        msg = None
+        if session.count >= 5:
+            # session.message can save!
+            if session.message is not None:
+                msg = session.message
+            else:
+                session.message = 'You have limit refresh at ' + str(session.count)
+        else:
+            session.count += 1
+        return render.sessions(count=refreshes, message=msg)
 
 class Kill:
     def GET(self):
