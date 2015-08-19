@@ -468,6 +468,25 @@ AND NOT EXISTS (SELECT 1
     AND RejectTransDetail_RejectTrans_ID=?)
 """
 
+GET_TABLES = "SELECT * FROM information_schema.tables"
+GET_COLUMNS = """SELECT column_name FROM information_schema.columns
+WHERE table_name = ?"""
+
+# Need string format
+GET_ROW_COUNT = "SELECT COUNT(*) FROM {0}"
+DUP = """
+;WITH cte
+AS (SELECT ROW_NUMBER() OVER (PARTITION BY {0}
+ORDER BY ( SELECT 0)) RN
+FROM   {1})
+DELETE FROM cte
+WHERE  RN > 1
+""" # 0: column names, 1: table
+
+NewTrans_ID = "SELECT * FROM tblNewTyreTransaction WHERE NewTrans_ID = ?"
+RejectTrans_ID = "SELECT * FROM tblRejectTransaction WHERE RejectTrans_ID = ?"
+
+
 def get_db():
     import pyodbc
     cnx = pyodbc.connect(CONN)
@@ -500,12 +519,53 @@ def query(q, params=None):
         
     return nr, tuple(rows), len(rows), tuple(cols) 
 
-NewTrans_ID = "SELECT * FROM tblNewTyreTransaction WHERE NewTrans_ID = ?"
-RejectTrans_ID = "SELECT * FROM tblRejectTransaction WHERE RejectTrans_ID = ?"
+def commit(q):
+    connection, cursor = get_db()
+    nr = cursor.execute(q).rowcount
+    cursor.commit()
+    cursor.close()
+    connection.close()
+
+def get_table_name(csv=False, catalog='Eurosoft'):
+    i, rows, nr, cols = query(GET_TABLES)
+    tn = [r[2] for r in rows if r[0] == catalog]
+    tn.sort()
+    if not csv:
+        return tn
+
+    table_names = ""
+    for t in tn:
+        if 'tbl' in t:
+            table_names += str(t) + ", "
+    return table_names[:-2]
+
+def get_row_count(table):
+    i, rows, nr, cols = query(GET_ROW_COUNT.format(table))
+    return rows[0][0]
+
+def print_row_count():
+    tn = get_table_name()
+    for t in tn:
+        if 'tbl' in t:
+            print t, get_row_count(t)
+
+def remove_duplicated_rows(table):
+    i, rows, nr, cols = query(GET_COLUMNS, table)
+    col_names = " "
+    for r in rows:
+        col_names += str(r[0]) + ", "
+    col_names = col_names[:-2] + " "
+    commit(DUP.format(col_names, table))
+
+def rem_dt():
+    tn = [u'tblBrand', u'tblBuffing', u'tblBuilding', u'tblCasing', u'tblCasingStock', u'tblCasingTransaction', u'tblCasingTransactionDetail', u'tblCasingTransactionType', u'tblCementing', u'tblChamber', u'tblCompany', u'tblCompanyBranch', u'tblConfig', u'tblControl', u'tblControlFormat', u'tblCuring', u'tblCuringTemp', u'tblCustomKB', u'tblDepartment', u'tblDocument', u'tblFilling', u'tblFinalInspection', u'tblFunctions', u'tblInner', u'tblLiner', u'tblLinerReserve', u'tblLinerStock', u'tblLinerTransaction', u'tblLinerTransactionDetail', u'tblLinerTransactionType', u'tblLinerUnit', u'tblLinerUsed', u'tblMachine', u'tblMachineType', u'tblModel', u'tblModelSize', u'tblNewTyreStock', u'tblNewTyreTransaction', u'tblNewTyreTransactionDetail', u'tblNewTyreTransactionType', u'tblOuter', u'tblPreInspection', u'tblProduction', u'tblProductionDetail', u'tblProductionStatus', u'tblProductionStock', u'tblProductionTransaction', u'tblProductionTransactionDetail', u'tblProductionTransactionType', u'tblRadius', u'tblRawMat', u'tblRawMatStock', u'tblRawMatTransaction', u'tblRawMatTransactionDetail', u'tblRawMatTransactionType', u'tblRawmatType', u'tblRejectStock', u'tblRejectTransaction', u'tblRejectTransactionDetail', u'tblRejectTransactionType', u'tblRejectType', u'tblRepairing', u'tblRimming', u'tblRole', u'tblRolePrivilege', u'tblSize', u'tblSkiving', u'tblSupplier', u'tblTyre', u'tblTyreHistory', u'tblUnit', u'tblUnitConversion', u'tblUser']
+    # except u'tblEmployee'
+    for t in tn:
+        print t, get_row_count(t)
+        remove_duplicated_rows(t)
+        print t, get_row_count(t)
 
 if __name__ == '__main__':
-    #res = query(NewTrans_ID, 'NTO15020011')
-    res = query(RejectTrans_ID, 'RJO15060023')
-    print res[1]
-    print res[2]
+    #rem_dt()
 
+    print 'Done'
