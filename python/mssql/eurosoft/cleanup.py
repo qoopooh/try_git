@@ -3,7 +3,6 @@
 
 __version__ = '1.0.6.3'
 
-HOST='127.0.0.1'
 HOST='192.168.1.66'
 USER='sa'
 PASSWORD='sa'
@@ -82,11 +81,6 @@ __all__ = (
         'ADD_NT_STOCK', 'ADD_PROD_STOCK',
         'ADD_REJ_STOCK'
         )
-
-import sys, json
-import time
-import web
-import pyodbc
 
 TRANS_NT = """
 SELECT TOP 100 NewTrans_ID as tid, Comp_Name,
@@ -474,275 +468,44 @@ AND NOT EXISTS (SELECT 1
     AND RejectTransDetail_RejectTrans_ID=?)
 """
 
-web.config.debug = True # comment out when release
-#web.config.debug = False
-web.config.db_parameters = {
-    'dbn':'sqlite',
-    'db':'web.db',
-}
-web.config.db_printing = True
+def get_db():
+    import pyodbc
+    cnx = pyodbc.connect(CONN)
+    return cnx, cnx.cursor()
 
-urls = (
-    '/', 'index',
-    '/login', 'login',
-    '/logout', 'logout',
-    '/table/', 'Table',
-    '/json/', 'Json',
-)
-template_globals = {
-    'app_path': lambda p: web.ctx.homepath + p,
-}
-render = web.template.render('templates/', globals=template_globals)
-app = web.application(urls, globals())
+def query(q, params=None):
+    """query as SELECT
+        if it's correct, you will got:
 
-# To make session available on debug mode
-if web.config.get('_session') is None:
-    ss = web.session.Session(app, web.session.DiskStore('sessions'),
-        initializer={
-            'count':0,
-            'usr':None,
-            'passwd':None,
-            'eid':None,
-        })
-    web.config._session = ss
-else:
-    ss = web.config._session
-
-
-def ask(q):
-    conn = pyodbc.connect(CONN)
-    cur = conn.cursor()
-    if q[1] == None:
-        param = ()
+        rowcount, rows, len, headers
+    """
+    connection, cursor = get_db()
+    if params is None:
+        cursor.execute(q)
+    elif isinstance(params, tuple) or isinstance(params, list):
+        cursor.execute(q, params)
     else:
-        param = q[1]
-    count = cur.execute(q[0], param).rowcount
-    print q[0], param, count
-    if cur.description == None:
-        res = 'failed'
-        if count > 0: # To support insert multirow
-            conn.commit()
-            res = 'success'
-        cur.close()
-        conn.close()
-        return (res,)
-    rows = cur.fetchall()
-    cols = [col[0] for col in cur.description]
-    cur.close()
-    conn.close()
+        params = (params,)
+        cursor.execute(q, params)
+    nr = cursor.rowcount
+    if cursor.description is None:
+        cursor.close()
+        connection.close()
+        return nr
 
-    out_rows = []
-    for row in rows:
-        rr = decode(row)
-        out_rows.append(rr)
-    return tuple(out_rows), tuple(cols)
+    cols = [col[0] for col in cursor.description]
+    rows = cursor.fetchall()
+    cursor.close()
+    connection.close()
+        
+    return nr, tuple(rows), len(rows), tuple(cols) 
 
-def ask_json(q):
-    """Get dict tuple of query result
-    """
-    conn = pyodbc.connect(CONN)
-    cur = conn.cursor()
-    if q[1] == None:
-        param = ()
-    else:
-        param = q[1]
-    count = cur.execute(q[0], param).rowcount
-    #print 'q', q
-    #print 'count', count
-    #print 'description', cur.description
-    if cur.description == None:
-        res = 'failed'
-        if count > 0: # To support insert multirow
-            conn.commit()
-            res = 'success'
-        cur.close()
-        conn.close()
-        return (res,)
-    rows = cur.fetchall()
-    cols = [col[0] for col in cur.description]
-    cur.close()
-    conn.close()
+NewTrans_ID = "SELECT * FROM tblNewTyreTransaction WHERE NewTrans_ID = ?"
+RejectTrans_ID = "SELECT * FROM tblRejectTransaction WHERE RejectTrans_ID = ?"
 
-    out_rows = []
-    for row in rows:
-        rr = decode(row)
-        out_rows.append(dict(zip(cols, rr)))
-    return tuple(out_rows)
-
-def decode(row):
-    """Decode thai string to UTF-8
-    """
-    out = []
-    for c in row:
-        if isinstance(c, str):
-            out.append(unicode(c, 'tis-620'))
-        else:
-            out.append(c)
-    return tuple(out)
-
-class index():
-    """Index Page
-    """
-
-    def GET(self):
-
-        inp = web.input(usr=None, passwd=None)
-        if inp['usr'] == None:
-            ss['count'] += 1
-            return render.index(__version__, \
-                    socket.gethostname() + ' (' \
-                        + socket.gethostbyname(socket.gethostname()) + ')' \
-                        + ' -- page count: ' + str(ss.count), \
-                    HOST, ss.usr)
-        q = LOGIN
-        param = (inp['usr'], inp['passwd'])
-
-        return self.show_resp((q, param))
-
-    def show_resp(self, query):
-        resp = ask_json(query)
-        if len(resp) > 0:
-            eid = resp[0].get('Usr_Emp_ID')
-            if eid is not None:
-                ss.eid = eid
-                ss.usr = query[1][0]
-                ss.passwd = query[1][1]
-
-        web.header('Content-Type', 'application/json;charset=utf8')
-        j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
-        return j
-
-class Table():
-
-    def GET(self):
-        q = self.get_query(web.input(
-            action='WIT_NT', tid=None, sn=None, check=None))
-        web.header('Content-Type', 'text/html;charset=utf8')
-        ss.count += 1
-        return self.show_resp(q)
-
-    def get_query(self, i):
-        print "get_query", i
-        self._input = i
-        act = i['action']
-        param = ()
-        if act=='WIT_NT': q=WIT_NT
-        elif act=='WIT_NT_ID': q, param = WIT_NT_ID, (i['tid'])
-        elif act=='WIT_CUS': q=WIT_CUS
-        elif act=='WIT_CUS_ID': q, param = WIT_CUS_ID, (i['tid'])
-        elif act=='WIT_STO': q=WIT_STO
-        elif act=='WIT_STO_ID': q, param = WIT_STO_ID, (i['tid'])
-        elif act=='WIT_REJ': q=WIT_REJ
-        elif act=='WIT_REJ_ID': q, param = WIT_REJ_ID, (i['tid'])
-        elif act=='RCV_NT': q=RCV_NT
-        elif act=='RCV_NT_ID': q, param = RCV_NT_ID, (i['tid'])
-        elif act=='RCV_CUS': q=RCV_CUS
-        elif act=='RCV_CUS_ID': q, param = RCV_CUS_ID, (i['tid'])
-        elif act=='RCV_STO': q=RCV_STO
-        elif act=='RCV_STO_ID': q, param = RCV_STO_ID, (i['tid'])
-        elif act=='RCV_REJ': q=RCV_REJ
-        elif act=='RCV_REJ_ID': q, param = RCV_REJ_ID, (i['tid'])
-        elif act=='INV_NT': q=INV_NT
-        elif act=='INV_NT_ID': q, param = INV_NT_ID, (i['sz'])
-        elif act=='INV_CUS': q=INV_CUS
-        elif act=='INV_CUS_ID': q, param = INV_CUS_ID, (i['sz'])
-        elif act=='INV_STO': q=INV_STO
-        elif act=='INV_STO_ID': q, param = INV_STO_ID, (i['sz'])
-        elif act=='INV_REJ': q=INV_REJ
-        elif act=='INV_REJ_ID': q, param = INV_REJ_ID, (i['sz'])
-        elif act=='CHK_NT':
-            if i['date'] == 'null':
-                q, param = CHK_NT_NULL, (i['tid'])
-            else:
-                q, param = CHK_NT, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_CUS':
-            if i['date'] == 'null':
-                q, param = CHK_CUS_NULL, (i['tid'])
-            else:
-                q, param = CHK_CUS, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_REJ':
-            if i['date'] == 'null':
-                q, param = CHK_REJ_NULL, (i['tid'])
-            else:
-                q, param = CHK_REJ, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_STO':
-            if i['date'] == 'null':
-                q, param = CHK_STO_NULL, (i['tid'])
-            else:
-                q, param = CHK_STO, (i['eid'],i['date'],i['tid'])
-        elif act=='CHK_NT_TYRE': q, param = CHK_NT_TYRE, (i['check'],i['tid'],i['sn'])
-        elif act=='CHK_PROD_TYRE': q, param = CHK_PROD_TYRE, (i['check'],i['tid'],i['sn'])
-        elif act=='CHK_REJ_TYRE': q, param = CHK_REJ_TYRE, (i['check'],i['tid'],i['sn'])
-        elif act=='ADD_NT_STOCK': q, param = ADD_NT_STOCK, (i['tid'],i['tid'],i['tid'])
-        elif act=='ADD_PROD_STOCK': q, param = ADD_PROD_STOCK, (i['tid'],i['tid'])
-        elif act=='ADD_REJ_STOCK': q, param = ADD_REJ_STOCK, (i['tid'],i['tid'])
-        elif act=='REM_NT_STOCK': q, param = REM_NT_STOCK, (i['tid'],i['tid'])
-        elif act=='REM_PROD_STOCK': q, param = REM_PROD_STOCK, (i['tid'],i['tid'])
-        elif act=='REM_REJ_STOCK': q, param = REM_REJ_STOCK, (i['tid'],i['tid'])
-        else: q, param = IDENTIFY, (i['sn'])
-        return q, param
-
-    def show_resp(self, query):
-        rows, cols = ask(query)
-        resp = self.filter_PRI(rows)
-
-        return render.tyretable(resp, cols)
-
-    def filter_PRI(self, resp):
-        if self._input['action'] != 'WIT_STO' or len(resp) < 1:
-            return resp
-        if isinstance(resp[0], dict):
-            for row in resp:
-                if row['tid'][:3] == 'PRI':
-                    row['Comp_Name'] = None
-                    row['Comp_ID'] = 0
-        else:
-            l, i, tmp, resp = len(resp), 0, resp, []
-            while i<l:
-                if tmp[i][0][:3] == 'PRI':
-                    resp.append((tmp[i][0], None, tmp[i][2], 0))
-                else:
-                    resp.append(tmp[i])
-                i += 1
-
-        return resp
-
-class Json(Table):
-
-    def GET(self):
-        q = self.get_query(web.input(
-            action='WIT_NT', tid=None, sn=None, check=None))
-        ss.count += 1
-        return self.show_resp(q)
-
-    def show_resp(self, query):
-        resp = ask_json(query)
-        resp = self.filter_PRI(resp)
-        web.header('Content-Type', 'application/json;charset=utf8')
-        j = json.dumps(resp, ensure_ascii=False, indent=2).encode('utf8')
-        with open('output.js', 'w') as f:
-            print >> f, j
-        return j
-
-class login:
-    def GET(self):
-        return render.login()
-
-class logout:
-    def GET(self):
-        resp = {
-            'count':ss.count,
-            'usr':ss.usr,
-            #'passwd':ss.passwd,
-            'eid':ss.eid,
-        }
-        ss.kill()
-        return resp
-
-import socket
 if __name__ == '__main__':
-    print "Eurosoft Application", __version__
-    print "Web Host:", socket.gethostbyname(socket.gethostname())
-
-    app.run()
+    #res = query(NewTrans_ID, 'NTO15020011')
+    res = query(RejectTrans_ID, 'RJO15060023')
+    print res[1]
+    print res[2]
 
