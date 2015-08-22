@@ -3,5 +3,7 @@ target
 bin
 gen
 dist
-cscope.*
+
+# gradle
+.gradle
 

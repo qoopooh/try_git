@@ -22,8 +22,11 @@ cover_html
 test.js
 .idea
 obj
-build-*
+build
 qtquick2*
+
+# editor
 cscope.*
+du-size
 
 sessions
