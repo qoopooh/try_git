@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>AiA Table</title>
+  <title th:text="${code}">AiA Table</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" media="screen"/>
@@ -12,23 +12,17 @@
   <div class="container">
 
     <br/>
-    <div class="panel panel-primary">
-      <div class="panel-heading">AIA Open Funds</div>
+    <div class="panel panel-info">
+      <div class="panel-heading" th:text="${code}">AIA Open Funds</div>
       <div class="panel-body">
-        <p>They are on ไทย market</p>
         <table class="table">
           <tr>
-            <th>id</th>
-            <th>code</th>
-            <th>name</th>
             <th>date</th>
+            <th>price</th>
           </tr>
-          <tr th:each="code : ${codes}">
-            <td th:text="${code.getId()}">id</td>
-            <td><a href="history.html" th:href="@{/price(id=${code.getId()},code=${code.getCode()})}" th:text="${code.getCode()}">code</a></td>
-            <td>-</td>
-            <!--<td th:text="${code.getName()}">name</td>-->
-            <td th:text="${code.getDate()}">date</td>
+          <tr th:each="p : ${prices}">
+            <td th:text="${p.getDate()}">date</td>
+            <td th:text="${p.getPrice()}">price</td>
           </tr>
         </table>
       </div>
