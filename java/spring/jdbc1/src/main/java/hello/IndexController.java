@@ -15,17 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import aia.AiaCode;
 
 @Controller
-public class CodeController {
+public class IndexController {
 
-    @RequestMapping("/code")
-    public String code (
-            @RequestParam(value="name", required=false, defaultValue="เบิ้ม") String name,
-            @RequestParam(value="age", required=false, defaultValue="0") int age,
-            Model model) {
+    @RequestMapping("/")
+    public String index(Model model) {
         try {
             SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
             dataSource.setDriver(new com.mysql.jdbc.Driver());
-            //dataSource.setUrl("jdbc:mysql://localhost/test");
             dataSource.setUrl("jdbc:mysql://192.168.1.57/test");
             dataSource.setUsername("root");
             dataSource.setPassword("sddba");
@@ -47,21 +43,8 @@ public class CodeController {
             });
 
             model.addAttribute("codes", listCode);
-            //model.addAttribute("name", codes(listCode));
         } catch (SQLException e) {
         }
-        model.addAttribute("name", name);
-        model.addAttribute("age", age);
-        return "code";
-    }
-
-    public String codes(List<AiaCode> list) {
-        StringBuilder sb = new StringBuilder();
-
-        for (AiaCode a : list) {
-            sb.append(a).append("\n");
-        }
-
-        return sb.toString();
+        return "index";
     }
 }

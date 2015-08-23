@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>AiA Table</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" media="screen"/>
+  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+
+    <br/>
+    <div class="panel panel-primary">
+      <div class="panel-heading">AIA Open Funds</div>
+      <div class="panel-body">
+        <p>They are on ไทย market</p>
+        <table class="table">
+          <tr>
+            <th>id</th>
+            <th>code</th>
+            <th>name</th>
+            <th>date</th>
+          </tr>
+          <tr th:each="code : ${codes}">
+            <td th:text="${code.getId()}">id</td>
+            <td><a href="history.html" th:href="@{/code(codeId=${code.getId()})}" th:text="${code.getCode()}">code</a></td>
+            <td>-</td>
+            <!--<td th:text="${code.getName()}">name</td>-->
+            <td th:text="${code.getDate()}">date</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

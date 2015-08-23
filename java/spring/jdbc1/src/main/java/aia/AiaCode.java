@@ -1,15 +1,18 @@
 package aia;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
 
 public class AiaCode {
     private long id;
     private String code, name;
+    private Date date;
     
-    public AiaCode(long id, String code, String name) {
+    public AiaCode(long id, String code, String name, Date date) {
         this.id = id;
         this.code = code;
         this.name = name;
+        this.date = date;
     }
 
     @Override
@@ -40,5 +43,9 @@ public class AiaCode {
 
     public String getName() {
         return this.name;
+    }
+
+    public Date getDate() {
+        return this.date;
     }
 }
