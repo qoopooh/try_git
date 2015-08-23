@@ -29,4 +29,16 @@ public class AiaCode {
                 "Code [id=%d, code='%s', name='%s']",
                 id, code, name);
     }
+
+    public long getId() {
+        return this.id;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public String getName() {
+        return this.name;
+    }
 }

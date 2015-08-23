@@ -25,7 +25,8 @@ public class CodeController {
         try {
             SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
             dataSource.setDriver(new com.mysql.jdbc.Driver());
-            dataSource.setUrl("jdbc:mysql://localhost/test");
+            //dataSource.setUrl("jdbc:mysql://localhost/test");
+            dataSource.setUrl("jdbc:mysql://192.168.1.57/test");
             dataSource.setUsername("root");
             dataSource.setPassword("sddba");
 
@@ -44,10 +45,11 @@ public class CodeController {
                 }
             });
 
-            model.addAttribute("name", codes(listCode));
+            model.addAttribute("codes", listCode);
+            //model.addAttribute("name", codes(listCode));
         } catch (SQLException e) {
-            model.addAttribute("name", e);
         }
+        model.addAttribute("name", name);
         model.addAttribute("age", age);
         return "code";
     }
