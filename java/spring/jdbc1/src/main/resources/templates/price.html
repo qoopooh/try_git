@@ -7,6 +7,7 @@
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" media="screen"/>
   <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="//www.google.com/jsapi"></script>
 </head>
 <body>
   <div class="container">
@@ -15,6 +16,7 @@
     <div class="panel panel-info">
       <div class="panel-heading" th:text="${code}">AIA Open Funds</div>
       <div class="panel-body">
+        <div id="chart_div"></div>
         <table class="table">
           <tr>
             <th>date</th>
@@ -26,7 +28,39 @@
           </tr>
         </table>
       </div>
-    </div>
+      <!--</div>-->
   </div>
+  <script>
+    google.load('visualization', '1', {packages: ['corechart', 'line']});
+    google.setOnLoadCallback(drawCurveTypes);
+
+    function drawCurveTypes() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('date', 'X');
+      data.addColumn('number', 'Dogs');
+
+      data.addRows([
+        [new Date(2015, 07, 28), 13.1512] ,
+        [new Date(2015, 07, 30), 13.1516] ,
+        [new Date(2015, 07, 31), 13.1525] ,
+        [new Date(2015, 08, 21), 13.1615]
+      ]);
+
+      var options = {
+        hAxis: {
+          title: 'Day'
+        },
+        vAxis: {
+          title: 'Price'
+        },
+        series: {
+          1: {curveType: 'function'}
+        }
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+  </script>
 </body>
 </html>
