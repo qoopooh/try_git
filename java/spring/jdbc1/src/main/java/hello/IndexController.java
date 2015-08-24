@@ -28,7 +28,13 @@ public class IndexController {
 
             JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
-            String sqlSelect = "SELECT * FROM aiacode";
+            String sqlSelect =
+            "SELECT t4.id, t4.code, t4.name, t3.price, t3.date FROM aiacode t4," +
+            "    (SELECT t1.* FROM aiaprice t1" +
+            "    JOIN (SELECT code_id, MAX(id) id, price, date FROM aiaprice GROUP BY code_id) t2" +
+            "    ON t1.id = t2.id AND t1.code_id = t2.code_id) t3" +
+            " WHERE t4.id = t3.code_id";
+                ;
             List<AiaCode> listCode = jdbcTemplate.query(sqlSelect, new RowMapper<AiaCode>() {
 
                 public AiaCode mapRow(ResultSet result, int rowNum) throws SQLException {
@@ -36,6 +42,7 @@ public class IndexController {
                             result.getLong("id"),
                             result.getString("code"),
                             result.getString("name"),
+                            result.getString("price"),
                             result.getDate("date"));
 
                     return code;

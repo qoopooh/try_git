@@ -14,13 +14,15 @@
 
     <br/>
     <div class="panel panel-info">
-      <div class="panel-heading" th:text="${code}">AIA Open Funds</div>
+      <div class="panel-heading">History of <a id="image_link" th:text="${code}">code name</a></div>
       <div class="panel-body">
         <div id="chart_div"></div>
+        <br/>
+
         <table class="table">
           <tr>
-            <th>date</th>
-            <th>price</th>
+            <th>Date</th>
+            <th>Price (Baht)</th>
           </tr>
           <tr th:each="p : ${prices}">
             <td th:text="${p.getDate()}">date</td>
@@ -28,30 +30,31 @@
           </tr>
         </table>
       </div>
-      <!--</div>-->
+    </div>
   </div>
-  <script>
+  <script th:inline="javascript">
     google.load('visualization', '1', {packages: ['corechart', 'line']});
     google.setOnLoadCallback(drawCurveTypes);
 
     function drawCurveTypes() {
       var data = new google.visualization.DataTable();
       data.addColumn('date', 'X');
-      data.addColumn('number', 'Dogs');
+      data.addColumn('number', 'Val.');
 
-      data.addRows([
-        [new Date(2015, 07, 28), 13.1512] ,
-        [new Date(2015, 07, 30), 13.1516] ,
-        [new Date(2015, 07, 31), 13.1525] ,
-        [new Date(2015, 08, 21), 13.1615]
-      ]);
+      /*[+
+
+      var plot = [[${plot}]];
+      //console.log(plot);
+      eval(plot);
+
+      +]*/
 
       var options = {
         hAxis: {
-          title: 'Day'
+          title: 'Date'
         },
         vAxis: {
-          title: 'Price'
+          title: 'Baht'
         },
         series: {
           1: {curveType: 'function'}
@@ -60,6 +63,8 @@
 
       var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
       chart.draw(data, options);
+      var link = document.getElementById('image_link');
+      link.href = chart.getImageURI();
     }
   </script>
 </body>

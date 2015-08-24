@@ -5,13 +5,14 @@ import java.sql.Date;
 
 public class AiaCode {
     private long id;
-    private String code, name;
+    private String code, name, price;
     private Date date;
     
-    public AiaCode(long id, String code, String name, Date date) {
+    public AiaCode(long id, String code, String name, String price, Date date) {
         this.id = id;
         this.code = code;
         this.name = name;
+        this.price = price;
         this.date = date;
     }
 
@@ -43,6 +44,10 @@ public class AiaCode {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getPrice() {
+        return this.price;
     }
 
     public Date getDate() {

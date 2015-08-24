@@ -40,6 +40,7 @@ public class CodeController {
                             result.getLong("id"),
                             result.getString("code"),
                             result.getString("name"),
+                            result.getString("price"),
                             result.getDate("date"));
 
                     return code;

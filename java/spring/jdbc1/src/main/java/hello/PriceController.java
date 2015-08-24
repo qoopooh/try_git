@@ -2,6 +2,8 @@ package hello;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+//import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +18,8 @@ import aia.AiaPrice;
 
 @Controller
 public class PriceController {
+
+    static Calendar calendar = Calendar.getInstance();
 
     @RequestMapping("/price")
     public String index(
@@ -46,11 +50,34 @@ public class PriceController {
                     return price;
                 }
             });
-
+            
             model.addAttribute("prices", list);
+            model.addAttribute("plot", getPlotArrayString(list));
         } catch (SQLException e) {
         }
         model.addAttribute("code", code);
         return "price";
+    }
+
+    private String getPlotArrayString(List<AiaPrice> list) {
+        StringBuilder sb = new StringBuilder("data.addRows([\n");
+        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy, MM, dd");
+        for (AiaPrice p : list) {
+            calendar.setTime(p.getDate());
+
+            sb.append("[new Date(")
+                //.append(sdf.format(p.getDate()))
+                .append(calendar.get(Calendar.YEAR))
+                .append(", ")
+                .append(calendar.get(Calendar.MONTH))
+                .append(", ")
+                .append(calendar.get(Calendar.DATE))
+                .append("), ")
+                .append(p.getPrice())
+                .append("],\n");
+        }
+        sb.append("]);");
+
+        return sb.toString();
     }
 }
