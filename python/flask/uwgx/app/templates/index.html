@@ -12,16 +12,18 @@
   <!--<div data-role="header" data-theme="c">-->
     <div data-role="header">
       <h1>{{title}}</h1>
-      </div><!-- /header -->
-      <div role="main" class="ui-content">
-      <h2 class="mc-text-center">Welcome!</h2>
-      <p class="mc-top-margin-1-5"><b>Existing Users</b></p>
-      <a href="sign-in.html" class="ui-btn ui-btn-b ui-corner-all">Sign In</a>
-      <p class="mc-top-margin-1-5"><b>Don't have an account?</b></p>
-      <a href="sign-up.html" class="ui-btn ui-btn-b ui-corner-all">Sign Up</a>
-      <p></p>
+    </div><!-- /header -->
+    <div role="main" class="ui-content">
+      <button id="aia_button" data-role="button">กดลิงค์เพื่อดูกองทุนรวมของ AIA</button>
     </div><!-- /content -->
   </div><!-- /page -->
+  <script>
+    $(document).ready(function() {
+      $('#aia_button').click(function() {
+        window.location.href = "/db";
+      });
+    });
+  </script>
 </body>
 </html>
 
