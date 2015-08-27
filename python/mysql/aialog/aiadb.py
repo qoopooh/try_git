@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+# -*- coding: utf-8; -*- 
 
 import time
-import MySQLdb
-from _mysql_exceptions import DatabaseError, OperationalError
+import pymysql
 
 DB_HOST = 'localhost'
 DB_USER = 'root'
@@ -10,6 +10,8 @@ DB_PASS = 'sddba'
 DB_NAME = 'test'
 SQL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 JSON_TIME_FORMAT = '%a, %d %b %Y %H:%M:%S +0000'
+
+DEBUG = False
 
 TABLES = {}
 TABLES['aiacode'] = (
@@ -55,7 +57,7 @@ INSERT_PRICE = "INSERT INTO aiaprice (`code_id`, `price`, `date`) VALUES (%s, %s
 cursor = None
 
 def preparedb():
-    db = MySQLdb.connect(host=DB_HOST, user=DB_USER,
+    db = pymysql.connect(host=DB_HOST, user=DB_USER,
             passwd=DB_PASS)
     cursor = db.cursor()
 
@@ -63,21 +65,19 @@ def preparedb():
     cursor.close()
     db.close()
 
-    db = MySQLdb.connect(host=DB_HOST, user=DB_USER,
+    db = pymysql.connect(host=DB_HOST, user=DB_USER,
             passwd=DB_PASS, db=DB_NAME)
     cursor = db.cursor()
 
     for name, ddl in TABLES.iteritems():
         try:
-            print "Creating table {}: ".format(name),
             cursor.execute(ddl)
-        except OperationalError as err:
-            if err[0] == 1050:
-                print("already exists.")
+        except Exception as e:
+            if e[0] == 1050:
+                if DEBUG:
+                    print("aiadb: already exists.")
             else:
-                print(err[1])
-        else:
-            print("OK")
+                raise e
 
     cursor.close()
     db.close()
@@ -86,13 +86,12 @@ def create_database(cursor):
     try:
         cursor.execute(
             "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
-    except DatabaseError as err:
-        if err[0] == 1007:
-            #print("Database {} exists!".format(DB_NAME))
-            pass
+    except Exception as e:
+        if e[0] == 1007:
+            if DEBUG:
+                print("aiadb: Database {} exists!".format(DB_NAME))
         else:
-            print("Failed creating database: {}".format(err[1]))
-        #exit(1)
+            raise e
 
 def get_code_id(c, db, code, name=None):
     c.execute(SELECT_CID, (code, name))
@@ -107,11 +106,13 @@ def get_code_id(c, db, code, name=None):
     return row[0]
 
 def update_price(code, name, price, ts):
-    db = MySQLdb.connect(host=DB_HOST, user=DB_USER,
+    db = pymysql.connect(host=DB_HOST, user=DB_USER,
             passwd=DB_PASS, db=DB_NAME)
     cursor = db.cursor()
     cid = get_code_id(cursor, db, code, name.encode('utf8'))
     if cid == None:
+        if DEBUG:
+            print 'aiadb: Cannot get cid'
         return False
 
     t = time.strptime(ts, JSON_TIME_FORMAT)
@@ -119,14 +120,20 @@ def update_price(code, name, price, ts):
     cursor.execute(SELECT_PRICE_DUP, (cid, tt))
     row = cursor.fetchone()
     if row != None:
+        if DEBUG:
+            print 'aiadb: There is redundant information', cid, tt
         return False
     cursor.execute(SELECT_PRICE, (cid, ))
     row = cursor.fetchone()
-    #print 'SELECT_PRICE', row[0], price
-    if row == None or row[0] == price:
+    if row == None:
+        if DEBUG:
+            print 'aiadb: There is no price of code_id', cid
         return False
+    if row[0] == price:
+        if DEBUG:
+            print 'aiadb: There is no price change', price
+        return True
     cursor.execute(INSERT_PRICE, (cid, price, tt))
-    #print 'INSERT_PRICE', cid, price
     db.commit()
     cursor.close()
     db.close()

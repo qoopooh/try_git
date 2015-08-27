@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8; -*- 
 
 import urllib, json, logging
 from aiadb import preparedb, update_price
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     try:
         preparedb()
     except Exception as err:
-        logger.error(err[1])
+        logger.error(err)
         exit(1)
 
     #j = get_json_from_file()
@@ -64,13 +65,13 @@ if __name__ == "__main__":
     time = get_time(j)
     prices = get_prices(j)
 
-    failure = False
+    success = True
     for k, v in prices.iteritems():
         if not update_price(k, v[0], v[1], time):
-            failure = True
+            success = False
 
-    if failure:
-        logger.warn("Cannot update price on " + time)
-    else:
+    if success:
         logger.info("Update price successfully for " + time)
+    else:
+        logger.warn("Cannot update price on " + time)
 
