@@ -1,15 +1,18 @@
+import java.nio.charset.Charset;
 //STEP 1. Import required packages
 import java.sql.*;
 
 public class FirstExample {
     // JDBC driver name and database URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
-    static final String DB_URL = "jdbc:mysql://192.168.1.57/test";
-    //static final String DB_URL = "jdbc:mysql://192.168.1.57/test?useUnicode=true&characterEncoding=utf-8";
+    //static final String DB_URL = "jdbc:mysql://192.168.1.57/test";
+    static final String DB_URL = "jdbc:mysql://192.168.1.57/test?useUnicode=true&characterEncoding=utf-8";
 
     //  Database credentials
     static final String USER = "root";
     static final String PASS = "sddba";
+
+    static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     public static void main(String[] args) {
         Connection conn = null;
@@ -40,8 +43,13 @@ public class FirstExample {
                 System.out.print("ID: " + id);
                 System.out.print(", code: " + code);
                 System.out.println(", name: "
-                        + name);
+                        //+ name);
                         //+ new String(name.getBytes("UTF-8"), "UTF-8"));
+                        //+ new String(name.getBytes("US-ASCII"), "UTF-8"));
+                        //+ new String(name.getBytes("ISO-8859-1"), UTF8_CHARSET));
+                        //+ new String(name.getBytes("ISO8859-1"), UTF8_CHARSET));
+                        //+ new String(name.getBytes("ISO8859-1"), "UTF-8"));
+                    + new String(name.getBytes("US-ASCII"), "UTF-8"));
                         //+ new String(name.getBytes("CP874"), "TIS-620"));
                         //+ new String(name.getBytes("ISO8859-1"), "TIS-620"));
                         //+ new String(name.getBytes("ISO8859-1"), "CP874"));
