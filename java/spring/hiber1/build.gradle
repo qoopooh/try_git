@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'hiber1'
+    version =  '0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web:1.2.5.RELEASE'
+    compile 'org.hibernate:hibernate-core:5.0.0.Final'
+    compile 'mysql:mysql-connector-java:5.1.31'
+}
