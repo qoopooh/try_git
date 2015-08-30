@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship, backref
 
-engine = create_engine('sqlite:///:memory:', echo=True)
+engine = create_engine('sqlite:///:memory:', echo=False)
 Base = declarative_base()
 
 class Employee(Base):
@@ -13,13 +13,18 @@ class Employee(Base):
 
     Empid = Column(String(5), primary_key=True)
     Cardno = Column(String(17))
-    Prefixid = Column(Integer)          # doc: Prefixed
+    Prefixid = Column(Integer, ForeignKey('Prefix.Pre_id'))     # doc: Prefixed
     Fullname = Column(String(50))
     Address = Column(String(50))
     Tel = Column(String(50))
-    Posid = Column(Integer)             # doc: String 3
+    Posid = Column(Integer, ForeignKey('Positions.Posid'))     # doc: Prefixed
     Username = Column(String(30))
     Password = Column(String(30))
+
+
+    prename = relationship('Prefix', foreign_keys='Employee.Prefixid')
+    posname = relationship('Positions', foreign_keys='Employee.Posid')
+    #user = relationship("User", backref=backref('addresses', order_by=Empid))
 
     def __repr__(self):
         """Optinal"""
@@ -27,6 +32,14 @@ class Employee(Base):
 
 #class WaterMeter(Base):
     #__tablename__ = 'Water_meter'
+
+    #Mt_no = Column(Integer)
+    #Adddate = Column(Date)          # doc: Integer
+    #Meterte_ID = Column(Integer)    # doc: Date
+    #Beformeternum = Column(String(6))
+    #Nowformeternum = Column(String(6))
+    #Amount = Column(Integer)
+    #Cus_id = Column(String)         # doc: Auto_Increment
 
 class Prefix(Base):
     __tablename__ = 'Prefix'
@@ -105,11 +118,14 @@ session = Session()
 
 add_prename(session)
 add_position(session)
-item = session.query(Positions).filter_by(Posid=1).first()
-print 'item', item
+#item = session.query(Positions).filter_by(Posid=1).first()
+#print 'item', item
 
-#add_employee(session)
+add_employee(session)
 
 #our_user = session.query(Employee).filter_by(Username='Pranee').first()
-#print our_user
+our_user = session.query(Employee).filter_by(Username='Manop').first()
+print "EMP", our_user
+print "PRE", our_user.prename
+print "POS", our_user.posname
 
