@@ -5,7 +5,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
-engine = create_engine('sqlite:///:memory:', echo=False)
+#engine = create_engine('sqlite:///:memory:', echo=False)
+#engine = create_engine('mysql+mysqldb://root:sddba@192.168.1.57/test')
+engine = create_engine('mysql://root:sddba@192.168.1.57/test?charset=utf8', echo=False)
 Base = declarative_base()
 
 class Employee(Base):
@@ -28,7 +30,10 @@ class Employee(Base):
 
     def __repr__(self):
         """Optinal"""
-        return "<Employee(name='{0}', fullname='{1}')>".format(self.Empid, self.Fullname.encode('utf8'))
+        fullname = ''
+        if self.Fullname is not None:
+            fullname = self.Fullname.encode('utf8')
+        return "<Employee(name='{0}', fullname='{1}')>".format(self.Empid, fullname)
 
 #class WaterMeter(Base):
     #__tablename__ = 'Water_meter'
@@ -82,28 +87,30 @@ class Positions(Base):
 
 Base.metadata.create_all(engine) 
 
-def add_prename(session):
-    prename = [u'นาย', u'นาง', u'นางสาว']
-    for i, name in enumerate(prename):
-        item = Prefix(Pre_id=i,prename=name)
+def add_prefix(session):
+    array = [u'นาย', u'นาง', u'นางสาว']
+    for i, name in enumerate(array):
+        item = Prefix(Pre_id=(i+1),prename=name)
+        print item
         session.add(item)
         session.commit()
 
 def add_position(session):
     array = [u'พนักงาน', u'ผู้บริหาร', u'ผู้ดูแลระบบ']
     for i, name in enumerate(array):
-        item = Positions(Posid=i, posname=name)
+        item = Positions(Posid=i+1, posname=name)
         session.add(item)
         session.commit()
 
 def add_employee(session):
-    pranee = Employee(Empid='0003', Cardno='1559900155611', Prefixid=1,
+    pranee = Employee(Empid='0003', Cardno='1559900155611', Prefixid=2,
             Fullname=u'ปรานี ดีมา', Address=u'12/4 หมู่ 8 อ.เมือง จ.น่าน',
-            Tel='0837628281', Posid=0, Username='Pranee', Password='222599')
-    manop = Employee(Empid='0005', Cardno='1559900155613', Prefixid=0,
+            Tel='0837628281', Posid=1, Username='Pranee', Password='222599')
+    manop = Employee(Empid='0005', Cardno='1559900155613', Prefixid=1,
             Fullname=u'มานพ มาดี', Address=u'15/3 หมู่ 7 อ.เมือง จ.น่าน',
-            Tel='0861908633', Posid=1, Username='Manop', Password='333599')
-    teera = Employee(Empid='0006', Posid=2, Username='Teera', Password='123456')
+            Tel='0861908633', Posid=2, Username='Manop', Password='333599')
+    teera = Employee(Empid='0006', Posid=3, Username='Teera', Password='123456',
+            Prefixid=1)
 
     session.add(pranee)
     session.commit()
@@ -112,20 +119,24 @@ def add_employee(session):
     session.add(teera)
     session.commit()
 
+def test_employee(session):
+    employees = ['Pranee', 'Manop', 'Teera']
+    for name in employees:
+        user = session.query(Employee).filter_by(Username=name).first()
+        print "EMP", user
+        print "PRE", user.prename
+        print "POS", user.posname
+
 Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-add_prename(session)
-add_position(session)
+#add_prefix(session)
+#add_position(session)
 #item = session.query(Positions).filter_by(Posid=1).first()
 #print 'item', item
 
-add_employee(session)
+#add_employee(session)
+test_employee(session)
 
-#our_user = session.query(Employee).filter_by(Username='Pranee').first()
-our_user = session.query(Employee).filter_by(Username='Manop').first()
-print "EMP", our_user
-print "PRE", our_user.prename
-print "POS", our_user.posname
 
