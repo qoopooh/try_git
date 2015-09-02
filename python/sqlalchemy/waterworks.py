@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
@@ -19,10 +19,9 @@ class Employee(Base):
     Fullname = Column(String(50))
     Address = Column(String(50))
     Tel = Column(String(50))
-    Posid = Column(Integer, ForeignKey('Positions.Posid'))     # doc: Prefixed
+    Posid = Column(Integer, ForeignKey('Positions.Posid'))
     Username = Column(String(30))
     Password = Column(String(30))
-
 
     prename = relationship('Prefix', foreign_keys='Employee.Prefixid')
     posname = relationship('Positions', foreign_keys='Employee.Posid')
@@ -33,18 +32,20 @@ class Employee(Base):
         fullname = ''
         if self.Fullname is not None:
             fullname = self.Fullname.encode('utf8')
-        return "<Employee(name='{0}', fullname='{1}')>".format(self.Empid, fullname)
+        return "<Employee(id='{0}', name='{1}', fullname='{2}, {3}, {4}')>".format(
+                self.Empid, self.Username, fullname, self.prename, self.posname)
 
-#class WaterMeter(Base):
-    #__tablename__ = 'Water_meter'
+class WaterMeter(Base):
+    __tablename__ = 'Water_meter'
 
-    #Mt_no = Column(Integer)
-    #Adddate = Column(Date)          # doc: Integer
-    #Meterte_ID = Column(Integer)    # doc: Date
-    #Beformeternum = Column(String(6))
-    #Nowformeternum = Column(String(6))
-    #Amount = Column(Integer)
-    #Cus_id = Column(String)         # doc: Auto_Increment
+    Meterte_ID = Column(Integer, primary_key=True) # doc: Date, no need Mt_no
+    Adddate = Column(DateTime)          # doc: Integer
+    Beformeternum = Column(String(6))
+    Nowformeternum = Column(String(6))
+    Amount = Column(Integer)
+    Cus_id = Column(Integer, ForeignKey('Customers.Cus_id'))
+    Dates_money = Column(DateTime)
+    Payment_Status = Column(Integer)
 
 class Prefix(Base):
     __tablename__ = 'Prefix'
@@ -58,31 +59,31 @@ class Prefix(Base):
 class Positions(Base):
     __tablename__ = 'Positions'
 
-    Posid = Column(Integer, primary_key=True)
+    Posid = Column(Integer, primary_key=True)   # doc: Varchar(3)
     posname = Column(String(50))
 
     def __repr__(self):
-        return "<Prefix(id='{0}', name='{1}')>".format(self.Posid, self.posname.encode('utf8'))
+        return "<Positions(id='{0}', name='{1}')>".format(self.Posid, self.posname.encode('utf8'))
 
 class Customers(Base):
     __tablename__ = 'Customers'
 
-    Cus_id = Column(Integer, primary_key=True) # doc: Auto_Increment
+    Cus_id = Column(Integer, primary_key=True, autoincrement=True)
     Pre_id = Column(Integer, ForeignKey('Prefix.Pre_id'))
     Fullname = Column(String(50))
     Card_id = Column(String(17))
     Cus_Address = Column(String(50))
     Cus_Phone = Column(String(15))
 
-    prename = relationship('Pre_id', foreign_keys='Employee.Prefixid')
+    prename = relationship('Prefix', foreign_keys='Customers.Pre_id')
 
     def __repr__(self):
         """Optinal"""
         fullname = ''
         if self.Fullname is not None:
             fullname = self.Fullname.encode('utf8')
-        return "<Customers(id='{0}, Card_id='{1}', fullname='{2}')>".format(
-                self.Cus_id, self.Card_id, fullname)
+        return "<Customers(id='{0}, Card_id='{1}', prename='{2}', fullname='{3}')>".format(
+                self.Cus_id, self.Card_id, self.prename, fullname)
 
 
 #class Payment(Base):
@@ -108,25 +109,24 @@ Base.metadata.create_all(engine)
 def add_prefix(session):
     array = [u'นาย', u'นาง', u'นางสาว']
     for i, name in enumerate(array):
-        item = Prefix(Pre_id=(i+1),prename=name)
-        print item
+        item = Prefix(prename=name)
         session.add(item)
         session.commit()
 
 def add_position(session):
-    array = [u'พนักงาน', u'ผู้บริหาร', u'ผู้ดูแลระบบ']
+    array = [u'ผู้บริหาร', u'พนักงาน', u'ผู้ดูแลระบบ']
     for i, name in enumerate(array):
-        item = Positions(Posid=i+1, posname=name)
+        item = Positions(posname=name)
         session.add(item)
         session.commit()
 
 def add_employee(session):
     pranee = Employee(Empid='0003', Cardno='1559900155611', Prefixid=2,
             Fullname=u'ปรานี ดีมา', Address=u'12/4 หมู่ 8 อ.เมือง จ.น่าน',
-            Tel='0837628281', Posid=1, Username='Pranee', Password='222599')
+            Tel='0837628281', Posid=2, Username='Pranee', Password='222599')
     manop = Employee(Empid='0005', Cardno='1559900155613', Prefixid=1,
             Fullname=u'มานพ มาดี', Address=u'15/3 หมู่ 7 อ.เมือง จ.น่าน',
-            Tel='0861908633', Posid=2, Username='Manop', Password='333599')
+            Tel='0861908633', Posid=1, Username='Manop', Password='333599')
     teera = Employee(Empid='0006', Posid=3, Username='Teera', Password='123456',
             Prefixid=1)
 
@@ -142,24 +142,26 @@ def test_employee(session):
     for name in employees:
         user = session.query(Employee).filter_by(Username=name).first()
         print "EMP", user
-        print "PRE", user.prename
-        print "POS", user.posname
 
 def add_customers(session):
-    pranee = Customers(Pre_id=1,
-            Cardno='1559900155611', Prefixid=2,
-            Fullname=u'ปรานี ดีมา', Address=u'12/4 หมู่ 8 อ.เมือง จ.น่าน',
-            Tel='0837628281', Posid=1, Username='Pranee', Password='222599')
+    cus1 = Customers(Pre_id=1,
+            Fullname=u'นวล  ใจงาม', Card_id='1559900155634',
+            Cus_Address=u'56/7 ต.ไชยสถาน อ.เมือง จ.น่าน',
+            Cus_Phone='0847638382') # doc: has Cus_Age
+    cus2 = Customers(Pre_id=2,
+            Fullname=u'มะลิ  ดำดี', Card_id='1559900155677',
+            Cus_Address=u'34/5 ต.ไชยสถาน อ.เมือง จ.น่าน',
+            Cus_Phone='0876543567') # doc: has Cus_Age
 
-    session.add(pranee)
+    session.add(cus1)
     session.commit()
-    session.add(manop)
+    session.add(cus2)
     session.commit()
 
 def test_customers(session):
     q = session.query(Customers).all()
     for i in q:
-        print i
+        print "CUS", i
 
 Session = sessionmaker()
 Session.configure(bind=engine)
@@ -168,7 +170,7 @@ session = Session()
 add_prefix(session)
 add_position(session)
 add_employee(session)
-#test_employee(session)
+test_employee(session)
 add_customers(session)
 test_customers(session)
 
