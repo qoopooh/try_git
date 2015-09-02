@@ -5,9 +5,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
-#engine = create_engine('sqlite:///:memory:', echo=False)
+engine = create_engine('sqlite:///:memory:', echo=False)
 #engine = create_engine('mysql+mysqldb://root:sddba@192.168.1.57/test')
-engine = create_engine('mysql://root:sddba@192.168.1.57/test?charset=utf8', echo=False)
+#engine = create_engine('mysql://root:sddba@192.168.1.57/test?water=utf8', echo=False)
 Base = declarative_base()
 
 class Employee(Base):
@@ -64,8 +64,26 @@ class Positions(Base):
     def __repr__(self):
         return "<Prefix(id='{0}', name='{1}')>".format(self.Posid, self.posname.encode('utf8'))
 
-#class Customers(Base):
-    #__tablename__ = 'Customers'
+class Customers(Base):
+    __tablename__ = 'Customers'
+
+    Cus_id = Column(Integer, primary_key=True) # doc: Auto_Increment
+    Pre_id = Column(Integer, ForeignKey('Prefix.Pre_id'))
+    Fullname = Column(String(50))
+    Card_id = Column(String(17))
+    Cus_Address = Column(String(50))
+    Cus_Phone = Column(String(15))
+
+    prename = relationship('Pre_id', foreign_keys='Employee.Prefixid')
+
+    def __repr__(self):
+        """Optinal"""
+        fullname = ''
+        if self.Fullname is not None:
+            fullname = self.Fullname.encode('utf8')
+        return "<Customers(id='{0}, Card_id='{1}', fullname='{2}')>".format(
+                self.Cus_id, self.Card_id, fullname)
+
 
 #class Payment(Base):
     #__tablename__ = 'Payment'
@@ -127,16 +145,30 @@ def test_employee(session):
         print "PRE", user.prename
         print "POS", user.posname
 
+def add_customers(session):
+    pranee = Customers(Pre_id=1,
+            Cardno='1559900155611', Prefixid=2,
+            Fullname=u'ปรานี ดีมา', Address=u'12/4 หมู่ 8 อ.เมือง จ.น่าน',
+            Tel='0837628281', Posid=1, Username='Pranee', Password='222599')
+
+    session.add(pranee)
+    session.commit()
+    session.add(manop)
+    session.commit()
+
+def test_customers(session):
+    q = session.query(Customers).all()
+    for i in q:
+        print i
+
 Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-#add_prefix(session)
-#add_position(session)
-#item = session.query(Positions).filter_by(Posid=1).first()
-#print 'item', item
-
-#add_employee(session)
-test_employee(session)
-
+add_prefix(session)
+add_position(session)
+add_employee(session)
+#test_employee(session)
+add_customers(session)
+test_customers(session)
 
