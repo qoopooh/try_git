@@ -6,7 +6,7 @@ public class FirstExample {
     // JDBC driver name and database URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
     //static final String DB_URL = "jdbc:mysql://192.168.1.57/test";
-    static final String DB_URL = "jdbc:mysql://192.168.1.57/test?useUnicode=true&characterEncoding=utf-8";
+    static final String DB_URL = "jdbc:mysql://192.168.1.57/water?useUnicode=true&characterEncoding=utf-8";
 
     //  Database credentials
     static final String USER = "root";
@@ -29,35 +29,21 @@ public class FirstExample {
             System.out.println("Creating statement...");
             stmt = conn.createStatement();
             String sql;
-            sql = "SELECT * FROM aiacode";
+            sql = "SELECT * FROM Employee";
             ResultSet rs = stmt.executeQuery(sql);
 
             //STEP 5: Extract data from result set
             while(rs.next()){
                 //Retrieve by column name
-                int id  = rs.getInt("id");
-                String code = rs.getString("code");
-                String name = rs.getString("name");
+                int id  = rs.getInt("Empid");
+                String address = rs.getString("Address");
+                String name = rs.getString("Fullname");
 
                 //Display values
                 System.out.print("ID: " + id);
-                System.out.print(", code: " + code);
+                System.out.print(", address: " + address);
                 System.out.println(", name: "
                         + name);
-                        //+ new String(name.getBytes("UTF-8"), "UTF-8"));
-                        //+ new String(name.getBytes("US-ASCII"), "UTF-8"));
-                        //+ new String(name.getBytes("ISO-8859-1"), UTF8_CHARSET));
-                        //+ new String(name.getBytes("ISO8859-1"), UTF8_CHARSET));
-                        //+ new String(name.getBytes("ISO8859-1"), "UTF-8"));
-                        //+ new String(name.getBytes("US-ASCII"), "UTF-8"));
-                        //+ new String(name.getBytes("CP874"), "TIS-620"));
-                        //+ new String(name.getBytes("ISO8859-1"), "TIS-620"));
-                        //+ new String(name.getBytes("ISO8859-1"), "CP874"));
-                        //+ new String(name.getBytes(), "CP874"));
-                        //+ new String(name.getBytes("UTF-8"), "ISO8859-1"));
-                        //+ new String(name.getBytes("ISO8859-1"), "UTF-8"));
-                        //+ new String(name.getBytes("TIS-620"), "UTF-8"));
-                //System.out.println(", name: " + "ภาษาไทย");
             }
             //STEP 6: Clean-up environment
             rs.close();
