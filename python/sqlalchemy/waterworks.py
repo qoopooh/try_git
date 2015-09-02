@@ -5,9 +5,9 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Foreign
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
-engine = create_engine('sqlite:///:memory:', echo=False)
+#engine = create_engine('sqlite:///:memory:', echo=False)
 #engine = create_engine('mysql+mysqldb://root:sddba@192.168.1.57/test')
-#engine = create_engine('mysql://root:sddba@192.168.1.57/test?water=utf8', echo=False)
+engine = create_engine('mysql://root:sddba@192.168.1.57/water?charset=utf8', echo=False)
 Base = declarative_base()
 
 class Employee(Base):
@@ -200,10 +200,10 @@ Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-add_prefix(session)
-add_position(session)
-add_employee(session)
+#add_prefix(session)
+#add_position(session)
+#add_employee(session)
 test_employee(session)
-add_customers(session)
+#add_customers(session)
 test_customers(session)
 
