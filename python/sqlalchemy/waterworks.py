@@ -11,6 +11,9 @@ engine = create_engine('sqlite:///:memory:', echo=False)
 Base = declarative_base()
 
 class Employee(Base):
+    '''สำหรับเก็บข้อมูลผู้ใช้งานระบบ
+    '''
+
     __tablename__ = 'Employee'
 
     Empid = Column(String(5), primary_key=True)
@@ -36,6 +39,13 @@ class Employee(Base):
                 self.Empid, self.Username, fullname, self.prename, self.posname)
 
 class WaterMeter(Base):
+    '''สำหรับเก็บข้อมูลมิเตอร์ค่าน้ำ
+    Mt_no ...
+    Meterte_ID is Date?
+    Beformeternum & Nowformeternum are String?
+    Is it the right table to count meter number?
+    Does employee calculate amount?
+    '''
     __tablename__ = 'Water_meter'
 
     Meterte_ID = Column(Integer, primary_key=True) # doc: Date, no need Mt_no
@@ -48,6 +58,7 @@ class WaterMeter(Base):
     Payment_Status = Column(Integer)
 
 class Prefix(Base):
+    '''สำหรับเก็บข้อมูลคำนำหน้าชื่อ'''
     __tablename__ = 'Prefix'
 
     Pre_id = Column(Integer, primary_key=True)
@@ -57,6 +68,7 @@ class Prefix(Base):
         return "<Prefix(id='{0}', name='{1}')>".format(self.Pre_id, self.prename.encode('utf8'))
 
 class Positions(Base):
+    '''สำหรับเก็บข้อมูลตำแหน่ง'''
     __tablename__ = 'Positions'
 
     Posid = Column(Integer, primary_key=True)   # doc: Varchar(3)
@@ -66,6 +78,7 @@ class Positions(Base):
         return "<Positions(id='{0}', name='{1}')>".format(self.Posid, self.posname.encode('utf8'))
 
 class Customers(Base):
+    '''สำหรับเก็บข้อมูลลูกค้า'''
     __tablename__ = 'Customers'
 
     Cus_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -87,21 +100,41 @@ class Customers(Base):
 
 
 #class Payment(Base):
+    '''ชำระเงินค่าติดตั้ง สำหรับเก็บข้อมูลชำระเงิน
+    Meterte_ID is PK?
+    Meterte_ID is Date?
+    Where we can get value of Install_price?
+    '''
     #__tablename__ = 'Payment'
 
 #class WaterUse(Base):
+    '''ข้อมูลการใช้น้ำ สำหรับเก็บข้อมูลการใช้น้ำ
+    Here Meterte_ID is String from WaterMeter table?
+    Do we get Register_Before & Register_After from Beformeternum & Nowformeternum of WaterMeter table?
+    '''
     #__tablename__ = 'Water_use'
 
 #class Extensions(Base):
+    '''สำหรับเก็บข้อมูลการแจ้งชำระเงิน
+    Is it the same amount as WaterMeter table?
+    Where does the Free (Fee) come from?
+    '''
+
     #__tablename__ = 'Extensions'
 
 #class Billnotpay(Base):
+    '''สำหรับเก็บข้อมูลบิลที่ยังไม่ได้ชำระเงิน
+    '''
     #__tablename__ = 'Billnotpay'
 
 #class Bill(Base):
+    '''สำหรับเก็บข้อมูลใบเสร็จรับเงิน
+    '''
     #__tablename__ = 'Bill'
 
 #class Uninstall(Base):
+    '''สำหรับเก็บข้อมูลยกเลิกใช้น้ำ
+    '''
     #__tablename__ = 'Uninstall'
 
 Base.metadata.create_all(engine) 
