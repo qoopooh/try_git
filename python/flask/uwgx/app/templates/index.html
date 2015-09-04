@@ -15,12 +15,16 @@
     </div><!-- /header -->
     <div role="main" class="ui-content">
       <button id="aia_button" data-role="button">กดลิงค์เพื่อดูกองทุนรวมของ AIA</button>
+      <button id="water" data-role="button">ระบบการจัดเก็บค่าน้ำประปา</button>
     </div><!-- /content -->
   </div><!-- /page -->
   <script>
     $(document).ready(function() {
       $('#aia_button').click(function() {
         window.location.href = "/db";
+      });
+      $('#water').click(function() {
+        window.location.href = "/water";
       });
     });
   </script>
