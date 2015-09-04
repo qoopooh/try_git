@@ -5,8 +5,10 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Foreign
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
+# CREATE DATABASE `water` CHARACTER SET utf8 COLLATE utf8_general_ci;
 #engine = create_engine('sqlite:///:memory:', echo=False)
 #engine = create_engine('mysql+mysqldb://root:sddba@192.168.1.57/test')
+engine = create_engine('mysql+mysqldb://root:sddba@localhost/water?charset=utf8')
 engine = create_engine('mysql://root:sddba@192.168.1.57/water?charset=utf8', echo=False)
 Base = declarative_base()
 
@@ -156,11 +158,11 @@ def add_position(session):
 def add_employee(session):
     pranee = Employee(Empid='0003', Cardno='1559900155611', Prefixid=2,
             Fullname=u'ปรานี ดีมา', Address=u'12/4 หมู่ 8 อ.เมือง จ.น่าน',
-            Tel='0837628281', Posid=2, Username='Pranee', Password='222599')
+            Tel='0837628281', Posid=1, Username='Pranee', Password='1')
     manop = Employee(Empid='0005', Cardno='1559900155613', Prefixid=1,
             Fullname=u'มานพ มาดี', Address=u'15/3 หมู่ 7 อ.เมือง จ.น่าน',
-            Tel='0861908633', Posid=1, Username='Manop', Password='333599')
-    teera = Employee(Empid='0006', Posid=3, Username='Teera', Password='123456',
+            Tel='0861908633', Posid=2, Username='Manop', Password='1')
+    teera = Employee(Empid='0006', Posid=3, Username='Teera', Password='1',
             Prefixid=1)
 
     session.add(pranee)
@@ -200,10 +202,9 @@ Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-#add_prefix(session)
-#add_position(session)
-#add_employee(session)
+add_prefix(session)
+add_position(session)
+
+add_employee(session)
 test_employee(session)
-#add_customers(session)
-test_customers(session)
 
