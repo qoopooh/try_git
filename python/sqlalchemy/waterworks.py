@@ -9,9 +9,9 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 
 # CREATE DATABASE `water` CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-engine = create_engine('sqlite:///:memory:', echo=False)
+#engine = create_engine('sqlite:///:memory:', echo=False)
 #engine = create_engine('mysql+mysqldb://root:sddba@localhost/water?charset=utf8')
-#engine = create_engine('mysql://root:sddba@192.168.1.57/water?charset=utf8', echo=False)
+engine = create_engine('mysql://root:sddba@192.168.1.57/water?charset=utf8', echo=False)
 
 Base = declarative_base()
 
