@@ -28,7 +28,7 @@ class Employee(Base):
     Address = Column(String(50))
     Tel = Column(String(50))
     Posid = Column(Integer, ForeignKey('Positions.Posid'))
-    Username = Column(String(30))
+    Username = Column(String(30), unique=True)
     Password = Column(String(30))
 
     prefix = relationship('Prefix', foreign_keys='Employee.Prefixid')
