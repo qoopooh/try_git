@@ -194,7 +194,7 @@ def add_prefix(session):
         session.commit()
 
 def add_position(session):
-    array = [u'พนักงาน', u'ผู้บริหาร', u'ผู้ดูแลระบบ']
+    array = [u'เจ้าหน้าที่', u'ผู้บริหาร', u'ผู้ดูแลระบบ']
     for i, name in enumerate(array):
         item = Positions(posname=name)
         session.add(item)
