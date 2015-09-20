@@ -142,6 +142,7 @@ class WaterUse(Base):
 
     # Transaction history
     RecordDate = Column(DateTime, info='Measure meter date')
+    IssueDate = Column(DateTime, info='Payment Issue Date')
     DueDate = Column(DateTime, info='Payment Due Date')
     PaidDate = Column(DateTime, info='Actual paid date')
 

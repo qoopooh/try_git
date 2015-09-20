@@ -566,6 +566,7 @@ def rem_dt():
         print t, get_row_count(t)
 
 if __name__ == '__main__':
-    #rem_dt()
+    rem_dt()
+    #print_row_count()
 
     print 'Done'
