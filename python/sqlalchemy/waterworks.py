@@ -10,8 +10,8 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 # CREATE DATABASE `water` CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 #engine = create_engine('sqlite:///:memory:', echo=False)
-#engine = create_engine('mysql+mysqldb://root:sddba@localhost/water?charset=utf8')
-engine = create_engine('mysql://root:sddba@192.168.1.57/water?charset=utf8', echo=False)
+engine = create_engine('mysql+mysqldb://root:sddba@localhost/water?charset=utf8')
+#engine = create_engine('mysql://root:sddba@192.168.1.57/water?charset=utf8', echo=False)
 
 Base = declarative_base()
 
@@ -90,8 +90,6 @@ class Customers(Base):
     '''ชำระเงินค่าติดตั้ง สำหรับเก็บข้อมูลชำระเงิน
     Customer has to do on first registration
 
-    Meterte_ID is PK?
-    Meterte_ID is Date?
     Install_price = 1500
     '''
     #__tablename__ = 'Payment'
@@ -106,9 +104,9 @@ class Meter(Base):
     Cus_id = Column(Integer, ForeignKey('Customers.Cus_id'))
     Empid = Column(Integer, ForeignKey('Employee.Empid'))
     Address = Column(String(50), nullable=False, unique=True)
-    MeterType = Column(String(10), default="1", info='"1": 1 inch, "1.5": 1 1/2 inches')
+    MeterType = Column(String(10), default="1", info='"1": 1 inch, "2": 1 1/2 inches')
     PaymentDate = Column(DateTime, default=datetime.utcnow)
-    Status = Column(Integer, default=1, info='1: active, 0: suspend')
+    Status = Column(Integer, default=1, info='1: active, 2: suspend')
     InstallPrice = Column(Integer, default=1500)
 
     customer = relationship('Customers', foreign_keys='Meter.Cus_id')
@@ -125,9 +123,8 @@ class Meter(Base):
 
 class WaterUse(Base):
     '''ข้อมูลการใช้น้ำ สำหรับเก็บข้อมูลการใช้น้ำ
-    Here Meterte_ID is String from WaterMeter table?
-    Do we get Register_Before & Register_After from Beformeternum & Nowformeternum of WaterMeter table?
     '''
+
     __tablename__ = 'Water_use'
 
     Water_use_id = Column(Integer, primary_key=True)
@@ -147,6 +144,15 @@ class WaterUse(Base):
     PaidDate = Column(DateTime, info='Actual paid date')
 
     meter = relationship('Meter', foreign_keys='WaterUse.Meter_ID')
+
+    def __repr__(self):
+        address = self.meter.Address
+        return "<WaterUse(id='{0}', address='{1}', use='{2}', paid='{3}')>".format(
+                self.Water_use_id,
+                address.encode('utf8'),
+                self.Amount,
+                self.PaidDate)
+
 
 #class Extensions(Base):
     '''สำหรับเก็บข้อมูลการแจ้งชำระเงิน
@@ -202,21 +208,25 @@ def add_position(session):
         session.commit()
 
 def add_employee(session):
-    pranee = Employee(Cardno='1559900155611', Prefixid=2,
+    employees = [
+        Employee(Cardno='1559900155611', Prefixid=2,
             Fullname=u'ปรานี ดีมา', Address=u'12/4 หมู่ 8 อ.เมือง จ.น่าน',
-            Tel='0837628281', Posid=1, Username='Pranee', Password='\'')
-    manop = Employee(Cardno='1559900155613', Prefixid=1,
+            Tel='0837628281', Posid=1, Username='Pranee', Password='222599'),
+        Employee(Cardno='1559900155613', Prefixid=1,
             Fullname=u'มานพ มาดี', Address=u'15/3 หมู่ 7 อ.เมือง จ.น่าน',
-            Tel='0861908633', Posid=2, Username='Manop', Password='\'')
-    teera = Employee(Posid=3, Username='Teera', Password='\'',
-            Prefixid=1)
-
-    session.add(pranee)
-    session.commit()
-    session.add(manop)
-    session.commit()
-    session.add(teera)
-    session.commit()
+            Tel='0861908633', Posid=2, Username='Manop', Password='333599'),
+        Employee(Username='Teera', Password='123456', Fullname=u'ธีระ',
+            Posid=3, Prefixid=1),
+        Employee(Posid=1, Username='oo', Password='oo', Fullname='O Officer',
+            Prefixid=1),
+        Employee(Posid=2, Username='mm', Password='mm', Fullname='M Manager',
+            Prefixid=2),
+        Employee(Posid=2, Username='aa', Password='aa', Fullname='A Admin',
+            Prefixid=3),
+    ]
+    for e in employees:
+        session.add(e)
+        session.commit()
 
 def test_employee(session):
     employees = ['Pranee', 'Manop', 'Teera']
@@ -225,19 +235,23 @@ def test_employee(session):
         print user
 
 def add_customers(session):
-    cus1 = Customers(Pre_id=1,
+    customers = [
+        Customers(Pre_id=1,
             Fullname=u'นวล  ใจงาม', Card_id='1559900155634',
             Cus_Address=u'56/7 ต.ไชยสถาน อ.เมือง จ.น่าน',
-            Cus_Phone='0847638382')
-    cus2 = Customers(Pre_id=2,
+            Cus_Phone='0847638382'),
+        Customers(Pre_id=2,
             Fullname=u'มะลิ  ดำดี', Card_id='1559900155677',
             Cus_Address=u'34/5 ต.ไชยสถาน อ.เมือง จ.น่าน',
-            Cus_Phone='0876543567')
-
-    session.add(cus1)
-    session.commit()
-    session.add(cus2)
-    session.commit()
+            Cus_Phone='0876543567'),
+        Customers(Pre_id=3,
+            Fullname=u'C Customer', Card_id='1559900155600',
+            Cus_Address=u'79/9 หมู่ 8 ต.สันปูเลย',
+            Cus_Phone='053333123'),
+    ]
+    for c in customers:
+        session.add(c)
+        session.commit()
 
 def test_customers(session):
     q = session.query(Customers).all()
@@ -245,20 +259,84 @@ def test_customers(session):
         print i
 
 def add_meters(session):
-    m1 = Meter(Cus_id=1, Empid=1, Address='89/4')
-    session.add(m1)
-    session.commit()
-
-    m2 = Meter(Cus_id=1, Empid=1, Address=u'อรสิริน 6')
-    session.add(m2)
-    session.commit()
-
-    m3 = Meter(Cus_id=2, Empid=1, Address='Ornsirn 6')
-    session.add(m3)
-    session.commit()
+    meters = [
+        Meter(Cus_id=1, Empid=1, Address='89/4 ท่าศาลา',
+            PaymentDate=datetime(2015, 6, 9, 11, 13, 3)),
+        Meter(Cus_id=1, Empid=4, Address=u'อรสิริน 6 ภาษาไทย',
+            PaymentDate=datetime(2015, 6, 12, 8, 0, 0)),
+        Meter(Cus_id=2, Empid=1, Address='CMRU English',
+            PaymentDate=datetime(2015, 6, 23, 17, 30, 45)),
+    ]
+    for m in meters:
+        session.add(m)
+        session.commit()
 
 def test_meters(session):
     q = session.query(Meter).all()
+    for i in q:
+        print i
+
+def add_use(session):
+    uses = [
+        WaterUse(Meter_ID=1, Amount=9, Fee=0, Total=45,
+        RecordDate=datetime(2015, 7, 17),
+        IssueDate=datetime(2015, 7, 19),
+        DueDate=datetime(2015, 7, 29),
+        PaidDate=datetime(2015, 7, 31)),
+
+        WaterUse(Meter_ID=2, Amount=30, Fee=0, Total=150,
+        RecordDate=datetime(2015, 7, 15),
+        IssueDate=datetime(2015, 7, 19),
+        DueDate=datetime(2015, 7, 29),
+        PaidDate=datetime(2015, 7, 29)),
+
+        WaterUse(Meter_ID=3, Amount=10, Fee=0, Total=50,
+        RecordDate=datetime(2015, 7, 19),
+        IssueDate=datetime(2015, 7, 19),
+        DueDate=datetime(2015, 7, 29),
+        PaidDate=datetime(2015, 7, 29)),
+
+        WaterUse(Meter_ID=1, Amount=22, Fee=20, Total=65,
+        RecordDate=datetime(2015, 8, 18),
+        IssueDate=datetime(2015, 8, 19),
+        DueDate=datetime(2015, 8, 29),
+        PaidDate=datetime(2015, 8, 25)),
+
+        WaterUse(Meter_ID=2, Amount=71, Fee=0, Total=205,
+        RecordDate=datetime(2015, 8, 19),
+        IssueDate=datetime(2015, 8, 19),
+        DueDate=datetime(2015, 8, 29),
+        PaidDate=datetime(2015, 8, 25)),
+
+        WaterUse(Meter_ID=3, Amount=21, Fee=0, Total=55,
+        RecordDate=datetime(2015, 8, 19),
+        IssueDate=datetime(2015, 8, 19),
+        DueDate=datetime(2015, 8, 29),
+        PaidDate=datetime(2015, 8, 26)),
+
+        WaterUse(Meter_ID=1, Amount=41, Fee=0, Total=95,
+        RecordDate=datetime(2015, 9, 18),
+        IssueDate=datetime(2015, 9, 19),
+        DueDate=datetime(2015, 9, 29),
+        PaidDate=datetime(2015, 9, 29)),
+
+        WaterUse(Meter_ID=2, Amount=104, Fee=0, Total=165,
+        RecordDate=datetime(2015, 9, 18),
+        IssueDate=datetime(2015, 9, 19),
+        DueDate=datetime(2015, 9, 29)),
+
+        WaterUse(Meter_ID=3, Amount=30, Fee=0, Total=45,
+        RecordDate=datetime(2015, 9, 19),
+        IssueDate=datetime(2015, 9, 19),
+        DueDate=datetime(2015, 9, 29),
+        PaidDate=datetime(2015, 9, 28)),
+    ]
+    for u in uses:
+        session.add(u)
+        session.commit()
+
+def test_use(session):
+    q = session.query(WaterUse).all()
     for i in q:
         print i
 
@@ -274,3 +352,5 @@ if __name__ == '__main__':
     add_customers(session)
     add_meters(session)
     test_meters(session)
+    add_use(session)
+    test_use(session)
