@@ -21,6 +21,11 @@
     </ul>
     <br>
 
+    <p>My switch</p>
+    <button ng-disabled="mySwitch" ng-click="buttonClicked()">Click Me!</button>
+    <p><input type="checkbox" ng-model="mySwitch"/>Button</p>
+    {{ mySwitch }}: {{ count }}<br>
+
     <p>Http get: http://www.w3schools.com/angular/customers.php</p>
     <table>
       <tr ng-repeat="x in customers | orderBy:['Country', 'City']">

@@ -12,4 +12,12 @@ app.controller('myCtrl', function($scope, $http) {
 
     $http.get("http://www.w3schools.com/angular/customers.php")
       .success(function(response) {$scope.customers = response.records;});
-});
+
+    $scope.mySwitch = true;
+
+    $scope.count = 0;
+    $scope.buttonClicked = function() {
+      return $scope.count += 1;
+    }
+}
+);
