@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Login Form in PHP with Session</title>
+</head>
+<body>
+  <div ng-app="myApp" ng-controller="myCtrl">
+    <p>My first expression: {{ 5 + 5 }}</p>
+
+    First Name: <input type="text" ng-model="firstName"><br>
+    Last Name: <input type="text" ng-model="lastName"><br>
+    <br>
+    Full Name: {{firstName + " " + lastName}}
+
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+  <script>
+    var app = angular.module('myApp', []);
+    app.controller('myCtrl', function($scope) {
+        $scope.firstName= "Berm";
+        $scope.lastName= "Win";
+    });
+  </script>
+
+</body>
+</html>
