@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Login Form in PHP with Session</title>
+  <link rel="stylesheet" href="css/table.css">
 </head>
 <body>
   <div ng-app="myApp" ng-controller="myCtrl">
@@ -10,17 +11,26 @@
 
     First Name: <input type="text" ng-model="firstName"><br>
     Last Name: <input type="text" ng-model="lastName"><br>
-    <br>
-    Full Name: {{fullName() | uppercase }}
+    Full Name: {{fullName() | uppercase }}<br>
 
-
-    <p>Filtering input:</p>
-    <p><input type="text" ng-model="test"></p>
+    <p>Filtering input: <input type="text" ng-model="test"></p>
     <ul>
       <li ng-repeat="x in names | filter:test | orderBy:'country'">
         {{ x.name + ', ' + x.country }}
       </li>
     </ul>
+    <br>
+
+    <p>Http get: http://www.w3schools.com/angular/customers.php</p>
+    <table>
+      <tr ng-repeat="x in customers | orderBy:['Country', 'City']">
+        <td>{{ $index + 1 }}</td>
+        <td>{{ x.Name }}</td>
+        <td>{{ x.City }}</td>
+        <td>{{ x.Country }}</td>
+      </tr>
+    </table>
+
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
