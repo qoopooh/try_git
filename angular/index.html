@@ -11,18 +11,20 @@
     First Name: <input type="text" ng-model="firstName"><br>
     Last Name: <input type="text" ng-model="lastName"><br>
     <br>
-    Full Name: {{firstName + " " + lastName}}
+    Full Name: {{fullName() | uppercase }}
 
+
+    <p>Filtering input:</p>
+    <p><input type="text" ng-model="test"></p>
+    <ul>
+      <li ng-repeat="x in names | filter:test | orderBy:'country'">
+        {{ x.name + ', ' + x.country }}
+      </li>
+    </ul>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
-  <script>
-    var app = angular.module('myApp', []);
-    app.controller('myCtrl', function($scope) {
-        $scope.firstName= "Berm";
-        $scope.lastName= "Win";
-    });
-  </script>
+  <script src="js/personController.js"></script>
 
 </body>
 </html>
