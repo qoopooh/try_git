@@ -7,7 +7,7 @@ import pymysql
 DB_HOST = 'localhost'
 DB_USER = 'root'
 DB_PASS = 'sddba'
-DB_NAME = 'test'
+DB_NAME = 'aia'
 SQL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 JSON_TIME_FORMAT = '%a, %d %b %Y %H:%M:%S +0000'
 
@@ -107,6 +107,7 @@ def get_code_id(c, db, code, name=None):
 
 def update_price(code, name, price, ts):
     db = pymysql.connect(host=DB_HOST, user=DB_USER,
+            charset='utf8', # phpmyadmin read Thai with this
             passwd=DB_PASS, db=DB_NAME)
     cursor = db.cursor()
     cid = get_code_id(cursor, db, code, name.encode('utf8'))
