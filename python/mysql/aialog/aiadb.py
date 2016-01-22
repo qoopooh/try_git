@@ -7,7 +7,7 @@ import pymysql
 DB_HOST = 'localhost'
 DB_USER = 'root'
 DB_PASS = 'sddba'
-DB_NAME = 'aia'
+DB_NAME = 'test'
 SQL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 JSON_TIME_FORMAT = '%a, %d %b %Y %H:%M:%S +0000'
 

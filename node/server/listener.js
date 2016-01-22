@@ -1,6 +1,6 @@
-#!/usr/bin/env nodejs
+#!/usr/bin/env node
 
-var PORT = 8001;
+var PORT = 8000;
 
 var count = 0;
 var http = require('http');

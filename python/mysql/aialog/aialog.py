@@ -59,7 +59,9 @@ if __name__ == "__main__":
     j = get_json()
     
     if not is_ok(j):
-        logger.error('Load aia source:', j.get('Status'))
+        message = str(j.get('Status'))
+        #print message
+        logger.error('Load aia source:', message)
         exit(1)
 
     time = get_time(j)
