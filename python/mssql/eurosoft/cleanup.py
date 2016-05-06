@@ -3,7 +3,7 @@
 
 __version__ = '1.0.6.3'
 
-HOST='192.168.1.66'
+HOST='192.168.1.67'
 USER='sa'
 PASSWORD='sa'
 DATABASE='Eurosoft'
