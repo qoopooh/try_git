@@ -19,7 +19,20 @@ port.on('open', function () {
     if (err) {
       return console.log('Error: ', err.message);
     }
-    console.log(bytesWritten, 'bytes written');
+    console.log(bytesWritten, 'Set notification');
+
+    setTimeout(function() {
+      var name = 'Queue ';
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      for( var i=0; i < 5; i++ )
+        name += possible.charAt(Math.floor(Math.random() * possible.length));
+      port.write('AT+NAME' + name + '\r\n', function(err, count) {
+        if (err) {
+          return console.log('Name Error: ', err.message);
+        }
+        console.log(bytesWritten, 'Set name: ' + name);
+      });
+    }, 250);
   });
 });
 
