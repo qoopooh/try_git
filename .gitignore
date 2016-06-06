@@ -30,3 +30,5 @@ cscope.*
 du-size
 
 sessions
+
+.vagrant
