@@ -1,4 +1,14 @@
 nginx:
-  image: nginx:latest
+  build: ./nginx/
   ports:
     - 8000:80
+  links:
+    - php
+  volumes:
+    - .:/var/www/html
+php:
+  image: php:7.0-fpm
+  expose:
+    - 9000
+  volumes:
+    - .:/var/www/html
