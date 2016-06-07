@@ -4,11 +4,46 @@ nginx:
     - 8000:80
   links:
     - php
-  volumes:
-    - .:/var/www/html
+  volumes_from:
+    - app
+
 php:
-  image: php:7.0-fpm
+  build: ./php/
   expose:
     - 9000
+  links:
+    - mysql
+  volumes_from:
+    - app
+
+app:
+  image: php:7.0-fpm
   volumes:
     - .:/var/www/html
+  command: "true"
+
+phpmyadmin:
+  image: phpmyadmin/phpmyadmin
+  ports:
+    - 8081:80
+  links:
+    - mysql
+  environment:
+    PMA_HOST: mysql
+
+mysql:
+  image: mysql:latest
+  volumes_from:
+    - data
+  environment:
+    MYSQL_ROOT_PASSWORD: sddba
+    MYSQL_DATABASE: sd_app
+    MYSQL_USER: root
+    MYSQL_PASSWORD: sddba
+
+data:
+  image: mysql:latest
+  volumes:
+    - /var/lib/mysql
+  command: "true"
+
