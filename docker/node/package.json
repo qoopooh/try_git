@@ -1,0 +1,10 @@
+{
+  "name": "sample",
+  "version": "0.0.0",
+  "dependencies": {
+    "express": "visionmedia/express"
+  },
+  "scripts": {
+    "start" : "node app.js"
+  }
+}
