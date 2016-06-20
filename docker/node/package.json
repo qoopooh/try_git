@@ -1,6 +1,9 @@
 {
   "name": "sample",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "description" : "A sample app",
+  "repository": "github:qoopooh/try_git/docker/node/",
+  "license": "MIT",
   "dependencies": {
     "express": "visionmedia/express"
   },

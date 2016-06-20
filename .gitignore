@@ -32,3 +32,4 @@ du-size
 sessions
 
 .vagrant
+*.jar
