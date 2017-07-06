@@ -1,0 +1,3 @@
+[submodule "arm/stm32/usbcdc/libopencm3"]
+	path = arm/stm32/usbcdc/libopencm3
+	url = https://github.com/libopencm3/libopencm3
