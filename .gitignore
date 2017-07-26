@@ -33,3 +33,7 @@ sessions
 
 .vagrant
 *.jar
+
+# java
+.gradle
+gradlew*
