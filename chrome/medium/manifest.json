@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Medium bar cleaner",
+  "version": "0.1",
+  "icons": {
+    "48": "icon.png"
+  },
+
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+
+  "browser_action": {
+    "default_icon": "icon.png"
+  },
+
+  "permissions": [
+    "https://*/*"
+  ]
+}

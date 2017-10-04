@@ -37,3 +37,13 @@ sessions
 # java
 .gradle
 gradlew*
+
+# python
+*.pyc
+*.pyd
+*.pyo
+env
+ENV
+db.sqlite3
+migrations
+
