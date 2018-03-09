@@ -36,5 +36,17 @@
     footer.style.display = "none";
   }
 
+  // remove facebook login header
+  var pagelet_bluebar = document.getElementById('pagelet_bluebar');
+  if (pagelet_bluebar && pagelet_bluebar.style) {
+    pagelet_bluebar.style.display = "none";
+  }
+
+  // remove facebook login footer
+  var u_0_c = document.getElementById('u_0_c');
+  if (u_0_c && u_0_c.style) {
+    u_0_c.style.display = "none";
+  }
+
   console.log('medium is hidden');
 })();
