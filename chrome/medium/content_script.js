@@ -48,5 +48,13 @@
     u_0_c.style.display = "none";
   }
 
+  // remove addthis
+  var addthis = document.getElementsByClassName('addthis-smartlayers');
+  for (i in addthis) {
+    if (addthis[i].style) {
+      addthis[i].style.display = "none";
+    }
+  }
+
   console.log('medium is hidden');
 })();
