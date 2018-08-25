@@ -1,60 +1,71 @@
 (function() {
+  /*console.log('medium is starting..');*/
+
+  /**
+   * Hide element (div)
+   */
+  function hideId(e) {
+    if (e && e.style) {
+      e.style.display = "none";
+    }
+  }
+
+  /**
+   * Hide elements in array
+   */
+  function hideArray(a) {
+    for (i in a) {
+      hideId(a[i]);
+    }
+  }
+
+  function hideIdByName(name) {
+    var e = document.getElementById(name);
+    hideId(e);
+  }
+
+  function hideTags(name) {
+    var tags = document.getElementsByTagName(name);
+    hideArray(tags);
+  }
+
+  function hideClass(name) {
+    var tags = document.getElementsByClassName(name);
+    hideArray(tags);
+  }
 
   // remove medium bars
-  var mediumbars = document.getElementsByClassName("u-fixed");
-  for (i in mediumbars) {
-    if (mediumbars[i].style) {
-      mediumbars[i].style.display = "none";
-    }
-  }
+  hideClass('u-fixed');
 
   // remove header tag
-  var headers = document.getElementsByTagName('header');
-  for (i in headers) {
-    if (headers[i].style) {
-      headers[i].style.display = "none";
-    }
-  }
+  hideTags('headers');
 
   // remove footer tag
-  var footers = document.getElementsByTagName('footer');
-  for (i in footers) {
-    if (footers[i].style) {
-      footers[i].style.display = "none";
-    }
-  }
+  hideTags('footer');
 
   // remove header id
-  var header = document.getElementById('header');
-  if (header && header.style) {
-    header.style.display = "none";
-  }
+  hideIdByName('header');
 
   // remove footer id
-  var footer = document.getElementById('footer');
-  if (footer && footer.style) {
-    footer.style.display = "none";
-  }
+  hideIdByName('footer');
 
   // remove facebook login header
-  var pagelet_bluebar = document.getElementById('pagelet_bluebar');
-  if (pagelet_bluebar && pagelet_bluebar.style) {
-    pagelet_bluebar.style.display = "none";
-  }
+  hideIdByName('pagelet_bluebar');
 
   // remove facebook login footer
-  var u_0_c = document.getElementById('u_0_c');
-  if (u_0_c && u_0_c.style) {
-    u_0_c.style.display = "none";
-  }
+  hideIdByName('u_0_c');
 
   // remove addthis
-  var addthis = document.getElementsByClassName('addthis-smartlayers');
-  for (i in addthis) {
-    if (addthis[i].style) {
-      addthis[i].style.display = "none";
-    }
-  }
+  hideClass('addthis-smartlayers');
+
+  // remove header sidebar
+  hideIdByName('sidebar');
+  hideIdByName('logo');
+  hideClass('nav-header');
+  hideClass('entry-media');
+  hideClass('ads-leaderboard');
+  /*hideArray(document.getElementsByClassName('videoAdUi')); */
+  /*hideId(document.getElementById('gni-interstitial-bg')); */
 
   console.log('medium is hidden');
 })();
