@@ -9,11 +9,11 @@ QT       += core gui sql network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = unikware_systray
+#CONFIG   += console
 TEMPLATE = app
 
-
 SOURCES += main.cpp\
-        unikware.cpp \
+    unikware.cpp \
     database.cpp
 
 HEADERS  += unikware.h \
@@ -25,4 +25,3 @@ RESOURCES += \
 win32 {
     RC_FILE = unik.rc # icon on exe file
 }
-

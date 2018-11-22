@@ -34,15 +34,31 @@ public:
 
   void setVisible(bool visible);
 
-  enum TimerState { Idle, Running, LastMinute };
+  enum TimerState {
+      Idle,
+      Hiding,
+      Running,
+      LastMinute,
+      Kill
+  };
 
 protected:
+
   void closeEvent(QCloseEvent *event);
 
 private slots:
+
   void iconActivated(QSystemTrayIcon::ActivationReason reason);
   void onTimeout();
+
+  /**
+   * User clicked extending time
+   */
   void onTimeExtend();
+
+  /**
+   * Open external link on browser
+   */
   void openLink();
 
 private:
@@ -51,9 +67,22 @@ private:
   void createActions();
   void createTrayIcon();
   void showMessage(int);
+
+  /**
+   * Check unikware running
+   *
+   * @return true if it's running
+   */
   bool isProcessRunning();
+
+  /**
+   * Close program
+   */
   bool killProcess();
-  void setMinuteLeft(int);
+
+  /**
+   * Calculate minute left and show balloon
+   */
   int calculateRemainMinute();
 
   QIcon m_icon;
@@ -73,7 +102,6 @@ private:
   QSystemTrayIcon *trayIcon;
   QMenu *trayIconMenu;
 
-  bool f_hide;
   bool f_first_close;
   int m_count;
   TimerState m_state;

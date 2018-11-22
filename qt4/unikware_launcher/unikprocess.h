@@ -13,6 +13,13 @@ public:
   explicit UnikProcess(QObject *parent = 0);
 
   bool isRunning(QString proc);
+
+  /**
+   * Run program
+   *
+   * @param proc process name
+   * @param path of target program
+   */
   bool exec(QString proc, QString path="");
 
 signals:

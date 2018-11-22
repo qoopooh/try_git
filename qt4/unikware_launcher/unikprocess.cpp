@@ -14,22 +14,27 @@ bool UnikProcess::isRunning(QString proc)
   tasklist.start("tasklist", args);
   tasklist.waitForFinished();
   QString output = tasklist.readAllStandardOutput().trimmed().toLower();
-  qDebug() << output;
+  if (!output.startsWith("info: no tasks"))
+    qDebug() << output;
+
   return output.startsWith(QString("\"%1\"").arg(proc));
 }
 
+/**
+ * Run program
+ *
+ * @param proc process name
+ * @param path of target program
+ */
 bool UnikProcess::exec(QString proc, QString path)
 {
   QProcess process;
 
-  if (path.length() > 0) {
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-//    env.insert("TMPDIR", "C:\\MyApp\\temp"); // Add an environment variable
-    env.insert("PATH", path + ";" + env.value("Path"));
-    process.setProcessEnvironment(env);
-//    qDebug() << process.environment();
-  }
+//  if (path.length() > 0) {
+//    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+//    env.insert("PATH", path + ";" + env.value("Path"));
+//    process.setProcessEnvironment(env);
+//  }
   int i = process.startDetached(proc);
-//  qDebug() << proc << i;
   return i == 1;
 }

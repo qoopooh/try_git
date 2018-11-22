@@ -7,5 +7,7 @@ int main(int argc, char *argv[])
     Unikware w;
     w.show();
 
+    qDebug() << "Run systray";
+
     return a.exec();
 }
