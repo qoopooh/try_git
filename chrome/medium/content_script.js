@@ -36,9 +36,12 @@
 
   // remove medium bars
   hideClass('u-fixed');
+  hideClass('branch-journeys-top');
 
   // remove header tag
   hideTags('headers');
+  hideTags('header');
+  hideTags('nav');
 
   // remove footer tag
   hideTags('footer');
