@@ -3,13 +3,12 @@ Blink
 Turns on/off an LED, repeatedly.
 */
 
-const int LED0 = 9;
-const int LED = 13;
+const int LED0 = 4;
+const int LED = LED_BUILTIN; // Pin 13 has an LED on most Arduino boards
 const int k_delay = 500; // unit: millisecond
 
 void setup() {                
   // initialize the digital pin as an output.
-  // Pin 13 has an LED connected on most Arduino boards:
   pinMode(LED0, OUTPUT);     
   pinMode(LED, OUTPUT);     
 }
