@@ -64,6 +64,9 @@ def _get_table(verbose):
     """
 
     now = datetime.now()
+    if verbose:
+        print("now", now)
+
     for period in TIME_TABLE:
         start_arr = period[0].split(':')
         start = now.replace(hour=int(start_arr[0]), minute=int(start_arr[1]))
@@ -72,7 +75,7 @@ def _get_table(verbose):
                 print("Not start yet ({})".format(start))
             continue
 
-        end_arr = period[0].split(':')
+        end_arr = period[1].split(':')
         end = now.replace(hour=int(end_arr[0]), minute=int(end_arr[1]))
         if now > end:
             if verbose:
