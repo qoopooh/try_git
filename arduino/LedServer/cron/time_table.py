@@ -108,7 +108,7 @@ def should_check_after_x_minutes(minutes):
         return True
 
     with open(tmp_file) as infile:
-        last_check = datetime.fromisoformat(infile.read())
+        last_check = datetime.fromisoformat(infile.read().strip())
 
     if now - last_check > timedelta(minutes=minutes):
         with open(tmp_file, 'w') as outfile:
