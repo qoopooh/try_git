@@ -17,8 +17,7 @@ PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-v', '--verbose', help='print debug info', action='store_true')
 
 if 'HOST' not in environ:
-    # 192.168.1.xxx:pppp
-    print("No host")
+    print("No host e.g. 192.168.1.xxx:pppp")
     sys.exit()
 HOST = environ['HOST']
 
@@ -45,12 +44,18 @@ def check_table(verbose=False):
     table_status = _get_table(verbose)
 
     if led_status == table_status:
+        #
+        # Nothing change
+        #
         if verbose:
             print("Keep", led_status)
         return
 
+    #
+    # Request sprinkler to change state
+    #
     requests.post(url, data={'led':table_status}, timeout=5)
-    print("{} -> {}".format(led_status, table_status))
+    print("Update {} -> {}".format(led_status, table_status))
 
 
 def _get_table(verbose):
@@ -71,6 +76,9 @@ def _get_table(verbose):
         start_arr = period[0].split(':')
         start = now.replace(hour=int(start_arr[0]), minute=int(start_arr[1]))
         if now < start:
+            #
+            # Too early
+            #
             if verbose:
                 print("Not start yet ({})".format(start))
             continue
@@ -78,10 +86,15 @@ def _get_table(verbose):
         end_arr = period[1].split(':')
         end = now.replace(hour=int(end_arr[0]), minute=int(end_arr[1]))
         if now > end:
+            #
+            # Done
+            #
             if verbose:
                 print("It's over ({})".format(end))
             continue
-
+        #
+        # In the right time, let's go ON
+        #
         return "ON"
 
     return "OFF"
@@ -101,8 +114,16 @@ def should_check_after_x_minutes(minutes):
     tmp_file = path.join('/tmp', basename)
 
     now = datetime.now()
+    if now.hour < 5 or now.hour > 20:
+        #
+        # Night time
+        #
+        return False
 
     if not path.exists(tmp_file):
+        #
+        # First check
+        #
         with open(tmp_file, 'w') as outfile:
             outfile.write(now.isoformat())
         return True
@@ -111,6 +132,9 @@ def should_check_after_x_minutes(minutes):
         last_check = datetime.fromisoformat(infile.read().strip())
 
     if now - last_check > timedelta(minutes=minutes):
+        #
+        # Long time no check ;)
+        #
         with open(tmp_file, 'w') as outfile:
             outfile.write(now.isoformat())
         return True
@@ -121,5 +145,5 @@ def should_check_after_x_minutes(minutes):
 if __name__ == '__main__':
 
     ARGS = PARSER.parse_args()
-    if should_check_after_x_minutes(5):
+    if should_check_after_x_minutes(4):
         check_table(ARGS.verbose)
