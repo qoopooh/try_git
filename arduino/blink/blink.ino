@@ -3,7 +3,7 @@ Blink
 Turns on/off an LED, repeatedly.
 */
 
-const int LED0 = 9;
+const int LED0 = 4;
 const int LED = 13;
 const int k_delay = 500; // unit: millisecond
 
