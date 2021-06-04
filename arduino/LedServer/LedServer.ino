@@ -70,6 +70,8 @@ void setup(void) {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("");
+  Serial.print("LED_BUILTIN ");
+  Serial.println(led);
 
   // Wait for connection
   Serial.print("Connecting to ");
