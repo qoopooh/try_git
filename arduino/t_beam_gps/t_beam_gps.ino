@@ -2,6 +2,7 @@
 #include "boards.h"
 
 int counter = 0;
+float old_lat = 0.0f;
 
 void getLocation(char * buf);
 
@@ -25,10 +26,10 @@ void loop()
     Serial.println(counter);
 
     // send packet
-    LoRa.beginPacket();
-    LoRa.print("hello ");
-    LoRa.print(counter);
-    LoRa.endPacket();
+    //LoRa.beginPacket();
+    //LoRa.print("hello ");
+    //LoRa.print(counter);
+    //LoRa.endPacket();
 
 #ifdef HAS_DISPLAY
     if (u8g2) {
@@ -56,6 +57,13 @@ void loop()
     display.setFont(ArialMT_Plain_10);
     getLocation(buf);
     display.drawString(0, 48, buf);
+
+    if (gps.location.lat() == old_lat) {
+      snprintf(buf, sizeof(buf), "hello: %d", counter);
+    } else {
+      old_lat = gps.location.lat();
+    }
+    loraSend(buf);
 #endif
 
     display.display();
@@ -68,11 +76,18 @@ void loop()
 
 void getLocation(char * buf) {
 #ifdef HAS_GPS
-  if (Serial1.available() > 0) {
+  while (Serial1.available() > 0) {
       if (gps.encode(Serial1.read())) {
-          Serial.println("Got GPS");
+          Serial.print("Got GPS ");
+          Serial.println(gps.location.lat());
       }
   }
   snprintf(buf, 32, "%f, %f", gps.location.lat(), gps.location.lng());
 #endif
+}
+
+void loraSend(char * buf) {
+    LoRa.beginPacket();
+    LoRa.print(buf);
+    LoRa.endPacket();
 }
