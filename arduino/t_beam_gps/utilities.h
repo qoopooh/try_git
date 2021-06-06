@@ -1,5 +1,5 @@
 
-/*#pragma once*/
+#pragma once
 
 /*
 * arduinoLoRa Library just only support SX1276/Sx1278,Not support SX1262
@@ -168,12 +168,4 @@
 #else
 #error "Please select the version you purchased in utilities.h"
 #endif
-
-
-
-
-
-
-
-
 

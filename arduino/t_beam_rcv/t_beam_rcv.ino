@@ -1,6 +1,11 @@
-
 #include <LoRa.h>
 #include "boards.h"
+
+char buf[256];
+char gps_buff[24];
+bool gps_show = false;
+
+void getLocation();
 
 void setup()
 {
@@ -39,7 +44,6 @@ void loop()
 #ifdef HAS_DISPLAY
         if (u8g2) {
             u8g2->clearBuffer();
-            char buf[256];
             u8g2->drawStr(0, 12, "Received OK!");
             u8g2->drawStr(0, 26, recv.c_str());
             snprintf(buf, sizeof(buf), "RSSI:%i", LoRa.packetRssi());
@@ -49,5 +53,44 @@ void loop()
             u8g2->sendBuffer();
         }
 #endif
+
+#ifdef HAS_OLED
+        char buf[256];
+        display.clear();
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+
+        display.setFont(ArialMT_Plain_10);
+        display.drawString(0, 0, "LoRa receiver:");
+        display.drawString(0, 11, recv.c_str());
+
+        snprintf(buf, sizeof(buf), "RSSI:%i", LoRa.packetRssi());
+        display.drawString(0, 24, buf);
+
+        snprintf(buf, sizeof(buf), "SNR:%.1f", LoRa.packetSnr());
+        display.drawString(0, 35, buf);
+
+        if (gps_show) {
+            display.drawString(0, 48, gps_buff);
+        }
+
+        display.display();
+#endif
+    } // packetSize
+#ifdef HAS_GPS
+    getLocation();
+#endif
+}
+
+void getLocation() {
+#ifdef HAS_GPS
+    while (Serial1.available() > 0) {
+        if (gps.encode(Serial1.read())) {
+            snprintf(gps_buff, sizeof(gps_buff), "%f, %f",
+                gps.location.lat(),
+                gps.location.lng());
+            Serial.println(gps_buff);
+            gps_show = true;
+        }
     }
+#endif
 }

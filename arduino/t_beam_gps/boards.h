@@ -92,7 +92,7 @@ bool initPMU()
 
 void disablePeripherals()
 {
-    PMU.setPowerOutPut(AXP192_DCDC1, AXP202_OFF);
+  /*PMU.setPowerOutPut(AXP192_DCDC1, AXP202_OFF);*/
     PMU.setPowerOutPut(AXP192_LDO2, AXP202_OFF);
     PMU.setPowerOutPut(AXP192_LDO3, AXP202_OFF);
 }
@@ -189,8 +189,5 @@ void initBoard()
 
     display.display();
 #endif
-
-    Serial.println("end init");
 }
-
 

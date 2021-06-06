@@ -73,7 +73,10 @@
 
 #define GPS_BAUD_RATE               9600
 #define HAS_GPS
-#define HAS_DISPLAY                 //Optional, bring your own board, no OLED !!
+/*#define HAS_DISPLAY                 //Optional, bring your own board, no OLED !!*/
+#define HAS_OLED
+
+// END of LILYGO_TBeam_V1_1
 
 #elif defined(LILYGO_T3_V1_0)
 #define I2C_SDA                     4
@@ -165,12 +168,4 @@
 #else
 #error "Please select the version you purchased in utilities.h"
 #endif
-
-
-
-
-
-
-
-
 
