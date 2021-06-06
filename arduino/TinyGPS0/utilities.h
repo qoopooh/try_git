@@ -65,7 +65,7 @@ bool initPMU()
     /*
      *   Turn off unused power sources to save power
      * **/
-    PMU.setPowerOutPut(AXP192_DCDC2, AXP202_OFF);
+    // PMU.setPowerOutPut(AXP192_DCDC2, AXP202_OFF);
     PMU.setPowerOutPut(AXP192_LDO2, AXP202_OFF);
     PMU.setPowerOutPut(AXP192_LDO3, AXP202_OFF);
     PMU.setPowerOutPut(AXP192_EXTEN, AXP202_OFF);

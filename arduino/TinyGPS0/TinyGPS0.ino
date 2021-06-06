@@ -4,7 +4,7 @@
 #include "SSD1306Wire.h"
 
 TinyGPSPlus gps;
-SSD1306Wire display(0x3c, SDA, SCL);
+SSD1306Wire display(0x3c, I2C_SDA, I2C_SCL);
 int count = 0;
 String gpsLocation;
 String gpsTime;
@@ -20,6 +20,7 @@ void setup()
 
     display.init();
     display.flipScreenVertically();
+    drawOLED();
 
     // When the power is turned on, a delay is required.
     delay(1500);
@@ -39,7 +40,7 @@ void loop()
           drawOLED();
           ++count;
         }
-        //Serial.println(data);
+        Serial.println(data);
     }
 
     if (millis() > 5000 && gps.charsProcessed() < 10) {

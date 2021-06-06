@@ -66,7 +66,7 @@ bool initPMU()
     /*PMU.setDCDC1Voltage(3300);  //3.3V Pin next to 21 and 22 is controlled by DCDC1*/
 
     /*PMU.setPowerOutPut(AXP192_DCDC1, AXP202_ON);*/
-    PMU.setPowerOutPut(AXP192_LDO2, AXP202_ON);
+    /*PMU.setPowerOutPut(AXP192_LDO2, AXP202_ON);*/
     PMU.setPowerOutPut(AXP192_LDO3, AXP202_ON);
 
     /*pinMode(PMU_IRQ, INPUT_PULLUP);*/
