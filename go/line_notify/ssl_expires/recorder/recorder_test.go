@@ -20,6 +20,10 @@ func TestFirstMaxDays(t *testing.T) {
 		t.Fatalf("Should notify %v for the first records %q", dat, r.records)
 	}
 
+	if r.Count != 1 {
+		t.Fatalf("Wrong count %q", r)
+	}
+
 	dat.DaysToExpires = 7
 	if !r.ShouldNotify(dat) {
 		t.Fatalf("Should notify %v for new expires %q", dat, r.records)

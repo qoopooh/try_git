@@ -6,6 +6,7 @@ import (
 	"line_notify/ssl_expires/recorder"
 	"line_notify/ssl_expires/ssl"
 	"os"
+	"path/filepath"
 	"sort"
 	"time"
 
@@ -84,14 +85,13 @@ func createMessage(domain ssl.Result) string {
 
 func run(dry bool) {
 	cfg := conf.Read()
-	var notified map[string]string
 	recorder := recorder.Recorder{}
 	recorder.Load()
 
 	if dry {
 		fmt.Printf("Domains: %+v\n", cfg.Domains)
 		fmt.Printf("NotifiedExpires: %+v\n", cfg.NotifiedExpires)
-		fmt.Printf("Notified: %+v\n\n", notified)
+		fmt.Printf("Recorder: %+v\n\n", recorder)
 	}
 
 	out := query(cfg)
@@ -111,6 +111,7 @@ func run(dry bool) {
 				fmt.Println("notify", msg)
 			} else {
 				param := notify.SendOpts{
+					Prefix:  getExeFilename(),
 					Token:   os.Getenv("LINE_NOTIFY_TOKEN"),
 					Message: msg,
 					Verbose: true,
@@ -121,6 +122,14 @@ func run(dry bool) {
 	}
 
 	recorder.Save()
+	if dry {
+		fmt.Printf("\nSaved: %+v\n\n", recorder)
+	}
+}
+
+func getExeFilename() string {
+	exePath, _ := os.Executable()
+	return filepath.Base(exePath)
 }
 
 func main() {

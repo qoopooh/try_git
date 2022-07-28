@@ -90,7 +90,3 @@ function function_event (func, ...)
     end
   end
 end
-
-
-
-

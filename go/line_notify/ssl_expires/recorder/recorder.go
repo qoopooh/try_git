@@ -21,6 +21,11 @@ func (r *Recorder) Load() {
 		FileName: "ssl_expires.json",
 	}
 	r.store.Get(&r.records)
+
+	r.Count = 0
+	for _ = range r.records {
+		r.Count += 1
+	}
 }
 
 func (r *Recorder) Save() {
@@ -28,6 +33,7 @@ func (r *Recorder) Save() {
 }
 
 func (r *Recorder) Clear() {
+	r.Count = 0
 	r.records = make(map[string]string)
 	r.Save()
 }
@@ -38,11 +44,11 @@ func (r *Recorder) ShouldNotify(domain ssl.Result) bool {
 	val, ok := r.records[domain.Fqdn]
 	if !ok {
 		r.records[domain.Fqdn] = fmt.Sprintf("%d", domain.DaysToExpires)
+		r.Count += 1
 		return true
 	}
 
 	arr := strToIntArr(val)
-	fmt.Println("trToIntArr", arr)
 
 	for _, days := range arr {
 		if domain.DaysToExpires == days {

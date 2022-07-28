@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/akamensky/argparse v1.3.1
-	github.com/qoopooh/linenotify v0.1.1
+	github.com/qoopooh/linenotify v0.1.2
 	gopkg.in/ini.v1 v1.66.6
 )
 
