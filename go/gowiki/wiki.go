@@ -120,6 +120,8 @@ func main() {
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
 	http.HandleFunc("/", makeHandler(saveHandler))
+	port := ":8080"
+	fmt.Printf("Server run on http://localhost%s", port)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(port, nil))
 }
