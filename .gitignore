@@ -23,6 +23,7 @@ test.js
 .idea
 obj
 build
+dist
 qtquick2*
 
 # editor

@@ -33,12 +33,12 @@ func main() {
 	flag.Parse() // parse the flags
 
 	http.Handle("/", &templateHandler{filename: "chat.html"})
-	http.Handle("/login", &templateHandler{filename: "login.html"})
-	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
-
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(Version))
 	})
+	http.Handle("/login", &templateHandler{filename: "login.html"})
+	http.HandleFunc("/auth/", loginHandler)
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
 
 	r := newRoom()
 	r.tracer = trace.New(os.Stdout)
