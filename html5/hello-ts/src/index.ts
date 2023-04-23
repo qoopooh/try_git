@@ -124,32 +124,3 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, key: Key) {
 let x = { a: 1, b: 2, c: 3 };
 getProperty(x, "a");
 // getProperty(x, "m"); // warning
-
-
-// let arr = [1, "Turing", {x: 2}, [3,4]];
-// for (let i=0; i<arr.length;i++) {
-//     if (arr[i] == "Turing") arr.splice(i, 1);
-//     else console.log(arr[i])
-// }
-
-// const xx = [1,2,3]
-// xx[-1] = -1;
-// console.log(xx.indexOf(1000))
-
-// setTimeout(() => {
-//     console.log("out")
-// }, 0)
-// console.log(Number("10") - 10 == 0)
-
-// var a: any;
-// var b: number = 10;
-// function check(x: any, name: any) {
-//     if (x==null) console.log(name + " == null")
-//     if (x===null) console.log(name + " === null")
-//     if (typeof x === 'undefined') {
-//         console.log(name + " is undif")
-//     }
-// }
-
-// check(a, 'a')
-// check(b, 'b')
