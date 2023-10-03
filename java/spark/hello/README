@@ -1,9 +1,0 @@
-Test run on pi 201505
-Apache Maven 2.2.1 (rdebian-8)
-Java version: 1.8.0
-Java home: /usr/lib/jvm/jdk-8-oracle-arm-vfp-hflt/jre
-Default locale: en_US, platform encoding: ANSI_X3.4-1968
-OS name: "linux" version: "3.18.11-v7+" arch: "arm" Family: "unix"
-
-- mvn clean install
-- mvn exec:java -Dexec.mainClass="Main"

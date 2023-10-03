@@ -1,9 +1,0 @@
-*.class
-target
-bin
-gen
-dist
-
-# gradle
-.gradle
-

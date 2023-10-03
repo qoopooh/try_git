@@ -2,16 +2,21 @@ package main
 
 import (
 	"os"
+  "strings"
 
 	"github.com/qoopooh/linenotify/notify"
 )
 
 func main() {
-	msg := "line_notify"
+	msg := ""
 
 	if len(os.Args) > 1 {
-		msg = os.Args[1]
+		msg = strings.TrimSpace(os.Args[1])
 	}
+
+       if len(msg) == 0 {
+         return
+       }
 
 	param := notify.SendOpts{
 		Token:   os.Getenv("LINE_NOTIFY_TOKEN"),
