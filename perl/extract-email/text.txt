@@ -1,0 +1,90 @@
+How to contact us
+
+    General Information
+    Installing and using Debian
+    Publicity & Press
+    Events & Conferences
+    Helping Debian
+    Reporting Problems in Debian Packages
+    Debian Development
+    Problems with the Debian Infrastructure
+    Harassment Issues
+
+We kindly ask you to send initial enquiries in English, as this is the language most of us speak. If this is not possible, please ask for help on one of our user mailing lists, which are available in many different languages.
+
+Debian is a large organization and there are several ways to get in touch with project members and other Debian users. This page summarizes often requested means of contact; it is by no means exhaustive. Please refer to the rest of the web pages for other contact methods.
+
+Please note that most of the e-mail addresses below represent open mailing lists with public archives. Read the disclaimer before sending any messages.
+General Information
+
+Most information about Debian is collected on our website https://www.debian.org/, so please browse and search through it before contacting us.
+
+You can send questions regarding the Debian project to the debian-project@lists.debian.org mailing list. Please don't ask general questions about Linux on this list; read on for more information about other mailing lists.
+
+Installing and using Debian
+
+If you are certain the documentation on the installation media and on our website doesn't have a solution to your problem, there's a very active user mailing list where Debian users and developers can answer your questions. Here, you can ask all kinds of questions regarding the following topics:
+
+    Installation
+    Configuration
+    Supported hardware
+    Machine administration
+    Using Debian 
+
+Please subscribe to the list and send your questions to debian-user@lists.debian.org.
+
+Additionally, there are user mailing lists for speakers of various languages. See the subscription info for international mailing lists.
+
+You can browse our mailing list archive or search the archives without the need to be subscribed.
+
+On top of that, it's possible to browse our mailing lists as newsgroups.
+
+If you think you've found a bug in our installation system, please write to the debian-boot@lists.debian.org mailing list. You can also file a bug report against the debian-installer pseudo-package.
+Publicity & Press
+
+The Debian Publicity Team moderates news and announcements in all the Debian official resources, for example some mailing lists, the blog, the micronews website, and official social media channels.
+
+If you're writing about Debian and need help or information, please contact the publicity team. This is also the right address if you're planning to submit news for our own news page.
+Events & Conferences
+
+Please send invitations for conferences, exhibitions, or other events to events@debian.org.
+
+Requests for flyers, posters, and participation in Europe should be sent to the debian-events-eu@lists.debian.org mailing list.
+Helping Debian
+
+There are plenty of possibilities to support the Debian project and contribute to the distribution. If you would like to offer help, please visit our How to join Debian page first.
+
+If you would like to maintain a Debian mirror, see the pages about mirroring Debian. New mirrors are submitted using this form. Problems with existing mirrors can be reported at mirrors@debian.org.
+
+If you would like to sell Debian CDs/DVDs, see the information for CD vendors. To get listed on the CD vendor list, please use this form.
+Reporting problems in Debian packages
+
+If you would like to file a bug against a Debian package, we have a bug tracking system where you can easily report your problem. Please read the instructions for filing bug reports.
+
+If you simply want to communicate with the maintainer of a Debian package, then you can use the special mail aliases set up for each package. Any mail sent to <package name>@packages.debian.org will be forwarded to the maintainer in charge of that package.
+
+If you would like to make the developers aware of a Debian security problem in a discreet manner, please send an email to security@debian.org.
+Debian Development
+
+If you have questions about the development of Debian, we have several mailing lists for that. Here you can get in touch with our developers.
+
+There is also a general mailing list for developers: debian-devel@lists.debian.org. Please follow this link to subscribe to it.
+Problems with the Debian Infrastructure
+
+To report a problem with a Debian service, you can usually report a bug against the appropriate pseudo-package.
+
+Alternatively, you can send an email to one of the following addresses:
+
+Web pages editors
+    package: www.debian.org
+    debian-www@lists.debian.org
+Mailing list administrators and archives maintainers
+    package: lists.debian.org
+    listmaster@lists.debian.org
+Bug tracking system administrators
+    package: bugs.debian.org
+    owner@bugs.debian.org
+
+Harassment Issues
+
+Debian is a community of people who values respect. If you are the victim of inappropriate behaviour, if someone in the project has harmed you, or if you feel you have been harassed, please contact the Community Team: community@debian.org

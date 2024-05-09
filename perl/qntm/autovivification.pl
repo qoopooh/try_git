@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-my @counter = (1..10);
+my @counter = ( 1 .. 10 );
 $counter[20]++;
 my $len = @counter;
 

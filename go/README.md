@@ -5,3 +5,6 @@ time CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w"
 
 ## Build arm64
 > time CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w"
+
+## Build x86_64
+> time CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" simdif_site.go

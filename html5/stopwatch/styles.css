@@ -20,7 +20,7 @@ body {
   align-items: center;
   font-size: 10vw;
   font-weight: bold;
-  height: 40%;
+  height: 10%;
   width: 100%;
 }
 
@@ -38,7 +38,7 @@ body {
 button#start {
   font-size: 5vw;
   font-weight: bold;
-  height: 30%;
+  height: 50%;
   width: 80%;
   padding: 10px 20px;
   border-radius: 10px;
@@ -46,6 +46,12 @@ button#start {
   color: #fff;
   border: none;
   margin-top: 20px;
+
+  /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 button {
@@ -57,7 +63,7 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  margin: 4px 2px;
+  margin: 20px 0px 2px 0px;
   cursor: pointer;
 }
 

@@ -1,0 +1,5 @@
+# generated files
+.qmake.stash
+Makefile
+qrc_resources.cpp
+*.app

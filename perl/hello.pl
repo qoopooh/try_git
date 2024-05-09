@@ -3,5 +3,5 @@
 use strict;
 use warnings;
 
-print "Hello เบิ้ม\n";
+print "Hello Perl\n";
 
